@@ -40,7 +40,7 @@ public class PropertyAccessor<C, T> implements IReversibleAccessor<C, T>, IRever
 			return new PropertyAccessor<>(new AccessorByField<>((Field) member));
 		} else if (member instanceof Method) {
 			// Determining if the method is an accessor or a mutator for given the good arguments to the final PropertyAccessor constructor
-			AbstractReflector<Object> reflector = Accessors.onJavaBeanFieldWrapper((Method) member,
+			AbstractReflector<Object> reflector = Reflections.onJavaBeanPropertyWrapperName((Method) member,
 					() -> new AccessorByMethod<>((Method) member),
 					() -> new MutatorByMethod<>((Method) member),
 					() -> new AccessorByMethod<>((Method) member));
