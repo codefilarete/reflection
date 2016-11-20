@@ -2,6 +2,7 @@ package org.gama.reflection;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
 
 import org.gama.lang.Reflections;
 import org.gama.lang.StringAppender;
@@ -13,27 +14,27 @@ import org.gama.lang.exception.Exceptions;
  */
 public class ExceptionConverter {
 	
-	protected void convertException(Throwable t, Object target, AbstractReflector reflector, Object... args) {
+	protected RuntimeException convertException(Throwable t, Object target, AbstractReflector reflector, Object... args) {
 		if (t instanceof NullPointerException) {
-			throw new NullPointerException("Cannot call " + getReflectorDescription(reflector) + " on null instance");
+			return new NullPointerException("Cannot call " + getReflectorDescription(reflector) + " on null instance");
 		} else if (t instanceof InvocationTargetException || t instanceof IllegalAccessException) {
-			throw Exceptions.asRuntimeException(t.getCause());
+			return Exceptions.asRuntimeException(t.getCause());
 		} else if (t instanceof IllegalArgumentException) {
 			if ("wrong number of arguments".equals(t.getMessage())) {
-				convertWrongNumberOfArguments(reflector, args);
+				return convertWrongNumberOfArguments(reflector, args);
 			} else if("object is not an instance of declaring class".equals(t.getMessage())) {
-				convertObjectIsNotAnInstanceOfDeclaringClass(target, reflector);
+				return convertObjectIsNotAnInstanceOfDeclaringClass(target, reflector);
 			} else if(t.getMessage().startsWith("Can not set")) {
-				convertCannotSetFieldToObject(target, reflector, args.length > 0 ? args[0] : null);
+				return convertCannotSetFieldToObject(target, reflector, args.length > 0 ? args[0] : null);
 			} else {
-				throw Exceptions.asRuntimeException(t);
+				return Exceptions.asRuntimeException(t);
 			}
 		} else {
-			throw Exceptions.asRuntimeException(t);
+			return Exceptions.asRuntimeException(t);
 		}
 	}
 	
-	private void convertWrongNumberOfArguments(AbstractReflector reflector, Object... args) {
+	private IllegalArgumentException convertWrongNumberOfArguments(AbstractReflector reflector, Object... args) {
 		String message = "wrong number of arguments for " + getReflectorDescription(reflector);
 		if (reflector instanceof AccessorByMethod) {
 			Class<?>[] parameterTypes = ((AccessorByMethod) reflector).getGetter().getParameterTypes();
@@ -43,19 +44,25 @@ public class ExceptionConverter {
 					+ " but " + (Arrays.isEmpty(args) ? "none" : new StringAppender(100).ccat(args, ", ").wrap("(", ")"))
 					+ " was given";
 		}
-		throw new IllegalArgumentException(message);
+		return new IllegalArgumentException(message);
 	}
 	
-	private void convertObjectIsNotAnInstanceOfDeclaringClass(Object target, AbstractReflector reflector) {
+	private IllegalArgumentException convertObjectIsNotAnInstanceOfDeclaringClass(Object target, AbstractReflector reflector) {
 		String message = "object is not an instance of declaring class";
-		if (reflector instanceof AccessorByMember) {
-			Class<?> declaringClass = ((AccessorByMember) reflector).getGetter().getDeclaringClass();
+		if (reflector instanceof AccessorByMember || reflector instanceof MutatorByMember) {
+			Member member;
+			if (reflector instanceof AccessorByMember) {
+				member = ((AccessorByMember) reflector).getGetter();
+			} else {
+				member = ((MutatorByMember) reflector).getSetter();
+			}
+			Class<?> declaringClass = member.getDeclaringClass();
 			message += ": expected " + declaringClass.getName() + " but was " + target.getClass().getName();
 		}
-		throw new IllegalArgumentException(message);
+		return new IllegalArgumentException(message);
 	}
 	
-	private void convertCannotSetFieldToObject(Object target, AbstractReflector reflector, Object arg) {
+	private RuntimeException convertCannotSetFieldToObject(Object target, AbstractReflector reflector, Object arg) {
 		// Modifying default message because it's not really understandable "Can not set ... to ... "
 		Field getter = null;
 		if (reflector instanceof AccessorByField) {
@@ -67,12 +74,12 @@ public class ExceptionConverter {
 		// 2 cases happen here: Object is of wrong type and has no matching field, or boxing of value is wrong
 		// (cf https://docs.oracle.com/javase/tutorial/reflect/member/fieldTrouble.html) but we can't distinguish cases
 		if (Reflections.findField(target.getClass(), getter.getName()) == null) {
-			throw new IllegalArgumentException(target.getClass() + " doesn't have field " + getter.getName());
+			return new IllegalArgumentException(target.getClass() + " doesn't have field " + getter.getName());
 		} else if (!getter.getType().isInstance(arg)) {
 			String fieldDescription = getter.getDeclaringClass().getName() + "." + getter.getName();
-			throw new IllegalArgumentException("Field " + fieldDescription + " of type " + getter.getType().getName() + " can't be used with " + arg.getClass().getName());
+			return new IllegalArgumentException("Field " + fieldDescription + " of type " + getter.getType().getName() + " can't be used with " + arg.getClass().getName());
 		} else {
-			throw new RuntimeException("Can't convert exception");
+			return new RuntimeException("Can't convert exception");
 		}
 	}
 	
