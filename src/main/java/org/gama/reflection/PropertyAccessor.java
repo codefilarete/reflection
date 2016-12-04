@@ -17,15 +17,43 @@ public class PropertyAccessor<C, T> implements IReversibleAccessor<C, T>, IRever
 	}
 	
 	public static <C, T> PropertyAccessor<C, T> forProperty(Class<C> clazz, String propertyName) {
+		IAccessor<C, T> propertyGetter = accessor(clazz, propertyName);
+		IMutator<C, T> propertySetter = mutator(clazz, propertyName);
+		return new PropertyAccessor<>(propertyGetter, propertySetter);
+	}
+	
+	/**
+	 * Create an {@link IAccessor} for the given property of the given class. Do it with conventional getter or a direct access to the field.
+	 * 
+	 * @param clazz the class owning the property
+	 * @param propertyName the name of the property
+	 * @param <C> the type of the class owning the property
+	 * @param <T> the type of the field (returned by the getter)
+	 * @return a new {@link IAccessor}
+	 */
+	public static <C, T> IAccessor<C, T> accessor(Class<C> clazz, String propertyName) {
 		IAccessor<C, T> propertyGetter = Accessors.accessorByMethod(clazz, propertyName);
 		if (propertyGetter == null) {
 			propertyGetter = new AccessorByField<>(Reflections.findField(clazz, propertyName));
 		}
+		return propertyGetter;
+	}
+	
+	/**
+	 * Create an {@link IMutator} for the given property of the given class. Do it with conventional setter or a direct access to the field.
+	 *
+	 * @param clazz the class owning the property
+	 * @param propertyName the name of the property
+	 * @param <C> the type of the class owning the property
+	 * @param <T> the type of the field (first parameter of the setter)
+	 * @return a new {@link IMutator}
+	 */
+	public static <C, T> IMutator<C, T> mutator(Class<C> clazz, String propertyName) {
 		IMutator<C, T> propertySetter = Accessors.mutatorByMethod(clazz, propertyName);
 		if (propertySetter == null) {
 			propertySetter = new MutatorByField<>(Reflections.findField(clazz, propertyName));
 		}
-		return new PropertyAccessor<>(propertyGetter, propertySetter);
+		return propertySetter;
 	}
 	
 	/**
