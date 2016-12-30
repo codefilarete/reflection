@@ -11,7 +11,6 @@ import org.gama.reflection.model.Address;
 import org.gama.reflection.model.City;
 import org.gama.reflection.model.Person;
 import org.gama.reflection.model.Phone;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -23,29 +22,30 @@ import static org.junit.Assert.assertEquals;
 @RunWith(DataProviderRunner.class)
 public class AccessorChainTest {
 	
-	private static AccessorByField<City, String> cityNameAccessor;
-	private static AccessorByField<Address, City> addressCityAccessor;
-	private static AccessorByField<Person, Address> personAddressAccessor;
-	private static AccessorByField<Address, List> addressPhonesAccessor;
-	private static AccessorByMethod<? extends List, Phone> phoneListAccessor;
-	private static AccessorByField<Phone, String> phoneNumberAccessor;
-	private static AccessorByMethod<Phone, String> phoneNumberMethodAccessor;
-	private static AccessorByMethod<String, Character> charAtAccessor;
-	private static AccessorByMethod<String, Character[]> toCharArrayAccessor;
-	private static ArrayAccessor<String> charArrayAccessor;
-	
-	@BeforeClass
-	public static void init() {
-		cityNameAccessor = Accessors.accessorByField(City.class, "name");
-		addressCityAccessor = Accessors.accessorByField(Address.class, "city");
-		personAddressAccessor = Accessors.accessorByField(Person.class, "address");
-		addressPhonesAccessor = Accessors.accessorByField(Address.class, "phones");
-		phoneListAccessor = new ListAccessor<>(2);
-		phoneNumberAccessor = Accessors.accessorByField(Phone.class, "number");
-		phoneNumberMethodAccessor = Accessors.accessorByMethod(Phone.class, "number");
-		charAtAccessor = new AccessorByMethod<>(Reflections.findMethod(String.class, "charAt", Integer.TYPE));
-		toCharArrayAccessor = new AccessorByMethod<>(Reflections.findMethod(String.class, "toCharArray"));
-		charArrayAccessor = new ArrayAccessor<>(2);
+	private static class DataSet {
+		private final AccessorByField<City, String> cityNameAccessor;
+		private final AccessorByField<Address, City> addressCityAccessor;
+		private final AccessorByField<Person, Address> personAddressAccessor;
+		private final AccessorByField<Address, List> addressPhonesAccessor;
+		private final AccessorByMethod<? extends List, Phone> phoneListAccessor;
+		private final AccessorByField<Phone, String> phoneNumberAccessor;
+		private final AccessorByMethod<Phone, String> phoneNumberMethodAccessor;
+		private final AccessorByMethod<String, Character> charAtAccessor;
+		private final AccessorByMethod<String, Character[]> toCharArrayAccessor;
+		private final ArrayAccessor<String> charArrayAccessor;
+		
+		private DataSet() {
+			cityNameAccessor = Accessors.accessorByField(City.class, "name");
+			addressCityAccessor = Accessors.accessorByField(Address.class, "city");
+			personAddressAccessor = Accessors.accessorByField(Person.class, "address");
+			addressPhonesAccessor = Accessors.accessorByField(Address.class, "phones");
+			phoneListAccessor = new ListAccessor<>(2);
+			phoneNumberAccessor = Accessors.accessorByField(Phone.class, "number");
+			phoneNumberMethodAccessor = Accessors.accessorByMethod(Phone.class, "number");
+			charAtAccessor = new AccessorByMethod<>(Reflections.findMethod(String.class, "charAt", Integer.TYPE));
+			toCharArrayAccessor = new AccessorByMethod<>(Reflections.findMethod(String.class, "toCharArray"));
+			charArrayAccessor = new ArrayAccessor<>(2);
+		}
 	}
 	
 	public static List<IAccessor> list(IAccessor ... accessors) {
@@ -54,22 +54,23 @@ public class AccessorChainTest {
 	
 	@DataProvider
 	public static Object[][] testGetData() {
+		DataSet dataSet = new DataSet();
 		return new Object[][] {
-				{ list(cityNameAccessor),
+				{ list(dataSet.cityNameAccessor),
 						new City("Toto"), "Toto" },
-				{ list(addressCityAccessor, cityNameAccessor),
+				{ list(dataSet.addressCityAccessor, dataSet.cityNameAccessor),
 						new Address(new City("Toto"), null), "Toto" },
-				{ list(personAddressAccessor, addressCityAccessor, cityNameAccessor),
+				{ list(dataSet.personAddressAccessor, dataSet.addressCityAccessor, dataSet.cityNameAccessor),
 						new Person(new Address(new City("Toto"), null)), "Toto" },
-				{ list(personAddressAccessor, addressPhonesAccessor, phoneListAccessor, phoneNumberAccessor),
+				{ list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor, dataSet.phoneNumberAccessor),
 						new Person(new Address(null, Arrays.asList(new Phone("123"), new Phone("456"), new Phone("789")))), "789" },
-				{ list(personAddressAccessor, addressPhonesAccessor, phoneListAccessor, phoneNumberMethodAccessor),
+				{ list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor, dataSet.phoneNumberMethodAccessor),
 						new Person(new Address(null, Arrays.asList(new Phone("123"), new Phone("456"), new Phone("789")))), "789" },
-				{ list(personAddressAccessor, addressPhonesAccessor, phoneListAccessor, phoneNumberMethodAccessor, charAtAccessor.setParameters(2)),
+				{ list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor, dataSet.phoneNumberMethodAccessor, dataSet.charAtAccessor.setParameters(2)),
 						new Person(new Address(null, Arrays.asList(new Phone("123"), new Phone("456"), new Phone("789")))), '9' },
-				{ list(personAddressAccessor, addressPhonesAccessor, phoneListAccessor, phoneNumberMethodAccessor, toCharArrayAccessor, charArrayAccessor),
+				{ list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor, dataSet.phoneNumberMethodAccessor, dataSet.toCharArrayAccessor, dataSet.charArrayAccessor),
 						new Person(new Address(null, Arrays.asList(new Phone("123"), new Phone("456"), new Phone("789")))), '9' },
-				{ list(toCharArrayAccessor, charArrayAccessor),
+				{ list(dataSet.toCharArrayAccessor, dataSet.charArrayAccessor),
 						"123", '3' },
 		};
 	}
@@ -84,7 +85,8 @@ public class AccessorChainTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void testGet_IllegalArgumentException() {
 		// field "number" doesn't exist on Collection "phones" => get(..) should throw IllegalArgumentException
-		List<IAccessor> accessors = list(personAddressAccessor, addressPhonesAccessor, phoneNumberAccessor);
+		DataSet dataSet = new DataSet();
+		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, Arrays.asList(new Phone("123"))));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
 		testInstance.get(object);
@@ -92,7 +94,8 @@ public class AccessorChainTest {
 	
 	@Test(expected = NullPointerException.class)
 	public void testGet_NullPointerException() {
-		List<IAccessor> accessors = list(personAddressAccessor, addressPhonesAccessor, phoneNumberAccessor);
+		DataSet dataSet = new DataSet();
+		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, null));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
 		testInstance.get(object);

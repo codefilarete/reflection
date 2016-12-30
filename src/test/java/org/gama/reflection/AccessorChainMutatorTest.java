@@ -11,7 +11,6 @@ import org.gama.reflection.model.Address;
 import org.gama.reflection.model.City;
 import org.gama.reflection.model.Person;
 import org.gama.reflection.model.Phone;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -23,73 +22,76 @@ import static org.junit.Assert.assertEquals;
 @RunWith(DataProviderRunner.class)
 public class AccessorChainMutatorTest {
 	
-	private static AccessorByField<City, String> cityNameAccessor;
-	private static AccessorByField<Address, City> addressCityAccessor;
-	private static AccessorByField<Person, Address> personAddressAccessor;
-	private static AccessorByField<Address, List> addressPhonesAccessor;
-	private static AccessorByMethod<? extends List, Phone> phoneListAccessor;
-	private static AccessorByField<Phone, String> phoneNumberAccessor;
-	private static AccessorByMethod<Phone, String> phoneNumberMethodAccessor;
-	private static AccessorByMethod<String, Character> charAtAccessor;
-	private static AccessorByMethod<String, Character[]> toCharArrayAccessor;
-	private static ArrayAccessor<String> charArrayAccessor;
-	
-	private static MutatorByField<City, String> cityNameMutator;
-	private static MutatorByField<Address, City> addressCityMutator;
-	private static MutatorByField<Person, Address> personAddressMutator;
-	private static MutatorByField<Address, List> addressPhonesMutator;
-	private static MutatorByMethod<? extends List, Phone> phoneListMutator;
-	private static MutatorByField<Phone, String> phoneNumberMutator;
-	private static MutatorByMethod<Phone, String> phoneNumberMethodMutator;
-	private static MutatorByMethod<String, Character> charAtMutator;
-	private static MutatorByMethod<String, Character[]> toCharArrayMutator;
-	private static ArrayMutator<String> charArrayMutator;
-	
-	@BeforeClass
-	public static void init() throws NoSuchFieldException {
-		cityNameAccessor = Accessors.accessorByField(City.class, "name");
-		addressCityAccessor = Accessors.accessorByField(Address.class, "city");
-		personAddressAccessor = Accessors.accessorByField(Person.class, "address");
-		addressPhonesAccessor = Accessors.accessorByField(Address.class, "phones");
-		phoneListAccessor = new ListAccessor<>(2);
-		phoneNumberAccessor = Accessors.accessorByField(Phone.class, "number");
-		phoneNumberMethodAccessor = Accessors.accessorByMethod(Phone.class, "number");
-		charAtAccessor = new AccessorByMethod<>(Reflections.findMethod(String.class, "charAt", Integer.TYPE));
-		toCharArrayAccessor = new AccessorByMethod<>(Reflections.findMethod(String.class, "toCharArray"));
-		charArrayAccessor = new ArrayAccessor<>(2);
+	private static class DataSet {
+		private final AccessorByField<City, String> cityNameAccessor;
+		private final AccessorByField<Address, City> addressCityAccessor;
+		private final AccessorByField<Person, Address> personAddressAccessor;
+		private final AccessorByField<Address, List> addressPhonesAccessor;
+		private final AccessorByMethod<? extends List, Phone> phoneListAccessor;
+		private final AccessorByField<Phone, String> phoneNumberAccessor;
+		private final AccessorByMethod<Phone, String> phoneNumberMethodAccessor;
+		private final AccessorByMethod<String, Character> charAtAccessor;
+		private final AccessorByMethod<String, Character[]> toCharArrayAccessor;
+		private final ArrayAccessor<String> charArrayAccessor;
 		
-		cityNameMutator = Accessors.mutatorByField(City.class, "name");
-		addressCityMutator = Accessors.mutatorByField(Address.class, "city");
-		personAddressMutator = Accessors.mutatorByField(Person.class, "address");
-		addressPhonesMutator = Accessors.mutatorByField(Address.class, "phones");
-		phoneListMutator = new ListMutator<>(2);
-		phoneNumberMutator = Accessors.mutatorByField(Phone.class, "number");
-		phoneNumberMethodMutator = Accessors.mutatorByMethod(Phone.class, "number");
-		charAtMutator = new MutatorByMethod<>(Reflections.findMethod(String.class, "charAt", Integer.TYPE));
-		toCharArrayMutator = new MutatorByMethod<>(Reflections.findMethod(String.class, "toCharArray"));
-		charArrayMutator = new ArrayMutator<>(2);
+		private final MutatorByField<City, String> cityNameMutator;
+		private final MutatorByField<Address, City> addressCityMutator;
+		private final MutatorByField<Person, Address> personAddressMutator;
+		private final MutatorByField<Address, List> addressPhonesMutator;
+		private final MutatorByMethod<? extends List, Phone> phoneListMutator;
+		private final MutatorByField<Phone, String> phoneNumberMutator;
+		private final MutatorByMethod<Phone, String> phoneNumberMethodMutator;
+		private final MutatorByMethod<String, Character> charAtMutator;
+		private final MutatorByMethod<String, Character[]> toCharArrayMutator;
+		private final ArrayMutator<String> charArrayMutator;
+		
+		private DataSet() throws NoSuchFieldException {
+			cityNameAccessor = Accessors.accessorByField(City.class, "name");
+			addressCityAccessor = Accessors.accessorByField(Address.class, "city");
+			personAddressAccessor = Accessors.accessorByField(Person.class, "address");
+			addressPhonesAccessor = Accessors.accessorByField(Address.class, "phones");
+			phoneListAccessor = new ListAccessor<>(2);
+			phoneNumberAccessor = Accessors.accessorByField(Phone.class, "number");
+			phoneNumberMethodAccessor = Accessors.accessorByMethod(Phone.class, "number");
+			charAtAccessor = new AccessorByMethod<>(Reflections.findMethod(String.class, "charAt", Integer.TYPE));
+			toCharArrayAccessor = new AccessorByMethod<>(Reflections.findMethod(String.class, "toCharArray"));
+			charArrayAccessor = new ArrayAccessor<>(2);
+			
+			cityNameMutator = Accessors.mutatorByField(City.class, "name");
+			addressCityMutator = Accessors.mutatorByField(Address.class, "city");
+			personAddressMutator = Accessors.mutatorByField(Person.class, "address");
+			addressPhonesMutator = Accessors.mutatorByField(Address.class, "phones");
+			phoneListMutator = new ListMutator<>(2);
+			phoneNumberMutator = Accessors.mutatorByField(Phone.class, "number");
+			phoneNumberMethodMutator = Accessors.mutatorByMethod(Phone.class, "number");
+			charAtMutator = new MutatorByMethod<>(Reflections.findMethod(String.class, "charAt", Integer.TYPE));
+			toCharArrayMutator = new MutatorByMethod<>(Reflections.findMethod(String.class, "toCharArray"));
+			charArrayMutator = new ArrayMutator<>(2);
+		}
 	}
 	
 	@DataProvider
-	public static Object[][] testGetMutatorData() {
+	public static Object[][] testGetMutatorData() throws NoSuchFieldException {
+		DataSet dataSet = new DataSet();
 		return new Object[][]{
-				{ cityNameAccessor, cityNameMutator },
-				{ addressCityAccessor, addressCityMutator },
-				{ personAddressAccessor, personAddressMutator },
-				{ addressPhonesAccessor, addressPhonesMutator },
-				{ phoneListAccessor, phoneListMutator },
-				{ phoneNumberAccessor, phoneNumberMutator },
-				{ phoneNumberMethodAccessor, phoneNumberMutator },
-				{ charArrayAccessor, charArrayMutator }
+				{ dataSet.cityNameAccessor, dataSet.cityNameMutator },
+				{ dataSet.addressCityAccessor, dataSet.addressCityMutator },
+				{ dataSet.personAddressAccessor, dataSet.personAddressMutator },
+				{ dataSet.addressPhonesAccessor, dataSet.addressPhonesMutator },
+				{ dataSet.phoneListAccessor, dataSet.phoneListMutator },
+				{ dataSet.phoneNumberAccessor, dataSet.phoneNumberMutator },
+				{ dataSet.phoneNumberMethodAccessor, dataSet.phoneNumberMutator },
+				{ dataSet.charArrayAccessor, dataSet.charArrayMutator }
 			
 		};
 	}
 	
 	@DataProvider
-	public static Object[][] testGetMutator_exception_data() {
+	public static Object[][] testGetMutator_exception_data() throws NoSuchFieldException {
+		DataSet dataSet = new DataSet();
 		return new Object[][]{
-				{ charAtAccessor, charAtMutator },    // chartAt() has no mutator equivalent
-				{ toCharArrayAccessor, toCharArrayMutator },    // toCharArray() has no mutator equivalent
+				{ dataSet.charAtAccessor, dataSet.charAtMutator },    // chartAt() has no mutator equivalent
+				{ dataSet.toCharArrayAccessor, dataSet.toCharArrayMutator },    // toCharArray() has no mutator equivalent
 		};
 	}
 	
@@ -110,19 +112,20 @@ public class AccessorChainMutatorTest {
 	}
 	
 	@DataProvider
-	public static Object[][] testSetData() {
+	public static Object[][] testSetData() throws NoSuchFieldException {
+		DataSet dataSet = new DataSet();
 		return new Object[][] {
-				{ list(cityNameAccessor),
+				{ list(dataSet.cityNameAccessor),
 						new City("Toto"), "Tata" },
-				{ list(addressCityAccessor, cityNameAccessor),
+				{ list(dataSet.addressCityAccessor, dataSet.cityNameAccessor),
 						new Address(new City("Toto"), null), "Tata" },
-				{ list(personAddressAccessor, addressCityAccessor, cityNameAccessor),
+				{ list(dataSet.personAddressAccessor, dataSet.addressCityAccessor, dataSet.cityNameAccessor),
 						new Person(new Address(new City("Toto"), null)), "Tata" },
-				{ list(personAddressAccessor, addressPhonesAccessor, phoneListAccessor, phoneNumberAccessor),
+				{ list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor, dataSet.phoneNumberAccessor),
 						new Person(new Address(null, Arrays.asList(new Phone("123"), new Phone("456"), new Phone("789")))), "000" },
-				{ list(personAddressAccessor, addressPhonesAccessor, phoneListAccessor, phoneNumberMethodAccessor),
+				{ list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor, dataSet.phoneNumberMethodAccessor),
 						new Person(new Address(null, Arrays.asList(new Phone("123"), new Phone("456"), new Phone("789")))), "000" },
-				{ list(charArrayAccessor),
+				{ list(dataSet.charArrayAccessor),
 						new char[] { '1', '2', '3' }, '0' },
 		};
 	}
@@ -137,8 +140,9 @@ public class AccessorChainMutatorTest {
 	}
 	
 	@Test(expected = NullPointerException.class)
-	public void testSet_NullPointerException() {
-		List<IAccessor> accessors = list(personAddressAccessor, addressPhonesAccessor);
+	public void testSet_NullPointerException() throws NoSuchFieldException {
+		DataSet dataSet = new DataSet();
+		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor);
 		Object object = new Person(null);
 		AccessorChainMutator testInstance = new AccessorChain(accessors).toMutator();
 		testInstance.set(object, new Address(new City("Toto"), null));
