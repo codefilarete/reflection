@@ -1,9 +1,9 @@
 package org.gama.reflection;
 
+import java.lang.reflect.Field;
+
 import org.gama.lang.Reflections;
 import org.junit.Test;
-
-import java.lang.reflect.Field;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -51,10 +51,30 @@ public class ExceptionConverterTest {
 		assertTrue(thrownThrowable.getMessage().contains("doesn't have field"));
 	}
 	
+	@Test
+	public void testConvertException_primitiveField() throws Throwable {
+		Field field_b = Reflections.findField(Toto.class, "b");
+		assertNotNull(field_b);
+		field_b.setAccessible(true);
+		
+		MutatorByField<Toto, Object> mutatorByField = new MutatorByField<>(field_b);
+		
+		Toto target = new Toto();
+		Throwable thrownThrowable = null;
+		try {
+			mutatorByField.set(target, null);
+		} catch (IllegalArgumentException e) {
+			thrownThrowable = e;
+		}
+		
+		assertTrue(thrownThrowable.getMessage().contains("can't be used with null"));
+	}
 	
 	private static class Toto {
 		
-		private Integer a; 
+		private Integer a;
+		
+		private int b;
 	}
 	
 	private static class Tata {
