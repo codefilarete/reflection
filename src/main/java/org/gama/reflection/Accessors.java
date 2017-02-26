@@ -3,6 +3,7 @@ package org.gama.reflection;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.function.Function;
 
 import org.gama.lang.Reflections;
 import org.gama.lang.Strings;
@@ -11,6 +12,10 @@ import org.gama.lang.Strings;
  * @author Guillaume Mary
  */
 public final class Accessors {
+	
+	public static final Function<Method, String> JAVA_BEAN_ACCESSOR_PREFIX_REMOVER = method -> method.getName().substring(3);
+	
+	public static final Function<Method, String> JAVA_BEAN_BOOLEAN_ACCESSOR_PREFIX_REMOVER = method -> method.getName().substring(2);
 	
 	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Field field) {
 		return accessorByMethod(field.getDeclaringClass(), field.getName());
@@ -77,9 +82,9 @@ public final class Accessors {
 	}
 	
 	public static String propertyName(Method fieldWrapper) {
-		String methodName = fieldWrapper.getName();
 		String propertyName;
-		propertyName = Reflections.onJavaBeanPropertyWrapperName(fieldWrapper, () -> methodName.substring(3), () -> methodName.substring(3), () -> methodName.substring(2));
+		propertyName = Reflections.onJavaBeanPropertyWrapperName(fieldWrapper,
+				JAVA_BEAN_ACCESSOR_PREFIX_REMOVER, JAVA_BEAN_ACCESSOR_PREFIX_REMOVER, JAVA_BEAN_BOOLEAN_ACCESSOR_PREFIX_REMOVER);
 		propertyName = Strings.uncapitalize(propertyName);
 		return propertyName;
 	}

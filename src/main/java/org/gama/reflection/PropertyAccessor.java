@@ -67,11 +67,12 @@ public class PropertyAccessor<C, T> implements IReversibleAccessor<C, T>, IRever
 		if (member instanceof Field) {
 			return new PropertyAccessor<>(new AccessorByField<>((Field) member));
 		} else if (member instanceof Method) {
-			// Determining if the method is an accessor or a mutator for given the good arguments to the final PropertyAccessor constructor
-			AbstractReflector<Object> reflector = Reflections.onJavaBeanPropertyWrapperName((Method) member,
-					() -> new AccessorByMethod<>((Method) member),
-					() -> new MutatorByMethod<>((Method) member),
-					() -> new AccessorByMethod<>((Method) member));
+			// Determining if the method is an accessor or a mutator to give the good arguments to the final PropertyAccessor constructor
+			Method method = (Method) member;
+			AbstractReflector<Object> reflector = Reflections.onJavaBeanPropertyWrapperName(method,
+					AccessorByMethod::new,
+					MutatorByMethod::new,
+					AccessorByMethod::new);
 			if (reflector instanceof IReversibleAccessor) {
 				return new PropertyAccessor<>((IReversibleAccessor<C, T>) reflector);
 			} else if (reflector instanceof IReversibleMutator) {
@@ -110,20 +111,39 @@ public class PropertyAccessor<C, T> implements IReversibleAccessor<C, T>, IRever
 		return mutator;
 	}
 	
+	/**
+	 * Shortcut for {@link #getAccessor()}.get(c)
+	 * @param c the source instance
+	 * @return the result of the invokation of the accessor onto c argument
+	 */
 	@Override
 	public T get(C c) {
 		return this.accessor.get(c);
 	}
 	
+	/**
+	 * Shortcut for {@link #getMutator()}.set(c, t)
+	 * @param c the source instance
+	 * @param t the argument of the setter
+	 * @return the result of the invokation of the mutator onto c argument with t parameter
+	 */
 	public void set(C c, T t) {
 		this.mutator.set(c, t);
 	}
 	
+	/**
+	 * Same as {@link #getAccessor()}
+	 * @return {@link #getAccessor()}
+	 */
 	@Override
 	public IAccessor<C, T> toAccessor() {
 		return getAccessor();
 	}
 	
+	/**
+	 * Same as {@link #getMutator()}
+	 * @return {@link #getMutator()}
+	 */
 	@Override
 	public IMutator<C, T> toMutator() {
 		return getMutator();

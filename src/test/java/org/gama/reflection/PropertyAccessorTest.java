@@ -49,7 +49,7 @@ public class PropertyAccessorTest {
 	@Test
 	public void testOf_nonConventionalMethodInput_exceptionThrown() {
 		expectedException.expect(IllegalArgumentException.class);
-		expectedException.expectMessage("Field wrapper org.gama.reflection.model.City.name doesn't feet encapsulation naming convention");
+		expectedException.expectMessage("Field wrapper j.l.String o.g.r.m.City.name() doesn't feet encapsulation naming convention");
 		Method nameGetter = Reflections.findMethod(City.class, "name");
 		PropertyAccessor.of(nameGetter);
 	}
