@@ -10,6 +10,8 @@ import org.gama.lang.collection.Arrays;
 import org.gama.lang.exception.Exceptions;
 
 /**
+ * A tool class to convert some exceptions from default JDK to a clearer one, well ... hope so !
+ *
  * @author Guillaume Mary
  */
 public class ExceptionConverter {
@@ -22,9 +24,9 @@ public class ExceptionConverter {
 		} else if (t instanceof IllegalArgumentException) {
 			if ("wrong number of arguments".equals(t.getMessage())) {
 				return convertWrongNumberOfArguments(reflector, args);
-			} else if("object is not an instance of declaring class".equals(t.getMessage())) {
+			} else if ("object is not an instance of declaring class".equals(t.getMessage())) {
 				return convertObjectIsNotAnInstanceOfDeclaringClass(target, reflector);
-			} else if(t.getMessage().startsWith("Can not set")) {
+			} else if (t.getMessage().startsWith("Can not set")) {
 				return convertCannotSetFieldToObject(target, reflector, args.length > 0 ? args[0] : null);
 			} else {
 				return Exceptions.asRuntimeException(t);
