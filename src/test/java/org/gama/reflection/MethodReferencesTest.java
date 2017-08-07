@@ -2,11 +2,14 @@ package org.gama.reflection;
 
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Method;
+import java.text.Collator;
 
 import org.gama.lang.Reflections;
 import org.gama.lang.Strings;
 import org.junit.Test;
 
+import static org.gama.reflection.MethodReferences.getTargetMethodRawSignature;
+import static org.gama.reflection.MethodReferences.buildSerializedLambda;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -15,15 +18,26 @@ import static org.junit.Assert.assertEquals;
 public class MethodReferencesTest {
 	
 	@Test
-	public void testGetSerializedLambda_getter() throws ReflectiveOperationException {
-		SerializedLambda serializedLambda = MethodReferences.getSerializedLambda(Object::toString);
-		Method method = Reflections.getMethod(Class.forName(serializedLambda.getImplClass().replace("/", ".")), serializedLambda.getImplMethodName());
-		assertEquals(Reflections.getMethod(Object.class, "toString"), method);
+	public void testGetTargetMethodRawSignature() throws ReflectiveOperationException {
+		assertEquals("java/lang/ObjecttoString()Ljava/lang/String;", getTargetMethodRawSignature(MethodReferences.buildSerializedLambda(Object::toString)));
+		assertEquals("java/lang/IntegershortValue()S", getTargetMethodRawSignature(MethodReferences.buildSerializedLambda(Integer::shortValue)));
+		assertEquals("java/text/CollatorsetStrength(I)V", getTargetMethodRawSignature(buildSerializedLambda(Collator::setStrength)));
 	}
 	
 	@Test
-	public void testGetSerializedLambda_setter() throws ReflectiveOperationException {
-		SerializedLambda serializedLambda = MethodReferences.getSerializedLambda(DummyClassWithSetter::setX);
+	public void testBuildSerializedLambda_getter() throws ReflectiveOperationException {
+		SerializedLambda serializedLambda = MethodReferences.buildSerializedLambda(Object::toString);
+		Method method = Reflections.getMethod(Class.forName(serializedLambda.getImplClass().replace("/", ".")), serializedLambda.getImplMethodName());
+		assertEquals(Reflections.getMethod(Object.class, "toString"), method);
+		
+		serializedLambda = MethodReferences.buildSerializedLambda(Integer::shortValue);
+		method = Reflections.getMethod(Class.forName(serializedLambda.getImplClass().replace("/", ".")), serializedLambda.getImplMethodName());
+		assertEquals(Reflections.getMethod(Integer.class, "shortValue"), method);
+	}
+	
+	@Test
+	public void testBuildSerializedLambda_setter() throws ReflectiveOperationException {
+		SerializedLambda serializedLambda = buildSerializedLambda(DummyClassWithSetter::setX);
 		// extracting method type argument from serialized lambda method type
 		String instantiatedMethodType = serializedLambda.getInstantiatedMethodType();
 		// cf Class#getName()

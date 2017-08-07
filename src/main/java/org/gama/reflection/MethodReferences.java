@@ -2,11 +2,12 @@ package org.gama.reflection;
 
 import java.io.Serializable;
 import java.lang.invoke.SerializedLambda;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
-import org.danekja.java.util.function.serializable.SerializableConsumer;
+import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.gama.lang.Reflections;
 import org.gama.lang.exception.Exceptions;
 
@@ -27,38 +28,42 @@ public class MethodReferences {
 	 * @return a hashcode for the method reference
 	 */
 	public static int hashCodeMethodReference(Serializable methodReference) {
-		try {
-			SerializedLambda serializedLambda = getSerializedLambda(methodReference);
-			// Inspired by SerializedLambda#toString()
-			String lambdaSignature = serializedLambda.getImplClass()
-					.concat(serializedLambda.getImplMethodName())
-					.concat(serializedLambda.getImplMethodSignature());
-			return lambdaSignature.hashCode();
-		} catch (ReflectiveOperationException e) {
-			throw Exceptions.asRuntimeException(e);
-		}
+		SerializedLambda serializedLambda = buildSerializedLambda(methodReference);
+		// Inspired by SerializedLambda#toString()
+		String lambdaSignature = getTargetMethodRawSignature(serializedLambda);
+		return lambdaSignature.hashCode();
 	}
 	
 	/**
-	 * Same as {@link #getSerializedLambda(Serializable)} specialized for getter (method returning value without argument)
+	 * Gives a raw version of the method targetted by the given {@link SerializedLambda}
+	 * THIS METHOD WILL ONLY WORK WITH A METHOD REFERENCE, NOT WITH AN ANONYMOUS LAMBDA FUNCTION.
+	 * @param serializedLambda a method reference
+	 * @return a concatenation of method class, method name, method arguments, method return type
+	 */
+	public static String getTargetMethodRawSignature(SerializedLambda serializedLambda) {
+		return serializedLambda.getImplClass()
+				.concat(serializedLambda.getImplMethodName())
+				.concat(serializedLambda.getImplMethodSignature());	// contains method arguments and return type
+	}
+	
+	/**
+	 * Same as {@link #buildSerializedLambda(Serializable)} specialized for getter (method returning value without argument)
 	 * @param methodReference a getter
 	 * @param <T> the target instance type of the getter
 	 * @return a {@link SerializedLambda}
-	 * @throws ReflectiveOperationException in case of erroneous lookup
 	 */
-	public static <T> SerializedLambda getSerializedLambda(SerializableConsumer<T> methodReference) throws ReflectiveOperationException {
-		return getSerializedLambda((Serializable) methodReference);
+	public static <T> SerializedLambda buildSerializedLambda(SerializableFunction<T, ?> methodReference) {
+		return buildSerializedLambda((Serializable) methodReference);
 	}
 	
 	/**
-	 * Same as {@link #getSerializedLambda(Serializable)} specialized for setter (method without return value but with one argument)
+	 * Same as {@link #buildSerializedLambda(Serializable)} specialized for setter (method without return value but with one argument)
 	 * @param methodReference a setter
 	 * @param <T> the target instance type of the setter
 	 * @return a {@link SerializedLambda}
-	 * @throws ReflectiveOperationException in case of erroneous lookup
 	 */
-	public static <T, U> SerializedLambda getSerializedLambda(SerializableBiConsumer<T, U> methodReference) throws ReflectiveOperationException {
-		return getSerializedLambda((Serializable) methodReference);
+	public static <T, U> SerializedLambda buildSerializedLambda(SerializableBiConsumer<T, U> methodReference) {
+		return buildSerializedLambda((Serializable) methodReference);
 	}
 	
 	/**
@@ -69,12 +74,18 @@ public class MethodReferences {
 	 * @param methodReference the method reference to hash
 	 * @return a SerializedLambda, not null
 	 */
-	public static SerializedLambda getSerializedLambda(Serializable methodReference) throws ReflectiveOperationException {
+	public static SerializedLambda buildSerializedLambda(Serializable methodReference) {
 		// algorithm made possible thanks to https://stackoverflow.com/a/25625761
 		// (https://stackoverflow.com/questions/21887358/reflection-type-inference-on-java-8-lambdas)
 		Method writeReplace = Reflections.getMethod(methodReference.getClass(), "writeReplace");
 		writeReplace.setAccessible(true);
-		Object serializedForm = writeReplace.invoke(methodReference);
+		Object serializedForm;
+		try {
+			serializedForm = writeReplace.invoke(methodReference);
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			// Considered as will never happen
+			throw Exceptions.asRuntimeException(e);
+		}
 		return (SerializedLambda) serializedForm;
 	}
 }

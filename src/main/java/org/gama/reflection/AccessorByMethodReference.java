@@ -26,12 +26,7 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> {
 	public AccessorByMethodReference(SerializableFunction<C, T> methodReference) {
 		this.methodReference = methodReference;
 		// we dissect the method reference to find out its equivalent method so we can keep its signature which is crucial for our hashCode
-		SerializedLambda serializedLambda;
-		try {
-			serializedLambda = MethodReferences.getSerializedLambda(methodReference);
-		} catch (ReflectiveOperationException e) {
-			throw new RuntimeException(e);
-		}
+		SerializedLambda serializedLambda = MethodReferences.buildSerializedLambda(methodReference);
 		// our description is made of SerializedLambda's one
 		this.methodReferenceSignature = serializedLambda.getImplClass()
 				.concat(".")
