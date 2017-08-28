@@ -3,6 +3,7 @@ package org.gama.reflection;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 
 import org.gama.lang.Reflections;
 import org.gama.lang.StringAppender;
@@ -39,14 +40,18 @@ public class ExceptionConverter {
 	private IllegalArgumentException convertWrongNumberOfArguments(AbstractReflector reflector, Object... args) {
 		String message = "wrong number of arguments for " + getReflectorDescription(reflector);
 		if (reflector instanceof AccessorByMethod) {
-			Class<?>[] parameterTypes = ((AccessorByMethod) reflector).getGetter().getParameterTypes();
-			StringAppender parameterFormatter = new StringAppender(100);
-			parameterFormatter.ccat(parameterTypes, ", ");
-			message += ": expected " + parameterFormatter.toString()
-					+ " but " + (Arrays.isEmpty(args) ? "none" : new StringAppender(100).ccat(args, ", ").wrap("(", ")"))
-					+ " was given";
+			message += giveMessageForWrongNumberOfArguments(((AccessorByMethod) reflector).getGetter(), args);
 		}
 		return new IllegalArgumentException(message);
+	}
+	
+	public String giveMessageForWrongNumberOfArguments(Method method, Object[] args) {
+		Class<?>[] parameterTypes = method.getParameterTypes();
+		StringAppender parameterFormatter = new StringAppender(100);
+		parameterFormatter.ccat(parameterTypes, ", ");
+		return ": expected " + parameterFormatter.toString()
+				+ " but " + (Arrays.isEmpty(args) ? "none" : new StringAppender(100).ccat(args, ", ").wrap("(", ")"))
+				+ " was given";
 	}
 	
 	private IllegalArgumentException convertObjectIsNotAnInstanceOfDeclaringClass(Object target, AbstractReflector reflector) {
@@ -59,9 +64,13 @@ public class ExceptionConverter {
 				member = ((MutatorByMember) reflector).getSetter();
 			}
 			Class<?> declaringClass = member.getDeclaringClass();
-			message += ": expected " + declaringClass.getName() + " but was " + target.getClass().getName();
+			message += giveMessageForConvertObjectIsNotAnInstanceOfDeclaringClass(target, declaringClass);
 		}
 		return new IllegalArgumentException(message);
+	}
+	
+	public String giveMessageForConvertObjectIsNotAnInstanceOfDeclaringClass(Object target, Class<?> declaringClass) {
+		return ": expected " + declaringClass.getName() + " but " + target.getClass().getName() + " was given";
 	}
 	
 	private RuntimeException convertCannotSetFieldToObject(Object target, AbstractReflector reflector, Object arg) {
@@ -82,7 +91,7 @@ public class ExceptionConverter {
 			return new IllegalArgumentException("Field " + fieldDescription + " of type " + getter.getType().getName()
 					+ " can't be used with " + (arg == null ? "null" : arg.getClass().getName()));
 		} else {
-			return new RuntimeException("Can't convert exception");
+			return new RuntimeException("Can not set " + arg + " to " + target);
 		}
 	}
 	
