@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 public class MethodReferenceCapturerTest {
 	
 	@Test
-	public void testFindMethod() throws ClassNotFoundException {
+	public void testFindMethod() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		assertEquals(Reflections.getMethod(Object.class, "toString"), testInstance.findMethod(Object::toString));
 		assertEquals(Reflections.getMethod(Integer.class, "shortValue"), testInstance.findMethod(Integer::shortValue));

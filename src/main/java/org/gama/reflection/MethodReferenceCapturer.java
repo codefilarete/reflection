@@ -71,7 +71,13 @@ public class MethodReferenceCapturer {
 			}
 			// looking for argument types
 			String methodSignature = serializedLambda.getImplMethodSignature();
-			Class[] argsClasses = giveArgumentTypes(methodSignature);
+			Class[] argsClasses;
+			try {
+				argsClasses = giveArgumentTypes(methodSignature);
+			} catch (ClassNotFoundException e) {
+				throw new IllegalArgumentException("Can't find method reference for "
+						+ serializedLambda.getImplClass() + "." + serializedLambda.getImplMethodName(), e);
+			}
 			return Reflections.findMethod(clazz, serializedLambda.getImplMethodName(), argsClasses);
 		});
 	}
@@ -81,20 +87,14 @@ public class MethodReferenceCapturer {
 	 * @param methodSignature the result of {@link SerializedLambda#getImplMethodSignature()}
 	 * @return an empty array if no argument were found, not null
 	 */
-	private Class[] giveArgumentTypes(String methodSignature) {
+	private Class[] giveArgumentTypes(String methodSignature) throws ClassNotFoundException {
 		Class[] argsClasses;
 		int closeArgsIndex = methodSignature.indexOf(")");
 		if (closeArgsIndex != 1) {
-			String[] argsTypes = methodSignature.substring(1, closeArgsIndex).split(",");
+			String[] argsTypes = methodSignature.substring(1, closeArgsIndex).split(";");
 			argsClasses = new Class[argsTypes.length];
 			for (int i = 0, argsTypesLength = argsTypes.length; i < argsTypesLength; i++) {
-				String argsType = argsTypes[i];
-				try {
-					argsClasses[i] = Reflections.forName(argsType);
-				} catch (ClassNotFoundException e) {
-					// should not happen
-					throw new RuntimeException(e);
-				}
+				argsClasses[i] = Reflections.forName(argsTypes[i]);
 			}
 		} else {
 			argsClasses = new Class[0];
