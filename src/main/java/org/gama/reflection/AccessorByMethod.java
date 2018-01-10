@@ -5,6 +5,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.gama.lang.Reflections;
 import org.gama.lang.StringAppender;
 
 /**
@@ -83,7 +84,7 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T> implements Ac
 	@Override
 	public MutatorByMember<C, T, ? extends Member> toMutator() {
 		Class<?> declaringClass = getGetter().getDeclaringClass();
-		String propertyName = Accessors.propertyName(getGetter());
+		String propertyName = Reflections.propertyName(getGetter());
 		MutatorByMethod<C, T> mutatorByMethod = Accessors.mutatorByMethod((Class<C>) declaringClass, propertyName, getGetter().getReturnType());
 		if (mutatorByMethod == null) {
 			try {
