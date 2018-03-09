@@ -1,7 +1,6 @@
 package org.gama.reflection;
 
 import java.lang.invoke.SerializedLambda;
-import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
 import org.danekja.java.util.function.serializable.SerializableFunction;
@@ -36,7 +35,7 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> {
 	}
 	
 	@Override
-	protected T doGet(C c) throws IllegalAccessException, InvocationTargetException {
+	protected T doGet(C c) {
 		return methodReference.apply(c);
 	}
 	

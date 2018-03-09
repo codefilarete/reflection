@@ -1,7 +1,6 @@
 package org.gama.reflection;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author Guillaume Mary
@@ -37,7 +36,7 @@ public class ArrayAccessor<C> extends AbstractAccessor<C, C> implements IReversi
 	public C get(C c) {
 		try {
 			return doGet(c);
-		} catch (Throwable t) {
+		} catch (RuntimeException t) {
 			handleException(t, c);
 			// shouldn't happen
 			return null;
@@ -45,7 +44,7 @@ public class ArrayAccessor<C> extends AbstractAccessor<C, C> implements IReversi
 	}
 	
 	@Override
-	protected C doGet(C cs) throws IllegalAccessException, InvocationTargetException {
+	protected C doGet(C cs) {
 		return (C) Array.get(cs, getIndex());
 	}
 	

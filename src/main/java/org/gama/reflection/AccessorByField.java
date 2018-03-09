@@ -1,7 +1,6 @@
 package org.gama.reflection;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author Guillaume Mary
@@ -21,7 +20,7 @@ public class AccessorByField<C, T> extends AbstractAccessor<C, T> implements Acc
 	}
 	
 	@Override
-	protected T doGet(C c) throws IllegalAccessException, InvocationTargetException {
+	protected T doGet(C c) throws IllegalAccessException {
 		return (T) getGetter().get(c);
 	}
 	

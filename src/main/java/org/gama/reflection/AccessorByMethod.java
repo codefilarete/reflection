@@ -1,5 +1,7 @@
 package org.gama.reflection;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -27,6 +29,10 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T> implements Ac
 		this.methodParameters = arguments;
 	}
 	
+	public <I> AccessorByMethod(Class<C> declaringClass, String methodName, Class<I> inputType, I input) {
+		this(Reflections.findMethod(declaringClass, methodName, inputType), input);
+	}
+	
 	@Override
 	public Method getGetter() {
 		return getter;
@@ -37,6 +43,12 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T> implements Ac
 		return get(c, methodParameters);
 	}
 	
+	/**
+	 * Sets parameters
+	 * 
+	 * @param values expecting to have at least 1 element
+	 * @return this
+	 */
 	public AccessorByMethod<C, T> setParameters(Object ... values) {
 		for (int i = 0; i < values.length; i++) {
 			setParameter(i, values[i]);
@@ -44,19 +56,38 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T> implements Ac
 		return this;
 	}
 	
+	/**
+	 * Sets parameters at index
+	 *
+	 * @param index the parameter index to be set
+	 * @param value value of the parameter
+	 * @return this
+	 */
 	public AccessorByMethod<C, T> setParameter(int index, Object value) {
 		this.methodParameters[index] = value;
 		return this;
 	}
 	
-	public Object getParameter(int index) {
+	/**
+	 * @param index expected to be positive and in parameters size bound
+	 * @return value of the parameter at index
+	 */
+	public Object getParameter(@Nonnegative int index) {
 		return methodParameters[index];
 	}
 	
-	public T get(C c, Object ... params) {
+	/**
+	 * Applies this getter on the given bean, with params.
+	 * Parameters already set with {@link #setParameter(int, Object)} or {@link #setParameters(Object...)} won't be used.
+	 * 
+	 * @param c an Object
+	 * @param params arguments
+	 * @return result of the called method
+	 */
+	public T get(@Nonnull C c, Object ... params) {
 		try {
 			return doGet(c, params);
-		} catch (Throwable t) {
+		} catch (ReflectiveOperationException | RuntimeException t) {
 			handleException(t, c, params);
 			// shouldn't happen
 			return null;
