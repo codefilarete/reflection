@@ -34,6 +34,12 @@ public class AccessorByMethodReferenceTest {
 		assertNotEquals(testInstance1, testInstance5);
 	}
 	
+	@Test
+	public void testToString() {
+		AccessorByMethodReference<String, char[]> testInstance = new AccessorByMethodReference<>(String::toCharArray);
+		assertEquals("method reference for java/lang/String.toCharArray()", testInstance.getGetterDescription());
+	}
+	
 	private static String myToString(Integer i) {
 		return String.valueOf(i);
 	}

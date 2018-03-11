@@ -4,6 +4,7 @@ import java.lang.invoke.SerializedLambda;
 import java.util.function.Function;
 
 import org.danekja.java.util.function.serializable.SerializableFunction;
+import org.gama.lang.Strings;
 
 /**
  * Accessor constructed with a method reference to a getter ({@link java.util.function.Function}).
@@ -30,8 +31,8 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> {
 		this.methodReferenceSignature = serializedLambda.getImplClass()
 				.concat(".")
 				.concat(serializedLambda.getImplMethodName())
-				.concat(".")
-				.concat(serializedLambda.getImplMethodSignature());
+				// we cut the method signature before return type because it doesn't seem necessary and ugly with arrays
+				.concat(Strings.head(serializedLambda.getImplMethodSignature(), ")").toString());
 	}
 	
 	@Override
@@ -41,6 +42,6 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> {
 	
 	@Override
 	protected String getGetterDescription() {
-		return methodReferenceSignature;
+		return "method reference for " + methodReferenceSignature;
 	}
 }
