@@ -1,5 +1,6 @@
 package org.gama.reflection;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 import org.gama.lang.Reflections;
@@ -11,6 +12,8 @@ import org.gama.lang.Reflections;
  */
 public class ListAccessor<C extends List<T>, T> extends AccessorByMethod<C, T> {
 	
+	private static final Method GET = Reflections.findMethod(List.class, "get", Integer.TYPE);
+	
 	/* Implementation note:
 	 * The index of the get() method is mapped to the first argument of super attribute "methodParameters" through setParameter(0, index)
 	 * and getParameter(0). We could have used a dedicated attribute "index" but it requires implementation of equald/hashcode. Whereas reuse
@@ -21,7 +24,7 @@ public class ListAccessor<C extends List<T>, T> extends AccessorByMethod<C, T> {
 	 * Default constructor without index. Will lead to error if {@link #setIndex(int)} is not called.
 	 */
 	public ListAccessor() {
-		super(Reflections.findMethod(List.class, "get", Integer.TYPE));
+		super(GET);
 	}
 	
 	public ListAccessor(int index) {
@@ -47,7 +50,7 @@ public class ListAccessor<C extends List<T>, T> extends AccessorByMethod<C, T> {
 	
 	@Override
 	protected String getGetterDescription() {
-		return "java.util.List.get(" + getIndex() +")";
+		return Reflections.toString(List.class) + ".get(" + getIndex() +")";
 	}
 	
 	@Override
