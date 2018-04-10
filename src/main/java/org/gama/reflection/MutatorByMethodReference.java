@@ -1,10 +1,10 @@
 package org.gama.reflection;
 
 import java.lang.invoke.SerializedLambda;
-import java.lang.reflect.InvocationTargetException;
 import java.util.function.BiConsumer;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
+import org.danekja.java.util.function.serializable.SerializableFunction;
 
 /**
  * Mutator constructed with a method reference to a setter ({@link java.util.function.BiConsumer}).
@@ -12,6 +12,8 @@ import org.danekja.java.util.function.serializable.SerializableBiConsumer;
  * its contract with an anonymous lambda.
  * 
  * @author Guillaume Mary
+ * @see Accessors#mutatorByMethodReference(SerializableBiConsumer)
+ * @see Accessors#accessorByMethodReference(SerializableFunction, SerializableBiConsumer)
  */
 public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> {
 	
@@ -36,7 +38,7 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> {
 	}
 	
 	@Override
-	protected void doSet(C c, T t) throws IllegalAccessException, InvocationTargetException {
+	protected void doSet(C c, T t) {
 		this.methodReference.accept(c, t);
 	}
 	

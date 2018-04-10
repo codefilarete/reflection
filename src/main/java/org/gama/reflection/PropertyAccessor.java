@@ -6,6 +6,7 @@ import org.gama.lang.bean.Objects;
  * A class for managing accesses (reading and writing) of a bean property.
  * 
  * @author Guillaume Mary
+ * @see Accessors
  */
 public class PropertyAccessor<C, T> implements IReversibleAccessor<C, T>, IReversibleMutator<C, T> {
 	
@@ -47,7 +48,6 @@ public class PropertyAccessor<C, T> implements IReversibleAccessor<C, T>, IRever
 	 * Shortcut for {@link #getMutator()}.set(c, t)
 	 * @param c the source instance
 	 * @param t the argument of the setter
-	 * @return the result of the invokation of the mutator onto c argument with t parameter
 	 */
 	public void set(C c, T t) {
 		this.mutator.set(c, t);
@@ -87,5 +87,17 @@ public class PropertyAccessor<C, T> implements IReversibleAccessor<C, T>, IRever
 	public int hashCode() {
 		// Implementation based on both accessor and mutator. Accessor is taken first but it doesn't matter
 		return 31 * getAccessor().hashCode() + getMutator().hashCode();
+	}
+	
+	/**
+	 * Implemented for trace in errors or debug
+	 * @return the getter description if available, else defaults to super.toString()
+	 */
+	@Override
+	public String toString() {
+		if (getAccessor() instanceof AbstractAccessor) {
+			return ((AbstractAccessor<C, T>) getAccessor()).getGetterDescription();
+		}
+		return super.toString();
 	}
 }

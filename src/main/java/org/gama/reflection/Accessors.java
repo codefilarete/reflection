@@ -4,8 +4,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 
+import org.danekja.java.util.function.serializable.SerializableBiConsumer;
+import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.gama.lang.Reflections;
 import org.gama.lang.Strings;
+import org.gama.lang.reflect.MethodDispatcher;
 
 /**
  * @author Guillaume Mary
@@ -29,6 +32,30 @@ public final class Accessors {
 		return getter == null ? null : new AccessorByMethod<>(getter);
 	}
 	
+	public static <C, T> AccessorByMethodReference<C, T> accessorByMethodReference(SerializableFunction<C, T> getter) {
+		return new AccessorByMethodReference<>(getter);
+	}
+	
+	public static <C, T> IReversibleAccessor<C, T> accessorByMethodReference(SerializableFunction<C, T> getter, SerializableBiConsumer<C, T> setter) {
+		AccessorByMethodReference<C, T> fallback = new AccessorByMethodReference<>(getter);
+		return new MethodDispatcher()
+				// reverse methods are redirected to a redirecting lambda
+				.redirect(IReversibleAccessor.class, new IReversibleAccessor<C, T>() {
+					@Override
+					public IMutator<C, T> toMutator() {
+						return new MutatorByMethodReference<>(setter);
+					}
+					
+					@Override
+					public T get(C o) {
+						return fallback.get(o);
+					}
+				})
+				// fallback goes to default instance
+				.fallbackOn(fallback)
+				.build(IReversibleAccessor.class);
+	}
+	
 	public static <C, T> AccessorByField<C, T> accessorByField(Field field) {
 		return new AccessorByField<>(field);
 	}
@@ -46,6 +73,10 @@ public final class Accessors {
 		Field propertyField = Reflections.findField(clazz, propertyName);
 		Class<?> inputType = propertyField.getType();
 		return mutatorByMethod(clazz, propertyName, inputType);
+	}
+	
+	public static <C, T> MutatorByMethodReference<C, T> mutatorByMethodReference(SerializableBiConsumer<C, T> setter) {
+		return new MutatorByMethodReference<>(setter);
 	}
 	
 	public static <C, T> MutatorByMethod<C, T> mutatorByMethod(Class<C> clazz, String propertyName, Class<?> inputType) {

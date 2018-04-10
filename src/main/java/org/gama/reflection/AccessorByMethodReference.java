@@ -3,6 +3,7 @@ package org.gama.reflection;
 import java.lang.invoke.SerializedLambda;
 import java.util.function.Function;
 
+import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.gama.lang.Strings;
 
@@ -12,21 +13,23 @@ import org.gama.lang.Strings;
  * its contract with an anonymous lambda.
  *
  * @author Guillaume Mary
+ * @see Accessors#accessorByMethodReference(SerializableFunction)
+ * @see Accessors#accessorByMethodReference(SerializableFunction, SerializableBiConsumer) 
  */
 public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> {
 	
-	private final Function<C, T> methodReference;
+	private final Function<C, T> getter;
 	private final String methodReferenceSignature;
 
 	/**
 	 * 
-	 * @param methodReference
+	 * @param getter
 	 * @throws RuntimeException with a compound {@link ReflectiveOperationException} in case of method reference dissect failure
 	 */
-	public AccessorByMethodReference(SerializableFunction<C, T> methodReference) {
-		this.methodReference = methodReference;
+	public AccessorByMethodReference(SerializableFunction<C, T> getter) {
+		this.getter = getter;
 		// we dissect the method reference to find out its equivalent method so we can keep its signature which is crucial for our hashCode
-		SerializedLambda serializedLambda = MethodReferences.buildSerializedLambda(methodReference);
+		SerializedLambda serializedLambda = MethodReferences.buildSerializedLambda(getter);
 		// our description is made of SerializedLambda's one
 		this.methodReferenceSignature = serializedLambda.getImplClass()
 				.concat(".")
@@ -37,7 +40,7 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> {
 	
 	@Override
 	protected T doGet(C c) {
-		return methodReference.apply(c);
+		return getter.apply(c);
 	}
 	
 	@Override
