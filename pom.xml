@@ -10,10 +10,9 @@
 	
 	<properties>
 		<encoding>UTF-8</encoding>
-		<junit.version>4.12</junit.version>
+		<junit.version>5.1.1</junit.version>
 		<mockito.version>2.7.13</mockito.version>
 		<slf4j-api.version>1.7.21</slf4j-api.version>
-		<junit-dataprovider.version>1.12.0</junit-dataprovider.version>
 		<jdk-serializable-functional.version>1.8.2</jdk-serializable-functional.version>
 	</properties>
 	
@@ -24,15 +23,15 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.tngtech.java</groupId>
-			<artifactId>junit-dataprovider</artifactId>
-			<version>${junit-dataprovider.version}</version>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-params</artifactId>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

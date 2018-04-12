@@ -2,24 +2,22 @@ package org.gama.reflection;
 
 import java.util.List;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import org.gama.lang.Reflections;
 import org.gama.lang.collection.Arrays;
 import org.gama.reflection.model.Address;
 import org.gama.reflection.model.City;
 import org.gama.reflection.model.Person;
 import org.gama.reflection.model.Phone;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Guillaume Mary
  */
-@RunWith(DataProviderRunner.class)
 public class AccessorChainMutatorTest {
 	
 	private static class DataSet {
@@ -70,7 +68,6 @@ public class AccessorChainMutatorTest {
 		}
 	}
 	
-	@DataProvider
 	public static Object[][] testGetMutatorData() throws NoSuchFieldException {
 		DataSet dataSet = new DataSet();
 		return new Object[][]{
@@ -86,32 +83,30 @@ public class AccessorChainMutatorTest {
 		};
 	}
 	
-	@DataProvider
 	public static Object[][] testGetMutator_exception_data() throws NoSuchFieldException {
 		DataSet dataSet = new DataSet();
 		return new Object[][]{
-				{ dataSet.charAtAccessor, dataSet.charAtMutator },    // chartAt() has no mutator equivalent
-				{ dataSet.toCharArrayAccessor, dataSet.toCharArrayMutator },    // toCharArray() has no mutator equivalent
+				{ dataSet.charAtAccessor },    // chartAt() has no mutator equivalent
+				{ dataSet.toCharArrayAccessor },    // toCharArray() has no mutator equivalent
 		};
 	}
 	
-	@Test
-	@UseDataProvider("testGetMutatorData")
+	@ParameterizedTest
+	@MethodSource("testGetMutatorData")
 	public void testGetMutator(IReversibleAccessor accessor, IMutator expected) {
 		assertEquals(expected, accessor.toMutator());
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
-	@UseDataProvider("testGetMutator_exception_data")
-	public void testGetMutator_exception(IReversibleAccessor accessor, IMutator expected) {
-		assertEquals(expected, accessor.toMutator());
+	@ParameterizedTest
+	@MethodSource("testGetMutator_exception_data")
+	public void testGetMutator_exception(IReversibleAccessor accessor) {
+		assertThrows(IllegalArgumentException.class, accessor::toMutator);
 	}
 	
 	public static List<IAccessor> list(IAccessor ... accessors) {
 		return Arrays.asList(accessors);
 	}
 	
-	@DataProvider
 	public static Object[][] testSetData() throws NoSuchFieldException {
 		DataSet dataSet = new DataSet();
 		return new Object[][] {
@@ -130,8 +125,8 @@ public class AccessorChainMutatorTest {
 		};
 	}
 	
-	@Test
-	@UseDataProvider("testSetData")
+	@ParameterizedTest
+	@MethodSource("testSetData")
 	public void testSet(List<IAccessor> accessors, Object object, Object expected) {
 		AccessorChain<Object, Object> accessorChain = new AccessorChain<>(accessors);
 		AccessorChainMutator testInstance = accessorChain.toMutator();
@@ -139,13 +134,13 @@ public class AccessorChainMutatorTest {
 		assertEquals(expected, accessorChain.get(object));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void testSet_NullPointerException() throws NoSuchFieldException {
 		DataSet dataSet = new DataSet();
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor);
 		Object object = new Person(null);
 		AccessorChainMutator testInstance = new AccessorChain(accessors).toMutator();
-		testInstance.set(object, new Address(new City("Toto"), null));
+		assertThrows(NullPointerException.class, () -> testInstance.set(object, new Address(new City("Toto"), null)));
 	}
 	
 }

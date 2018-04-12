@@ -2,24 +2,22 @@ package org.gama.reflection;
 
 import java.util.List;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import org.gama.lang.Reflections;
 import org.gama.lang.collection.Arrays;
 import org.gama.reflection.model.Address;
 import org.gama.reflection.model.City;
 import org.gama.reflection.model.Person;
 import org.gama.reflection.model.Phone;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Guillaume Mary
  */
-@RunWith(DataProviderRunner.class)
 public class AccessorChainTest {
 	
 	private static class DataSet {
@@ -52,7 +50,6 @@ public class AccessorChainTest {
 		return Arrays.asList(accessors);
 	}
 	
-	@DataProvider
 	public static Object[][] testGetData() {
 		DataSet dataSet = new DataSet();
 		return new Object[][] {
@@ -75,29 +72,29 @@ public class AccessorChainTest {
 		};
 	}
 	
-	@Test
-	@UseDataProvider("testGetData")
+	@ParameterizedTest
+	@MethodSource("testGetData")
 	public void testGet(List<IAccessor> accessors, Object object, Object expected) {
 		AccessorChain<Object, Object> accessorChain = new AccessorChain<>(accessors);
 		assertEquals(expected, accessorChain.get(object));
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testGet_IllegalArgumentException() {
 		// field "number" doesn't exist on Collection "phones" => get(..) should throw IllegalArgumentException
 		DataSet dataSet = new DataSet();
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, Arrays.asList(new Phone("123"))));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
-		testInstance.get(object);
+		assertThrows(IllegalArgumentException.class, () -> testInstance.get(object));
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void testGet_NullPointerException() {
 		DataSet dataSet = new DataSet();
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, null));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
-		testInstance.get(object);
+		assertThrows(NullPointerException.class, () -> testInstance.get(object));
 	}
 }

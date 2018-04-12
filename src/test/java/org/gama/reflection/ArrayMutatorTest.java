@@ -1,8 +1,9 @@
 package org.gama.reflection;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Guillaume Mary
@@ -25,12 +26,12 @@ public class ArrayMutatorTest {
 		assertArrayEquals(sample, new String[]{"x", "y", "z"});
 	}
 	
-	@Test(expected = ArrayIndexOutOfBoundsException.class)
+	@Test
 	public void testSet_ArrayIndexOutOfBoundsException() {
 		ArrayMutator<String> testInstance = new ArrayMutator<>();
 		String[] sample = { "a", "b", "c" };
 		
 		testInstance.setIndex(-1);
-		testInstance.set(sample, "x");
+		assertThrows(ArrayIndexOutOfBoundsException.class, () -> testInstance.set(sample, "x"));
 	}
 }

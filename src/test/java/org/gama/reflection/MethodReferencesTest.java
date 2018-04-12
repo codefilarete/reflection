@@ -6,11 +6,11 @@ import java.text.Collator;
 
 import org.gama.lang.Reflections;
 import org.gama.lang.Strings;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.gama.reflection.MethodReferences.getTargetMethodRawSignature;
 import static org.gama.reflection.MethodReferences.buildSerializedLambda;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Guillaume Mary

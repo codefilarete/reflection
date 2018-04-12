@@ -6,11 +6,10 @@ import java.lang.reflect.Method;
 import org.gama.lang.Reflections;
 import org.gama.reflection.model.City;
 import org.gama.reflection.model.Phone;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Guillaume Mary
@@ -43,15 +42,12 @@ public class PropertyAccessorTest {
 		assertEquals(new MutatorByMethod<>(nameSetter), nameAccessor.getMutator());
 	}
 	
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
-	
 	@Test
 	public void testOf_nonConventionalMethodInput_exceptionThrown() {
-		expectedException.expect(IllegalArgumentException.class);
-		expectedException.expectMessage("Field wrapper j.l.String o.g.r.m.City.name() doesn't feet encapsulation naming convention");
 		Method nameGetter = Reflections.findMethod(City.class, "name");
-		Accessors.of(nameGetter);
+		
+		assertThrows(IllegalArgumentException.class, () -> Accessors.of(nameGetter),
+				"Field wrapper j.l.String o.g.r.m.City.name() doesn't feet encapsulation naming convention");
 	}
 	
 }
