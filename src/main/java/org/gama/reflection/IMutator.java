@@ -1,5 +1,7 @@
 package org.gama.reflection;
 
+import java.util.function.BiConsumer;
+
 /**
  * @author Guillaume Mary
  */
@@ -7,4 +9,8 @@ package org.gama.reflection;
 public interface IMutator<C, T> {
 	
 	void set(C c, T t);
+	
+	static <C, T> IMutator<C, T> mutator(BiConsumer<C, T> consumer) {
+		return consumer::accept;
+	}
 }
