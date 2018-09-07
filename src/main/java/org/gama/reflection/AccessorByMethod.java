@@ -25,7 +25,7 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T> implements Ac
 	
 	public AccessorByMethod(Method getter, Object ... arguments) {
 		this.getter = getter;
-		this.getter.setAccessible(true);
+		Reflections.ensureAccessible(getter);
 		this.methodParameters = arguments;
 	}
 	

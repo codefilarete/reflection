@@ -2,6 +2,8 @@ package org.gama.reflection;
 
 import java.lang.reflect.Field;
 
+import org.gama.lang.Reflections;
+
 /**
  * @author Guillaume Mary
  */
@@ -11,7 +13,7 @@ public class AccessorByField<C, T> extends AbstractAccessor<C, T> implements Acc
 	
 	public AccessorByField(Field field) {
 		this.field = field;
-		this.field.setAccessible(true);
+		Reflections.ensureAccessible(field);
 	}
 	
 	@Override

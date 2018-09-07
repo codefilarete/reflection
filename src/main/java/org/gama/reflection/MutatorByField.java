@@ -3,6 +3,8 @@ package org.gama.reflection;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 
+import org.gama.lang.Reflections;
+
 /**
  * @author mary
  */
@@ -13,7 +15,7 @@ public class MutatorByField<C, T> extends AbstractMutator<C, T> implements Mutat
 	public MutatorByField(Field field) {
 		super();
 		this.field = field;
-		this.field.setAccessible(true);
+		Reflections.ensureAccessible(field);
 	}
 	
 	@Override

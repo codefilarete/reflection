@@ -6,6 +6,7 @@ import org.gama.lang.Reflections;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -14,59 +15,41 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ExceptionConverterTest {
 	
 	@Test
-	public void testConvertException_wrongConversion() throws Throwable {
+	public void testConvertException_wrongConversion() {
 		Field field_a = Reflections.findField(Toto.class, "a");
 		assertNotNull(field_a);
-		field_a.setAccessible(true);
+		Reflections.ensureAccessible(field_a);
 		
 		MutatorByField<Toto, Object> accessorByField = new MutatorByField<>(field_a);
 		
 		Toto target = new Toto();
-		Throwable thrownThrowable = null;
-		try {
-			accessorByField.set(target, 0L);
-		} catch (IllegalArgumentException e) {
-			thrownThrowable = e;
-		}
-		
+		IllegalArgumentException thrownThrowable = assertThrows(IllegalArgumentException.class, () -> accessorByField.set(target, 0L));
 		assertTrue(thrownThrowable.getMessage().contains("can't be used with"));
 	}
 	
 	@Test
-	public void testConvertException_missingField() throws Throwable {
+	public void testConvertException_missingField() {
 		Field field_a = Reflections.findField(Toto.class, "a");
 		assertNotNull(field_a);
-		field_a.setAccessible(true);
+		Reflections.ensureAccessible(field_a);
 		
 		MutatorByField<Tata, Object> mutatorByField = new MutatorByField<>(field_a);
 		
 		Tata target = new Tata();
-		Throwable thrownThrowable = null;
-		try {
-			mutatorByField.set(target, 0L);
-		} catch (IllegalArgumentException e) {
-			thrownThrowable = e;
-		}
-		
+		IllegalArgumentException thrownThrowable = assertThrows(IllegalArgumentException.class, () -> mutatorByField.set(target, 0L));
 		assertTrue(thrownThrowable.getMessage().contains("doesn't have field"));
 	}
 	
 	@Test
-	public void testConvertException_primitiveField() throws Throwable {
+	public void testConvertException_primitiveField() {
 		Field field_b = Reflections.findField(Toto.class, "b");
 		assertNotNull(field_b);
-		field_b.setAccessible(true);
+		Reflections.ensureAccessible(field_b);
 		
 		MutatorByField<Toto, Object> mutatorByField = new MutatorByField<>(field_b);
 		
 		Toto target = new Toto();
-		Throwable thrownThrowable = null;
-		try {
-			mutatorByField.set(target, null);
-		} catch (IllegalArgumentException e) {
-			thrownThrowable = e;
-		}
-		
+		IllegalArgumentException thrownThrowable = assertThrows(IllegalArgumentException.class, () -> mutatorByField.set(target, null));
 		assertTrue(thrownThrowable.getMessage().contains("can't be used with null"));
 	}
 	

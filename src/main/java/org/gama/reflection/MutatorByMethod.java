@@ -20,7 +20,7 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T> implements Muta
 	public MutatorByMethod(Method setter) {
 		super();
 		this.setter = setter;
-		this.setter.setAccessible(true);
+		Reflections.ensureAccessible(setter);
 		int parametersLength = this.setter.getParameterTypes().length;
 		// method parameters instanciation to avoid extra array instanciation on each set(..) call 
 		this.methodParameters = new Object[parametersLength];
