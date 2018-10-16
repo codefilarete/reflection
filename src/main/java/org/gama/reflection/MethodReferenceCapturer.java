@@ -179,7 +179,7 @@ public class MethodReferenceCapturer {
 			List<Class> result = new ArrayList<>(5);
 			while(currPos < signatureChars.length) {
 				// 4 cases to take into account : a combination of 2
-				// - object vs primitive type : object starts with 'L' followed by class name whose packages are separated with /, primitive is only 1 char
+				// - object vs primitive type : object starts with 'L' followed by class name which packages are separated with /, primitive is only 1 char
 				// - arrays are distincted by a '[' prefix
 				boolean typeIsArray = signatureChars[currPos] == '[';
 				boolean isObjectType = signatureChars[currPos + (typeIsArray ? /* add 1 for '[' */ 1 : 0)] == 'L';
