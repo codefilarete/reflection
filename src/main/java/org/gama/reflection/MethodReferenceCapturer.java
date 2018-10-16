@@ -1,8 +1,13 @@
 package org.gama.reflection;
 
+import javax.annotation.Nonnull;
 import java.lang.invoke.SerializedLambda;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
@@ -22,7 +27,7 @@ public class MethodReferenceCapturer {
 	/** A totally arbitrary value for cache size */
 	private static final int DEFAULT_CACHE_SIZE = 1000;
 	
-	private final Map<String, Method> cache;
+	private final Map<String, Executable> cache;
 	
 	public MethodReferenceCapturer() {
 		this(DEFAULT_CACHE_SIZE);
@@ -54,6 +59,14 @@ public class MethodReferenceCapturer {
 		return findMethod(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	
+	public <I, O, U> Method findMethod(SerializableTriConsumer<I, O, U> methodReference) {
+		return findMethod(MethodReferences.buildSerializedLambda(methodReference));
+	}
+	
+	public <I, O> Constructor findConstructor(SerializableFunction<I, O> methodReference) {
+		return findConstructor(MethodReferences.buildSerializedLambda(methodReference));
+	}
+	
 	/**
 	 * Shells a {@link SerializedLambda} to find out what {@link Method} it refers to.
 	 * @param serializedLambda the {@link Method} container
@@ -61,7 +74,28 @@ public class MethodReferenceCapturer {
 	 */
 	public Method findMethod(SerializedLambda serializedLambda) {
 		String targetMethodRawSignature = MethodReferences.getTargetMethodRawSignature(serializedLambda);
-		return cache.computeIfAbsent(targetMethodRawSignature, s -> {
+		return (Method) findExecutable(serializedLambda, targetMethodRawSignature);
+	}
+	
+	/**
+	 * Shells a {@link SerializedLambda} to find out what {@link Method} it refers to.
+	 * @param serializedLambda the {@link Method} container
+	 * @return the found Method
+	 */
+	public Constructor findConstructor(SerializedLambda serializedLambda) {
+		String targetMethodRawSignature = MethodReferences.getTargetMethodRawSignature(serializedLambda);
+		return (Constructor) findExecutable(serializedLambda, targetMethodRawSignature);
+	}
+	
+	/**
+	 * Find any {@link Executable} behind the given {@link SerializedLambda}
+	 * 
+	 * @param serializedLambda any non null {@link SerializedLambda}
+	 * @param targetExecutableRawSignature the executable signature to be used for caching
+	 * @return the {@link Executable} in the given {@link SerializedLambda}
+	 */
+	private Executable findExecutable(SerializedLambda serializedLambda, String targetExecutableRawSignature) {
+		return cache.computeIfAbsent(targetExecutableRawSignature, s -> {
 			Class<?> clazz;
 			try {
 				clazz = Class.forName(serializedLambda.getImplClass().replace("/", "."));
@@ -78,7 +112,12 @@ public class MethodReferenceCapturer {
 				throw new IllegalArgumentException("Can't find method reference for "
 						+ serializedLambda.getImplClass() + "." + serializedLambda.getImplMethodName(), e);
 			}
-			return Reflections.findMethod(clazz, serializedLambda.getImplMethodName(), argsClasses);
+			// method or constructor case ?
+			if (serializedLambda.getImplMethodName().equals("<init>")) {
+				return Reflections.getConstructor(clazz, argsClasses);
+			} else {
+				return Reflections.findMethod(clazz, serializedLambda.getImplMethodName(), argsClasses);
+			}
 		});
 	}
 	
@@ -87,15 +126,13 @@ public class MethodReferenceCapturer {
 	 * @param methodSignature the result of {@link SerializedLambda#getImplMethodSignature()}
 	 * @return an empty array if no argument were found, not null
 	 */
-	private Class[] giveArgumentTypes(String methodSignature) throws ClassNotFoundException {
+	@Nonnull
+	Class[] giveArgumentTypes(String methodSignature) throws ClassNotFoundException {
 		Class[] argsClasses;
-		int closeArgsIndex = methodSignature.indexOf(")");
+		int closeArgsIndex = methodSignature.indexOf(')');
 		if (closeArgsIndex != 1) {
-			String[] argsTypes = methodSignature.substring(1, closeArgsIndex).split(";");
-			argsClasses = new Class[argsTypes.length];
-			for (int i = 0, argsTypesLength = argsTypes.length; i < argsTypesLength; i++) {
-				argsClasses[i] = Reflections.forName(argsTypes[i]);
-			}
+			String argumentTypeSignature = methodSignature.substring(1, closeArgsIndex);
+			argsClasses = new ArgumentTypeSignatureParser(argumentTypeSignature).parse();
 		} else {
 			argsClasses = new Class[0];
 		}
@@ -105,17 +142,90 @@ public class MethodReferenceCapturer {
 	/**
 	 * Very simple implementation of a Least-Recently-Used cache
 	 */
-	private static class LRUCache extends LinkedHashMap<String, Method> {
+	static class LRUCache extends LinkedHashMap<String, Executable> {
 		
 		private final int cacheSize;
 		
-		public LRUCache(int cacheSize) {
+		LRUCache(int cacheSize) {
 			this.cacheSize = cacheSize;
 		}
 		
+		/**
+		 * Implemented to remove the given entry if cache size overflows : not depending on entry, only on cache size
+		 * @param eldest the least recently added entry (computed by caller)
+		 * @return true if current cache size overflows expected cache size (given at construction time)
+		 */
 		@Override
 		protected boolean removeEldestEntry(Map.Entry eldest) {
 			return size() > cacheSize;
 		}
+	}
+	
+	/**
+	 * Small class aimed at parsing arguments types 
+	 */
+	private static class ArgumentTypeSignatureParser {
+		
+		private int currPos = 0;
+		private String className;
+		private int typeDefSize;
+		private final char[] signatureChars;
+		
+		private ArgumentTypeSignatureParser(String signature) {
+			this.signatureChars = signature.toCharArray();
+		}
+		
+		Class[] parse() throws ClassNotFoundException {
+			List<Class> result = new ArrayList<>(5);
+			while(currPos < signatureChars.length) {
+				// 4 cases to take into account : a combination of 2
+				// - object vs primitive type : object starts with 'L' followed by class name whose packages are separated with /, primitive is only 1 char
+				// - arrays are distincted by a '[' prefix
+				boolean typeIsArray = signatureChars[currPos] == '[';
+				boolean isObjectType = signatureChars[currPos + (typeIsArray ? /* add 1 for '[' */ 1 : 0)] == 'L';
+				lookAHeadForType(isObjectType, typeIsArray);
+				currPos += typeDefSize;
+				result.add(Reflections.forName(className));
+			}
+			return result.toArray(new Class[0]);
+		}
+		
+		/**
+		 * Consumes signature characters to find out object or primitive type definition.
+		 * Updates className and typeDefSize fields.
+		 * 
+		 * @param isObjectType indicates if type is an object one (vs primitive) : crucial for parsing
+		 * @param isArray indicates if type is an array : needed to compute typeDefSize in primitive case
+		 */
+		private void lookAHeadForType(boolean isObjectType, boolean isArray) {
+			if (isObjectType) {
+				// Object type ends with ';'
+				int typeDefEnd = currPos;
+				while(signatureChars[++typeDefEnd] != ';') {
+					// iteration is already done in condition, so ther's nothing to do here
+				}
+				typeDefSize = typeDefEnd - currPos + 1;
+				className = cleanClassName(new String(signatureChars, currPos, typeDefSize));
+			} else {
+				typeDefSize = 1 + (isArray ? /* add 1 for '[' */ 1 : 0);
+				className = new String(signatureChars, currPos, typeDefSize);
+			}
+		}
+		
+		/**
+		 * Cleans the given class name to comply with {@link Reflections#forName(String)} expected input
+		 * @param objectClass a class name with '/' and ;
+		 * @return
+		 */
+		private static String cleanClassName(String objectClass) {
+			if (objectClass.charAt(0) == 'L') {
+				// class name : starts with 'L' and ends with ';' : we remove them
+				objectClass = objectClass.substring(1, objectClass.length() - 1);
+			}
+			// other case [L...; (object array) is accepted without modification
+			objectClass = objectClass.replace('/', '.');
+			return objectClass;
+		}
+		
 	}
 }
