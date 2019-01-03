@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.gama.lang.Reflections;
+import org.gama.lang.Reflections.MemberNotFoundException;
 import org.gama.lang.StringAppender;
 
 /**
@@ -61,7 +62,11 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T> implements Muta
 		String propertyName = Reflections.propertyName(getSetter());
 		AccessorByMethod<C, T> accessorByMethod = Accessors.accessorByMethod(declaringClass, propertyName);
 		if (accessorByMethod == null) {
-			return Accessors.accessorByField((Class<C>) declaringClass, propertyName);
+			try {
+				return Accessors.accessorByField((Class<C>) declaringClass, propertyName);
+			} catch (MemberNotFoundException e) {
+				throw new NonReversibleAccessor("Can't find a mutator for " + Reflections.toString(getSetter()), e);
+			}
 		} else {
 			return accessorByMethod;
 		}

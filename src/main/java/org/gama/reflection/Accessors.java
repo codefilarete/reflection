@@ -1,5 +1,6 @@
 package org.gama.reflection;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -13,6 +14,7 @@ import org.gama.lang.reflect.MethodDispatcher;
 /**
  * @author Guillaume Mary
  */
+@ParametersAreNonnullByDefault
 public final class Accessors {
 	
 	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Field field) {
@@ -61,7 +63,7 @@ public final class Accessors {
 	}
 	
 	public static <C, T> AccessorByField<C, T> accessorByField(Class<C> clazz, String propertyName) {
-		Field propertyField = Reflections.findField(clazz, propertyName);
+		Field propertyField = Reflections.getField(clazz, propertyName);
 		return accessorByField(propertyField);
 	}
 	
@@ -70,7 +72,7 @@ public final class Accessors {
 	}
 	
 	public static <C, T> MutatorByMethod<C, T> mutatorByMethod(Class<C> clazz, String propertyName) {
-		Field propertyField = Reflections.findField(clazz, propertyName);
+		Field propertyField = Reflections.getField(clazz, propertyName);
 		Class<?> inputType = propertyField.getType();
 		return mutatorByMethod(clazz, propertyName, inputType);
 	}
@@ -89,11 +91,8 @@ public final class Accessors {
 		return new MutatorByField<>(field);
 	}
 	
-	public static <C, T> MutatorByField<C, T> mutatorByField(Class clazz, String propertyName) throws NoSuchFieldException {
-		Field propertyField = Reflections.findField(clazz, propertyName);
-		if (propertyField == null) {
-			throw new NoSuchFieldException("Class " + clazz.getName() + " doesn't have a field name " + propertyName);
-		}
+	public static <C, T> MutatorByField<C, T> mutatorByField(Class clazz, String propertyName) {
+		Field propertyField = Reflections.getField(clazz, propertyName);
 		return mutatorByField(propertyField);
 	}
 	
@@ -174,5 +173,9 @@ public final class Accessors {
 		} else {
 			throw new IllegalArgumentException("Member cannot be used as an accessor : " + member);
 		}
+	}
+	
+	private Accessors() {
+		// utility class
 	}
 }

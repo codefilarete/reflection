@@ -4,6 +4,7 @@ import org.gama.lang.Reflections;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Guillaume Mary
@@ -24,6 +25,19 @@ public class AccessorByMethodTest {
 		assertEquals((Object) 42, testInstance.get(toto));
 	}
 	
+	@Test
+	public void testToMutator() {
+		AccessorByMethod<Toto, Integer> testInstance = new AccessorByMethod<>(Reflections.findMethod(Toto.class, "getA"));
+		assertEquals(Reflections.getMethod(Toto.class, "setA", int.class), testInstance.toMutator().getSetter());
+	}
+	
+	@Test
+	public void testToMutator_reverseSetterDoesntExist_throwsException() {
+		AccessorByMethod<Toto, Integer> testInstance = new AccessorByMethod<>(Reflections.findMethod(Toto.class, "getFakeProperty"));
+		assertEquals("Can't find a mutator for int o.g.r.Toto.getFakeProperty()",
+				assertThrows(NonReversibleAccessor.class, testInstance::toMutator).getMessage());
+	}
+	
 	private static class Toto {
 		private int a;
 		
@@ -33,6 +47,10 @@ public class AccessorByMethodTest {
 		
 		public void setA(int a) {
 			this.a = a;
+		}
+		
+		public int getFakeProperty() {
+			return 0;
 		}
 	}
 	

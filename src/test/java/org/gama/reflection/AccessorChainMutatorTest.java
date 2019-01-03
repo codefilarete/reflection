@@ -3,6 +3,7 @@ package org.gama.reflection;
 import java.util.List;
 
 import org.gama.lang.Reflections;
+import org.gama.lang.Reflections.MemberNotFoundException;
 import org.gama.lang.collection.Arrays;
 import org.gama.reflection.model.Address;
 import org.gama.reflection.model.City;
@@ -43,7 +44,7 @@ public class AccessorChainMutatorTest {
 		private final MutatorByMethod<String, Character[]> toCharArrayMutator;
 		private final ArrayMutator<String> charArrayMutator;
 		
-		private DataSet() throws NoSuchFieldException {
+		private DataSet() {
 			cityNameAccessor = Accessors.accessorByField(City.class, "name");
 			addressCityAccessor = Accessors.accessorByField(Address.class, "city");
 			personAddressAccessor = Accessors.accessorByField(Person.class, "address");
@@ -68,7 +69,7 @@ public class AccessorChainMutatorTest {
 		}
 	}
 	
-	public static Object[][] testGetMutatorData() throws NoSuchFieldException {
+	public static Object[][] testGetMutatorData() {
 		DataSet dataSet = new DataSet();
 		return new Object[][]{
 				{ dataSet.cityNameAccessor, dataSet.cityNameMutator },
@@ -83,7 +84,7 @@ public class AccessorChainMutatorTest {
 		};
 	}
 	
-	public static Object[][] testGetMutator_exception_data() throws NoSuchFieldException {
+	public static Object[][] testGetMutator_exception_data() {
 		DataSet dataSet = new DataSet();
 		return new Object[][]{
 				{ dataSet.charAtAccessor },    // chartAt() has no mutator equivalent
@@ -100,14 +101,14 @@ public class AccessorChainMutatorTest {
 	@ParameterizedTest
 	@MethodSource("testGetMutator_exception_data")
 	public void testGetMutator_exception(IReversibleAccessor accessor) {
-		assertThrows(IllegalArgumentException.class, accessor::toMutator);
+		assertThrows(MemberNotFoundException.class, accessor::toMutator);
 	}
 	
 	public static List<IAccessor> list(IAccessor ... accessors) {
 		return Arrays.asList(accessors);
 	}
 	
-	public static Object[][] testSetData() throws NoSuchFieldException {
+	public static Object[][] testSetData() {
 		DataSet dataSet = new DataSet();
 		return new Object[][] {
 				{ list(dataSet.cityNameAccessor),

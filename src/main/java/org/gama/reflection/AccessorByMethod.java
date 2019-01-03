@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.gama.lang.Reflections;
+import org.gama.lang.Reflections.MemberNotFoundException;
 import org.gama.lang.StringAppender;
 
 /**
@@ -97,7 +98,7 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T> implements Ac
 	@Override
 	// NB: set final to force override doGet(C, Object ...) and so to avoid mistake
 	protected final T doGet(C c) throws IllegalAccessException, InvocationTargetException {
-		return doGet(c, new Object[] {});
+		return doGet(c, new Object[0]);
 	}
 	
 	protected T doGet(C c, Object ... args) throws IllegalAccessException, InvocationTargetException {
@@ -109,7 +110,7 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T> implements Ac
 		StringAppender arguments = new StringAppender(Arrays.deepToString(methodParameters));
 		// removing '[' and ']'
 		arguments.cutHead(1).cutTail(1);
-		return getGetter().getDeclaringClass().getName() + "." + getGetter().getName() + "(" + arguments + ")";
+		return Reflections.toString(getGetter());
 	}
 	
 	@Override
@@ -120,8 +121,8 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T> implements Ac
 		if (mutatorByMethod == null) {
 			try {
 				return Accessors.mutatorByField(declaringClass, propertyName);
-			} catch (NoSuchFieldException e) {
-				throw new NotReversibleAccessor("Can't find a mutator for " + getGetter());
+			} catch (MemberNotFoundException e) {
+				throw new NonReversibleAccessor("Can't find a mutator for " + Reflections.toString(getGetter()), e);
 			}
 		} else {
 			return mutatorByMethod;

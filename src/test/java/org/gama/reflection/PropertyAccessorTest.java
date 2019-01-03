@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import org.gama.lang.Reflections;
+import org.gama.lang.Reflections.MemberNotFoundException;
 import org.gama.reflection.model.City;
 import org.gama.reflection.model.Phone;
 import org.junit.jupiter.api.Test;
@@ -46,7 +47,7 @@ public class PropertyAccessorTest {
 	public void testOf_nonConventionalMethodInput_exceptionThrown() {
 		Method nameGetter = Reflections.findMethod(City.class, "name");
 		
-		assertThrows(IllegalArgumentException.class, () -> Accessors.of(nameGetter),
+		assertThrows(MemberNotFoundException.class, () -> Accessors.of(nameGetter),
 				"Field wrapper j.l.String o.g.r.m.City.name() doesn't feet encapsulation naming convention");
 	}
 	
