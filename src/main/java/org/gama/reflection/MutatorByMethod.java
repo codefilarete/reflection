@@ -7,7 +7,6 @@ import java.util.Arrays;
 
 import org.gama.lang.Reflections;
 import org.gama.lang.Reflections.MemberNotFoundException;
-import org.gama.lang.StringAppender;
 
 /**
  * @author mary
@@ -44,16 +43,7 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T> implements Muta
 	
 	@Override
 	protected String getSetterDescription() {
-		StringAppender description = new StringAppender(100);
-		description.cat(getSetter().getDeclaringClass().getName(), ".", getSetter().getName(), "(");
-		Class<?>[] parameterTypes = getSetter().getParameterTypes();
-		if (parameterTypes.length > 0) {
-			for (Class<?> paramType : parameterTypes) {
-				description.cat(paramType.getSimpleName(), ", ");
-			}
-			description.cutTail(2).cat(")");
-		}
-		return description.toString();
+		return Reflections.toString(getSetter());
 	}
 	
 	@Override

@@ -38,6 +38,11 @@ public class MutatorByMethodTest {
 				assertThrows(NonReversibleAccessor.class, testInstance::toAccessor).getMessage());
 	}
 	
+	@Test
+	public void testToString() {
+		MutatorByMethod<Toto, Integer> testInstance = new MutatorByMethod<>(Reflections.findMethod(Toto.class, "setA", int.class));
+		assertEquals("void o.g.r.Toto.setA(int)", testInstance.toString());
+	}
 	
 	private static class Toto {
 		private int a;

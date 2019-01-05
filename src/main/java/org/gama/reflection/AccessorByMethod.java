@@ -9,7 +9,6 @@ import java.util.Arrays;
 
 import org.gama.lang.Reflections;
 import org.gama.lang.Reflections.MemberNotFoundException;
-import org.gama.lang.StringAppender;
 
 /**
  * @author Guillaume Mary
@@ -107,9 +106,6 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T> implements Ac
 	
 	@Override
 	protected String getGetterDescription() {
-		StringAppender arguments = new StringAppender(Arrays.deepToString(methodParameters));
-		// removing '[' and ']'
-		arguments.cutHead(1).cutTail(1);
 		return Reflections.toString(getGetter());
 	}
 	
