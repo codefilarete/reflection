@@ -5,13 +5,16 @@ import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
+import org.danekja.java.util.function.serializable.SerializableBiFunction;
 import org.danekja.java.util.function.serializable.SerializableFunction;
+import org.danekja.java.util.function.serializable.SerializableSupplier;
 import org.gama.lang.Reflections;
 import org.gama.lang.exception.Exceptions;
 
@@ -63,7 +66,15 @@ public class MethodReferenceCapturer {
 		return findMethod(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	
+	public <I> Constructor findConstructor(SerializableSupplier<I> methodReference) {
+		return findConstructor(MethodReferences.buildSerializedLambda(methodReference));
+	}
+	
 	public <I, O> Constructor findConstructor(SerializableFunction<I, O> methodReference) {
+		return findConstructor(MethodReferences.buildSerializedLambda(methodReference));
+	}
+	
+	public <I1, I2, O> Constructor findConstructor(SerializableBiFunction<I1, I2, O> methodReference) {
 		return findConstructor(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	
@@ -84,7 +95,23 @@ public class MethodReferenceCapturer {
 	 */
 	public Constructor findConstructor(SerializedLambda serializedLambda) {
 		String targetMethodRawSignature = MethodReferences.getTargetMethodRawSignature(serializedLambda);
-		return (Constructor) findExecutable(serializedLambda, targetMethodRawSignature);
+		return handleConstructorCast(findExecutable(serializedLambda, targetMethodRawSignature));
+	}
+	
+	private Constructor handleConstructorCast(Executable executable) {
+		try {
+			return (Constructor) executable;
+		} catch (ClassCastException e) {
+			// Throwing a better suited exception to prevent loss of time to debug ... according to experience
+			if ("java.lang.reflect.Method cannot be cast to java.lang.reflect.Constructor".equals(e.getMessage())
+					&& !Modifier.isStatic(((Method) executable).getReturnType().getModifiers())) {
+				Class<?> returnType = ((Method) executable).getReturnType();
+				throw new UnsupportedOperationException("Capturing by reference a non-static inner classes constructor is not supported" +
+							", make " + Reflections.toString(returnType) + " to be static or an outer class of " + Reflections.toString(returnType.getEnclosingClass()));
+			} else {
+				throw e;
+			}
+		}
 	}
 	
 	/**
@@ -116,7 +143,11 @@ public class MethodReferenceCapturer {
 			if (serializedLambda.getImplMethodName().equals("<init>")) {
 				return Reflections.getConstructor(clazz, argsClasses);
 			} else {
-				return Reflections.findMethod(clazz, serializedLambda.getImplMethodName(), argsClasses);
+//				try {
+					return Reflections.findMethod(clazz, serializedLambda.getImplMethodName(), argsClasses);
+//				} catch (ClassCastException e) {
+//					//TODO
+//				}
 			}
 		});
 	}

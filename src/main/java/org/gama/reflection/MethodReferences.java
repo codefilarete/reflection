@@ -7,7 +7,9 @@ import java.lang.reflect.Method;
 import java.util.function.Function;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
+import org.danekja.java.util.function.serializable.SerializableBiFunction;
 import org.danekja.java.util.function.serializable.SerializableFunction;
+import org.danekja.java.util.function.serializable.SerializableSupplier;
 import org.gama.lang.Reflections;
 import org.gama.lang.exception.Exceptions;
 
@@ -47,22 +49,63 @@ public class MethodReferences {
 	}
 	
 	/**
-	 * Same as {@link #buildSerializedLambda(Serializable)} specialized for getter (method returning value without argument)
-	 * @param methodReference a getter
-	 * @param <T> the target instance type of the getter
+	 * Gives the {@link SerializedLambda} of a no-arg constructor 
+	 * 
+	 * @param methodReference a reference to a no-arg constructor
+	 * @param <O> returned value type of the supplier
 	 * @return a {@link SerializedLambda}
 	 */
-	public static <T> SerializedLambda buildSerializedLambda(SerializableFunction<T, ?> methodReference) {
+	public static <O> SerializedLambda buildSerializedLambda(SerializableSupplier<O> methodReference) {
 		return buildSerializedLambda((Serializable) methodReference);
 	}
 	
 	/**
-	 * Same as {@link #buildSerializedLambda(Serializable)} specialized for setter (method without return value but with one argument)
+	 * Gives the {@link SerializedLambda} of a getter (method returning value without argument) or a one-arg constructor 
+	 * 
+	 * @param methodReference a getter
+	 * @param <T> the target instance type of the getter
+	 * @param <O> returned value type of the getter
+	 * @return a {@link SerializedLambda}
+	 */
+	public static <T, O> SerializedLambda buildSerializedLambda(SerializableFunction<T, O> methodReference) {
+		return buildSerializedLambda((Serializable) methodReference);
+	}
+	
+	/**
+	 * Gives the {@link SerializedLambda} of a two-args constructor (or getter with one argument)
+	 *
+	 * @param methodReference a two-args constructor
+	 * @param <O> constructor type, or returned value type of the getter
+	 * @param <I1> first argument type
+	 * @param <I2> second argument type
+	 * @return a {@link SerializedLambda}
+	 */
+	public static <I1, I2, O> SerializedLambda buildSerializedLambda(SerializableBiFunction<I1, I2, O> methodReference) {
+		return buildSerializedLambda((Serializable) methodReference);
+	}
+	
+	/**
+	 * Gives the {@link SerializedLambda} of a setter (method without return value but with one argument)
+	 * 
 	 * @param methodReference a setter
-	 * @param <T> the target instance type of the setter
+	 * @param <T> target instance type of the setter
+	 * @param <U> argument type
 	 * @return a {@link SerializedLambda}
 	 */
 	public static <T, U> SerializedLambda buildSerializedLambda(SerializableBiConsumer<T, U> methodReference) {
+		return buildSerializedLambda((Serializable) methodReference);
+	}
+	
+	/**
+	 * Gives the {@link SerializedLambda} of a two-args setter (method without return value but with two arguments)
+	 * 
+	 * @param methodReference a setter
+	 * @param <T> target instance type of the setter
+	 * @param <U> first argument type
+	 * @param <V> second argument type
+	 * @return a {@link SerializedLambda}
+	 */
+	public static <T, U, V> SerializedLambda buildSerializedLambda(SerializableTriConsumer<T, U, V> methodReference) {
 		return buildSerializedLambda((Serializable) methodReference);
 	}
 	
@@ -74,7 +117,7 @@ public class MethodReferences {
 	 * @param methodReference the method reference to hash
 	 * @return a SerializedLambda, not null
 	 */
-	public static SerializedLambda buildSerializedLambda(Serializable methodReference) {
+	private static SerializedLambda buildSerializedLambda(Serializable methodReference) {
 		// algorithm made possible thanks to https://stackoverflow.com/a/25625761
 		// (https://stackoverflow.com/questions/21887358/reflection-type-inference-on-java-8-lambdas)
 		Method writeReplace = Reflections.getMethod(methodReference.getClass(), "writeReplace");

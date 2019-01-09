@@ -2,10 +2,13 @@ package org.gama.reflection;
 
 import java.lang.reflect.Constructor;
 import java.text.Collator;
+import java.util.HashMap;
 import java.util.List;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
+import org.danekja.java.util.function.serializable.SerializableBiFunction;
 import org.danekja.java.util.function.serializable.SerializableFunction;
+import org.danekja.java.util.function.serializable.SerializableSupplier;
 import org.gama.lang.Reflections;
 import org.gama.lang.StringAppender;
 import org.gama.lang.collection.Arrays;
@@ -14,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Guillaume Mary
@@ -35,10 +39,36 @@ public class MethodReferenceCapturerTest {
 	}
 	
 	@Test
-	public void testFindConstructor() {
+	public void testFindConstructor_0arg() {
+		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
+		assertEquals(Reflections.getConstructor(String.class), testInstance.findConstructor((SerializableSupplier<String>) String::new));
+	}
+	
+	@Test
+	public void testFindConstructor_1arg() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		assertEquals(Reflections.getConstructor(String.class, String.class), testInstance.findConstructor((SerializableFunction<String, String>) String::new));
 		assertEquals(Reflections.getConstructor(String.class, char[].class), testInstance.findConstructor((SerializableFunction<char[], String>) String::new));
+	}
+	
+	@Test
+	public void testFindConstructor_2args() {
+		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
+		assertEquals(Reflections.getConstructor(HashMap.class, int.class, float.class), testInstance.findConstructor((SerializableBiFunction<Integer, Float, HashMap>) HashMap::new));
+	}
+	
+	@Test
+	public void testFindConstructor_constructorIsInnerOne_static() {
+		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
+		assertEquals(Reflections.getConstructor(StaticInnerClass.class), testInstance.findConstructor(StaticInnerClass::new));
+	}
+	
+	@Test
+	public void testFindConstructor_constructorIsInnerOne_nonStatic_throwsException() {
+		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
+		assertEquals("Capturing by reference a non-static inner classes constructor is not supported" +
+						", make o.g.r.NonStaticInnerClass to be static or an outer class of o.g.r.MethodReferenceCapturerTest",
+				assertThrows(UnsupportedOperationException.class, () -> testInstance.findConstructor(NonStaticInnerClass::new)).getMessage());
 	}
 	
 	@Test
@@ -72,5 +102,17 @@ public class MethodReferenceCapturerTest {
 		// adding an already existing one as no influence on the map
 		testInstance.put("d", dummyExecutable);
 		assertEquals(Arrays.asSet("a", "c", "d"), testInstance.keySet());
+	}
+	
+	private class NonStaticInnerClass {
+		
+		public NonStaticInnerClass() {
+		}
+	}
+	
+	private static class StaticInnerClass {
+		
+		public StaticInnerClass() {
+		}
 	}
 }
