@@ -103,11 +103,20 @@ public class MethodReferenceCapturer {
 			return (Constructor) executable;
 		} catch (ClassCastException e) {
 			// Throwing a better suited exception to prevent loss of time to debug ... according to experience
-			if ("java.lang.reflect.Method cannot be cast to java.lang.reflect.Constructor".equals(e.getMessage())
-					&& !Modifier.isStatic(((Method) executable).getReturnType().getModifiers())) {
-				Class<?> returnType = ((Method) executable).getReturnType();
-				throw new UnsupportedOperationException("Capturing by reference a non-static inner classes constructor is not supported" +
-							", make " + Reflections.toString(returnType) + " to be static or an outer class of " + Reflections.toString(returnType.getEnclosingClass()));
+			if ("java.lang.reflect.Method cannot be cast to java.lang.reflect.Constructor".equals(e.getMessage())) {
+				Method method = (Method) executable;
+				Class returnType = method.getReturnType();
+				if (!Modifier.isStatic(returnType.getModifiers())) {
+					throw new UnsupportedOperationException("Capturing by reference a non-static inner classes constructor is not supported, make "
+							+ Reflections.toString(returnType) + " to be static or an outer class of " + Reflections.toString(returnType.getEnclosingClass()));
+				} else {
+					// case here is a private constructor of a static inner class : for any (not really understood) reason, in such a case some bytecode
+					// wraps the call to the constructor so the serialized lambda is no more a direct access to it (hence the ClassCastException),
+					// but the constructor can be deduced from method return type
+					Constructor constructor = Reflections.getConstructor(method.getReturnType(), method.getParameterTypes());
+					Reflections.ensureAccessible(constructor);
+					return constructor;
+				}
 			} else {
 				throw e;
 			}
@@ -143,11 +152,7 @@ public class MethodReferenceCapturer {
 			if (serializedLambda.getImplMethodName().equals("<init>")) {
 				return Reflections.getConstructor(clazz, argsClasses);
 			} else {
-//				try {
-					return Reflections.findMethod(clazz, serializedLambda.getImplMethodName(), argsClasses);
-//				} catch (ClassCastException e) {
-//					//TODO
-//				}
+				return Reflections.findMethod(clazz, serializedLambda.getImplMethodName(), argsClasses);
 			}
 		});
 	}

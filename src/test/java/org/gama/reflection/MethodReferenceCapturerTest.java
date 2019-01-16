@@ -1,6 +1,7 @@
 package org.gama.reflection;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
 import java.util.HashMap;
 import java.util.List;
@@ -54,13 +55,21 @@ public class MethodReferenceCapturerTest {
 	@Test
 	public void testFindConstructor_2args() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
-		assertEquals(Reflections.getConstructor(HashMap.class, int.class, float.class), testInstance.findConstructor((SerializableBiFunction<Integer, Float, HashMap>) HashMap::new));
+		assertEquals(Reflections.getConstructor(HashMap.class, int.class, float.class),
+				testInstance.findConstructor((SerializableBiFunction<Integer, Float, HashMap>) HashMap::new));
 	}
 	
 	@Test
 	public void testFindConstructor_constructorIsInnerOne_static() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		assertEquals(Reflections.getConstructor(StaticInnerClass.class), testInstance.findConstructor(StaticInnerClass::new));
+	}
+	
+	@Test
+	public void testFindConstructor_constructorIsInnerOne_static_onlyOneConstructorWithOneArgument() throws IllegalAccessException, InvocationTargetException, InstantiationException {
+		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
+		assertEquals(Reflections.getConstructor(StaticInnerClassWithOnlyOneConstructorWithOneArgument.class, int.class),
+				testInstance.findConstructor(StaticInnerClassWithOnlyOneConstructorWithOneArgument::new));
 	}
 	
 	@Test
@@ -113,6 +122,13 @@ public class MethodReferenceCapturerTest {
 	private static class StaticInnerClass {
 		
 		public StaticInnerClass() {
+		}
+	}
+	
+	
+	private static class StaticInnerClassWithOnlyOneConstructorWithOneArgument {
+		
+		private StaticInnerClassWithOnlyOneConstructorWithOneArgument(int i) {
 		}
 	}
 }
