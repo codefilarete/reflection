@@ -76,7 +76,7 @@ public class MethodReferenceCapturerTest {
 	public void testFindConstructor_constructorIsInnerOne_nonStatic_throwsException() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		assertEquals("Capturing by reference a non-static inner classes constructor is not supported" +
-						", make o.g.r.NonStaticInnerClass to be static or an outer class of o.g.r.MethodReferenceCapturerTest",
+						", make o.g.r.MethodReferenceCapturerTest$NonStaticInnerClass to be static or an outer class of o.g.r.MethodReferenceCapturerTest",
 				assertThrows(UnsupportedOperationException.class, () -> testInstance.findConstructor(NonStaticInnerClass::new)).getMessage());
 	}
 	

@@ -34,14 +34,14 @@ public class AccessorByMethodTest {
 	@Test
 	public void testToMutator_reverseSetterDoesntExist_throwsException() {
 		AccessorByMethod<Toto, Integer> testInstance = new AccessorByMethod<>(Reflections.findMethod(Toto.class, "getFakeProperty"));
-		assertEquals("Can't find a mutator for int o.g.r.Toto.getFakeProperty()",
+		assertEquals("Can't find a mutator for int o.g.r.AccessorByMethodTest$Toto.getFakeProperty()",
 				assertThrows(NonReversibleAccessor.class, testInstance::toMutator).getMessage());
 	}
 	
 	@Test
 	public void testToString() {
 		AccessorByMethod<Toto, Integer> testInstance = new AccessorByMethod<>(Reflections.findMethod(Toto.class, "getA"));
-		assertEquals("int o.g.r.Toto.getA()", testInstance.toString());
+		assertEquals("int o.g.r.AccessorByMethodTest$Toto.getA()", testInstance.toString());
 	}
 	
 	private static class Toto {

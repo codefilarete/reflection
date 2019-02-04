@@ -5,9 +5,9 @@ import java.lang.reflect.Field;
 import org.gama.lang.Reflections;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Guillaume Mary
@@ -24,7 +24,7 @@ public class ExceptionConverterTest {
 		
 		Toto target = new Toto();
 		IllegalArgumentException thrownThrowable = assertThrows(IllegalArgumentException.class, () -> accessorByField.set(target, 0L));
-		assertTrue(thrownThrowable.getMessage().contains("can't be used with"));
+		assertEquals("Field j.l.Integer o.g.r.ExceptionConverterTest$Toto.a is not compatible with j.l.Long", thrownThrowable.getMessage());
 	}
 	
 	@Test
@@ -37,7 +37,7 @@ public class ExceptionConverterTest {
 		
 		Tata target = new Tata();
 		IllegalArgumentException thrownThrowable = assertThrows(IllegalArgumentException.class, () -> mutatorByField.set(target, 0L));
-		assertTrue(thrownThrowable.getMessage().contains("doesn't have field"));
+		assertEquals("Field j.l.Integer o.g.r.ExceptionConverterTest$Toto.a doesn't exist in o.g.r.ExceptionConverterTest$Tata", thrownThrowable.getMessage());
 	}
 	
 	@Test
@@ -50,7 +50,7 @@ public class ExceptionConverterTest {
 		
 		Toto target = new Toto();
 		IllegalArgumentException thrownThrowable = assertThrows(IllegalArgumentException.class, () -> mutatorByField.set(target, null));
-		assertTrue(thrownThrowable.getMessage().contains("can't be used with null"));
+		assertEquals("Field int o.g.r.ExceptionConverterTest$Toto.b is not compatible with null", thrownThrowable.getMessage());
 	}
 	
 	private static class Toto {
