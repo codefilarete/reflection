@@ -1,7 +1,6 @@
 package org.gama.reflection;
 
 import java.lang.invoke.SerializedLambda;
-import java.util.function.Function;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
@@ -18,29 +17,39 @@ import org.gama.lang.Strings;
  */
 public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> {
 	
-	private final Function<C, T> getter;
+	private final SerializableFunction<C, T> methodReference;
 	private final String methodReferenceSignature;
-
+	private final String methodName;
+	
 	/**
 	 * 
-	 * @param getter
+	 * @param methodReference a getter
 	 * @throws RuntimeException with a compound {@link ReflectiveOperationException} in case of method reference dissect failure
 	 */
-	public AccessorByMethodReference(SerializableFunction<C, T> getter) {
-		this.getter = getter;
+	public AccessorByMethodReference(SerializableFunction<C, T> methodReference) {
+		this.methodReference = methodReference;
 		// we dissect the method reference to find out its equivalent method so we can keep its signature which is crucial for our hashCode
-		SerializedLambda serializedLambda = MethodReferences.buildSerializedLambda(getter);
+		SerializedLambda serializedLambda = MethodReferences.buildSerializedLambda(methodReference);
 		// our description is made of SerializedLambda's one
+		methodName = serializedLambda.getImplMethodName();
 		this.methodReferenceSignature = serializedLambda.getImplClass()
 				.concat(".")
-				.concat(serializedLambda.getImplMethodName())
+				.concat(methodName)
 				// we cut the method signature before return type because it doesn't seem necessary and ugly with arrays
 				.concat(Strings.head(serializedLambda.getImplMethodSignature(), ")").toString());
 	}
 	
+	public SerializableFunction<C, T> getMethodReference() {
+		return methodReference;
+	}
+	
+	public String getMethodName() {
+		return this.methodName;
+	}
+	
 	@Override
 	protected T doGet(C c) {
-		return getter.apply(c);
+		return methodReference.apply(c);
 	}
 	
 	@Override

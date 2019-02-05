@@ -123,7 +123,9 @@ public final class Accessors {
 	public static <C, T> IAccessor<C, T> accessor(Class<C> clazz, String propertyName) {
 		IAccessor<C, T> propertyGetter = accessorByMethod(clazz, propertyName);
 		if (propertyGetter == null) {
-			propertyGetter = new AccessorByField<>(Reflections.findField(clazz, propertyName));
+			// NB: we use getField instead of findField because the latest returns null if field wasn't found
+			// so AccessorByField will throw a NPE later
+			propertyGetter = new AccessorByField<>(Reflections.getField(clazz, propertyName));
 		}
 		return propertyGetter;
 	}
@@ -140,7 +142,9 @@ public final class Accessors {
 	public static <C, T> IMutator<C, T> mutator(Class<C> clazz, String propertyName) {
 		IMutator<C, T> propertySetter = mutatorByMethod(clazz, propertyName);
 		if (propertySetter == null) {
-			propertySetter = new MutatorByField<>(Reflections.findField(clazz, propertyName));
+			// NB: we use getField instead of findField because the latest returns null if field wasn't found
+			// so AccessorByField will throw a NPE later
+			propertySetter = new MutatorByField<>(Reflections.getField(clazz, propertyName));
 		}
 		return propertySetter;
 	}

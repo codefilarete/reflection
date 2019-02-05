@@ -9,6 +9,7 @@ import org.gama.lang.Reflections;
 import org.gama.lang.StringAppender;
 import org.gama.lang.collection.Arrays;
 import org.gama.lang.exception.Exceptions;
+import org.gama.lang.exception.NotImplementedException;
 
 /**
  * A tool class to convert some exceptions from default JDK to a clearer one, well ... hope so !
@@ -75,21 +76,22 @@ public class ExceptionConverter {
 	
 	private RuntimeException convertCannotSetFieldToObject(Object target, AbstractReflector reflector, Object arg) {
 		// Modifying default message because it's not really understandable "Can not set ... to ... "
-		Field getter = null;
+		Field getter;
 		if (reflector instanceof AccessorByField) {
 			getter = ((AccessorByField) reflector).getGetter();
-		}
-		if (reflector instanceof MutatorByField) {
+		} else if (reflector instanceof MutatorByField) {
 			getter = ((MutatorByField) reflector).getSetter();
+		} else {
+			// this should never happen because this method only handle field access which are handled by previous ifs
+			throw new NotImplementedException(reflector.getClass() + " is not handled by this convertor");
 		}
 		// 2 cases happen here: Object is of wrong type and has no matching field, or boxing of value is wrong
 		// (cf https://docs.oracle.com/javase/tutorial/reflect/member/fieldTrouble.html) but we can't distinguish cases
 		if (Reflections.findField(target.getClass(), getter.getName()) == null) {
-			return new IllegalArgumentException(target.getClass() + " doesn't have field " + getter.getName());
+			return new IllegalArgumentException("Field " + Reflections.toString(getter) + " doesn't exist in " + Reflections.toString(target.getClass()));
 		} else if (!getter.getType().isInstance(arg)) {
-			String fieldDescription = getter.getDeclaringClass().getName() + "." + getter.getName();
-			return new IllegalArgumentException("Field " + fieldDescription + " of type " + getter.getType().getName()
-					+ " can't be used with " + (arg == null ? "null" : arg.getClass().getName()));
+			return new IllegalArgumentException("Field " + Reflections.toString(getter)
+					+ " is not compatible with " + (arg == null ? "null" : Reflections.toString(arg.getClass())));
 		} else {
 			return new RuntimeException("Can not set " + arg + " to " + target);
 		}

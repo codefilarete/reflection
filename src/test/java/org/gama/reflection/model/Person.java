@@ -10,4 +10,8 @@ public class Person {
 	public Person(Address address) {
 		this.address = address;
 	}
+	
+	public Address getAddress() {
+		return address;
+	}
 }

@@ -51,6 +51,10 @@ public class MethodReferenceCapturer {
 		return findMethod(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	
+	public <I1, I2, O> Method findMethod(SerializableBiFunction<I1, I2, O> methodReference) {
+		return findMethod(MethodReferences.buildSerializedLambda(methodReference));
+	}
+	
 	/**
 	 * Looks for the equivalent {@link Method} of a setter
 	 * @param methodReference a method reference refering to a setter

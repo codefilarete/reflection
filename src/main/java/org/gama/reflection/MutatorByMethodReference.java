@@ -1,7 +1,6 @@
 package org.gama.reflection;
 
 import java.lang.invoke.SerializedLambda;
-import java.util.function.BiConsumer;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
@@ -17,8 +16,9 @@ import org.danekja.java.util.function.serializable.SerializableFunction;
  */
 public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> {
 	
-	private final BiConsumer<C, T> methodReference;
+	private final SerializableBiConsumer<C, T> methodReference;
 	private final String methodReferenceSignature;
+	private final String methodName;
 	
 	/**
 	 * 
@@ -30,11 +30,20 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> {
 		// we dissect the method reference to find out its equivalent method so we can keep its signature which is crucial for our hashCode
 		SerializedLambda serializedLambda = MethodReferences.buildSerializedLambda(methodReference);
 		// our description is made of SerializedLambda's one
+		methodName = serializedLambda.getImplMethodName();
 		this.methodReferenceSignature = serializedLambda.getImplClass()
 				.concat(".")
-				.concat(serializedLambda.getImplMethodName())
+				.concat(methodName)
 				.concat(".")
 				.concat(serializedLambda.getImplMethodSignature());
+	}
+	
+	public SerializableBiConsumer<C, T> getMethodReference() {
+		return methodReference;
+	}
+	
+	public String getMethodName() {
+		return methodName;
 	}
 	
 	@Override

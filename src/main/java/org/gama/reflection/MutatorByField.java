@@ -1,7 +1,6 @@
 package org.gama.reflection;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 
 import org.gama.lang.Reflections;
 
@@ -24,13 +23,13 @@ public class MutatorByField<C, T> extends AbstractMutator<C, T> implements Mutat
 	}
 	
 	@Override
-	protected void doSet(C c, T t) throws IllegalAccessException, InvocationTargetException {
+	protected void doSet(C c, T t) throws IllegalAccessException {
 		getSetter().set(c, t);
 	}
 	
 	@Override
 	protected String getSetterDescription() {
-		return "mutator for field " + getSetter().toString();
+		return "mutator for field " + Reflections.toString(getSetter());
 	}
 	
 	@Override

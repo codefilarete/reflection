@@ -12,12 +12,12 @@ import org.gama.lang.Reflections;
  */
 public class ListAccessor<C extends List<T>, T> extends AccessorByMethod<C, T> {
 	
-	private static final Method GET = Reflections.findMethod(List.class, "get", Integer.TYPE);
+	private static final Method GET = Reflections.findMethod(List.class, "get", int.class);
 	
 	/* Implementation note:
 	 * The index of the get() method is mapped to the first argument of super attribute "methodParameters" through setParameter(0, index)
-	 * and getParameter(0). We could have used a dedicated attribute "index" but it requires implementation of equald/hashcode. Whereas reuse
-	 * of "methodParameters" allow comparison (equals()) with another AccessorByMethod that is not a ListAccessor.
+	 * and getParameter(0). We could have used a dedicated attribute "index" but it requires implementation of equals/hashcode. Whereas reuse
+	 * of "methodParameters" allows comparison (equals()) with another AccessorByMethod that is not a ListAccessor.
 	 */
 	
 	/**

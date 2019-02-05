@@ -1,7 +1,6 @@
 package org.gama.reflection;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author Guillaume Mary
@@ -43,7 +42,7 @@ public class ArrayMutator<C> extends AbstractMutator<C, C> implements IReversibl
 	}
 	
 	@Override
-	protected void doSet(C cs, C c) throws IllegalAccessException, InvocationTargetException {
+	protected void doSet(C cs, C c) {
 		Array.set(cs, getIndex(), c);
 	}
 	
