@@ -1,5 +1,6 @@
 package org.gama.reflection;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -21,6 +22,17 @@ public final class Accessors {
 		return accessorByMethod(field.getDeclaringClass(), field.getName());
 	}
 	
+	/**
+	 * Shortcut to create a {@link AccessorByMethod} from a class and a property name.
+	 * Java bean naming convention will be applied to find out property getter name : prefixed with "get" or "is".
+	 * Returns null is getter method is not found.
+	 *
+	 * @param clazz any class 
+	 * @param propertyName a property name owned by the class or one of its parent
+	 * @param <C> owning class type
+	 * @param <T> getter return type, which is property type too
+	 * @return null if getter method is not found
+	 */
 	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Class clazz, String propertyName) {
 		String capitalizedProperty = Strings.capitalize(propertyName);
 		Method getter = Reflections.findMethod(clazz, "get" + capitalizedProperty);
@@ -71,9 +83,21 @@ public final class Accessors {
 		return mutatorByMethod((Class<C>) field.getDeclaringClass(), field.getName());
 	}
 	
+	/**
+	 * Shortcut to create a {@link MutatorByMethod} from a class and a property name.
+	 * Java bean naming convention will be applied to find out property setter name : prefixed with "set".
+	 * Returns null is setter method is not found.
+	 * 
+	 * @param clazz any class 
+	 * @param propertyName a property name owned by the class or one of its parent
+	 * @param <C> owning class type
+	 * @param <T> setter input type, which is property type too
+	 * @return null if setter method is not found
+	 */
+	@Nullable
 	public static <C, T> MutatorByMethod<C, T> mutatorByMethod(Class<C> clazz, String propertyName) {
 		Field propertyField = Reflections.getField(clazz, propertyName);
-		Class<?> inputType = propertyField.getType();
+		Class<T> inputType = (Class<T>) propertyField.getType();
 		return mutatorByMethod(clazz, propertyName, inputType);
 	}
 	
@@ -81,7 +105,19 @@ public final class Accessors {
 		return new MutatorByMethodReference<>(setter);
 	}
 	
-	public static <C, T> MutatorByMethod<C, T> mutatorByMethod(Class<C> clazz, String propertyName, Class<?> inputType) {
+	/**
+	 * Shortcut to create a {@link MutatorByMethod} from a class, a property name, and its type
+	 * Java bean naming convention will be applied to find out property setter name : prefixed with "set".
+	 * Returns null is setter method is not found.
+	 *
+	 * @param clazz any class 
+	 * @param propertyName a property name owned by the class or one of its parent
+	 * @param <C> owning class type
+	 * @param <T> setter input type, which is property type too
+	 * @return null if setter method is not found
+	 */
+	@Nullable
+	public static <C, T> MutatorByMethod<C, T> mutatorByMethod(Class<C> clazz, String propertyName, Class<T> inputType) {
 		String capitalizedProperty = Strings.capitalize(propertyName);
 		Method setter = Reflections.findMethod(clazz, "set" + capitalizedProperty, inputType);
 		return setter == null ? null : new MutatorByMethod<>(setter);
@@ -150,7 +186,7 @@ public final class Accessors {
 	}
 	
 	/**
-	 * Give an adequate {@link PropertyAccessor} according to the given {@link Member}
+	 * Gives an adequate {@link PropertyAccessor} according to the given {@link Member}
 	 * @param member a member to be transformed as a {@link PropertyAccessor}
 	 * @param <C> the declaring class of the {@link Member}
 	 * @param <T> the type of the {@link Member}
