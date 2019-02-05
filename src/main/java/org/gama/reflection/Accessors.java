@@ -137,11 +137,11 @@ public final class Accessors {
 		return Reflections.wrappedField(getter);
 	}
 	
-	public static <C, T> PropertyAccessor<C, T> forProperty(Field field) {
+	public static <C, T> PropertyAccessor<C, T> propertyAccessor(Field field) {
 		return new PropertyAccessor<>(new AccessorByField<>(field), new MutatorByField<>(field));
 	}
 	
-	public static <C, T> PropertyAccessor<C, T> forProperty(Class<C> clazz, String propertyName) {
+	public static <C, T> PropertyAccessor<C, T> propertyAccessor(Class<C> clazz, String propertyName) {
 		IAccessor<C, T> propertyGetter = accessor(clazz, propertyName);
 		IMutator<C, T> propertySetter = mutator(clazz, propertyName);
 		return new PropertyAccessor<>(propertyGetter, propertySetter);

@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.gama.reflection.AccessorChain.getInputType;
 import static org.gama.reflection.Accessors.accessorByMethodReference;
-import static org.gama.reflection.Accessors.forProperty;
+import static org.gama.reflection.Accessors.propertyAccessor;
 import static org.gama.reflection.Accessors.mutatorByField;
 import static org.gama.reflection.Accessors.mutatorByMethod;
 import static org.gama.reflection.Accessors.mutatorByMethodReference;
@@ -117,8 +117,8 @@ public class AccessorChainTest {
 	
 	@Test
 	public void testGetInputType() {
-		assertEquals(int.class, getInputType(forProperty(City.class, "citizenCount")));
-		assertEquals(boolean.class, getInputType(forProperty(City.class, "capital")));
+		assertEquals(int.class, getInputType(propertyAccessor(City.class, "citizenCount")));
+		assertEquals(boolean.class, getInputType(propertyAccessor(City.class, "capital")));
 		assertEquals(int.class, getInputType(mutatorByField(City.class, "citizenCount")));
 		assertEquals(boolean.class, getInputType(mutatorByField(City.class, "capital")));
 		assertEquals(int.class, getInputType(mutatorByMethod(City.class, "citizenCount", int.class)));
