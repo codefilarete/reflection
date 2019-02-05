@@ -113,7 +113,7 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T> implements Ac
 	public MutatorByMember<C, T, ? extends Member> toMutator() {
 		Class<?> declaringClass = getGetter().getDeclaringClass();
 		String propertyName = Reflections.propertyName(getGetter());
-		MutatorByMethod<C, T> mutatorByMethod = Accessors.mutatorByMethod((Class<C>) declaringClass, propertyName, getGetter().getReturnType());
+		MutatorByMethod<C, T> mutatorByMethod = Accessors.mutatorByMethod((Class<C>) declaringClass, propertyName, (Class<T>) getGetter().getReturnType());
 		if (mutatorByMethod == null) {
 			try {
 				return Accessors.mutatorByField(declaringClass, propertyName);
