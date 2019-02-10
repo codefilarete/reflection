@@ -5,14 +5,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableBiFunction;
+import org.danekja.java.util.function.serializable.SerializableConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.danekja.java.util.function.serializable.SerializableSupplier;
 import org.gama.lang.Reflections;
 import org.gama.lang.StringAppender;
 import org.gama.lang.collection.Arrays;
+import org.gama.lang.function.SerializableTriFunction;
 import org.gama.reflection.MethodReferenceCapturer.LRUCache;
 import org.junit.jupiter.api.Test;
 
@@ -113,6 +117,23 @@ public class MethodReferenceCapturerTest {
 		assertEquals(Arrays.asSet("a", "c", "d"), testInstance.keySet());
 	}
 	
+	@Test
+	public void testToMethodReferenceString() throws NoSuchMethodException {
+		assertEquals("String::concat", MethodReferences.toMethodReferenceString(String.class.getMethod("concat", String.class)));
+		SerializableFunction<String, char[]> toCharArray = String::toCharArray;
+		assertEquals("String::toCharArray", MethodReferences.toMethodReferenceString(toCharArray));
+		SerializableBiFunction<String, String, String> concat = String::concat;
+		assertEquals("String::concat", MethodReferences.toMethodReferenceString(concat));
+		SerializableTriFunction<String, Integer, Integer, CharSequence> subSequence = String::subSequence;
+		assertEquals("String::subSequence", MethodReferences.toMethodReferenceString(subSequence));
+		SerializableBiConsumer<AtomicInteger, Integer> set = AtomicInteger::set;
+		assertEquals("AtomicInteger::set", MethodReferences.toMethodReferenceString(set));
+		SerializableConsumer<Map> clear = Map::clear;
+		assertEquals("Map::clear", MethodReferences.toMethodReferenceString(clear));
+		SerializableTriConsumer<StaticInnerClass, String, Integer> triConsumerMethod = StaticInnerClass::triConsumerMethod;
+		assertEquals("StaticInnerClass::triConsumerMethod", MethodReferences.toMethodReferenceString(triConsumerMethod));
+	}
+	
 	private class NonStaticInnerClass {
 		
 		public NonStaticInnerClass() {
@@ -122,6 +143,10 @@ public class MethodReferenceCapturerTest {
 	private static class StaticInnerClass {
 		
 		public StaticInnerClass() {
+		}
+		
+		void triConsumerMethod(String param1, Integer param2) {
+			
 		}
 	}
 	

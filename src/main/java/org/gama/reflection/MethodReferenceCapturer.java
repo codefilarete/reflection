@@ -13,10 +13,12 @@ import java.util.Map;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableBiFunction;
+import org.danekja.java.util.function.serializable.SerializableConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.danekja.java.util.function.serializable.SerializableSupplier;
 import org.gama.lang.Reflections;
 import org.gama.lang.exception.Exceptions;
+import org.gama.lang.function.SerializableTriFunction;
 
 /**
  * Will help to find {@link Method}s behind method references.
@@ -42,6 +44,7 @@ public class MethodReferenceCapturer {
 	
 	/**
 	 * Looks for the equivalent {@link Method} of a getter
+	 * 
 	 * @param methodReference a method reference refering to a getter
 	 * @param <I> the owning class of the method
 	 * @param <O> the return type of the getter
@@ -51,34 +54,102 @@ public class MethodReferenceCapturer {
 		return findMethod(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	
-	public <I1, I2, O> Method findMethod(SerializableBiFunction<I1, I2, O> methodReference) {
+	/**
+	 * Looks for the equivalent {@link Method} of a getter with one argument
+	 * 
+	 * @param methodReference a method reference refering to a 1-arg getter
+	 * @param <I> the owning class of the method
+	 * @param <A1> the argument type
+	 * @param <O> the return type of the getter
+	 * @return the found method
+	 */
+	public <I, A1, O> Method findMethod(SerializableBiFunction<I, A1, O> methodReference) {
+		return findMethod(MethodReferences.buildSerializedLambda(methodReference));
+	}
+	
+	/**
+	 * Looks for the equivalent {@link Method} of a getter with two arguments
+	 *
+	 * @param methodReference a method reference refering to a 2-args getter
+	 * @param <I> the owning class of the method
+	 * @param <A1> the first argument type
+	 * @param <A2> the second argument type
+	 * @param <O> the return type of the getter
+	 * @return the found method
+	 */
+	public <I, A1, A2, O> Method findMethod(SerializableTriFunction<I, A1, A2, O> methodReference) {
+		return findMethod(MethodReferences.buildSerializedLambda(methodReference));
+	}
+	
+	/**
+	 * Looks for the equivalent {@link Method} of a no-arg no-return function
+	 *
+	 * @param methodReference a method reference refering to a no-arg no-return function
+	 * @param <I> the owning class of the method
+	 * @return the found method
+	 */
+	public <I> Method findMethod(SerializableConsumer<I> methodReference) {
 		return findMethod(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	
 	/**
 	 * Looks for the equivalent {@link Method} of a setter
+	 * 
 	 * @param methodReference a method reference refering to a setter
 	 * @param <I> the owning class of the method
-	 * @param <O> the input type of the setter
+	 * @param <A1> the input type of the setter
 	 * @return the found method
 	 */
-	public <I, O> Method findMethod(SerializableBiConsumer<I, O> methodReference) {
+	public <I, A1> Method findMethod(SerializableBiConsumer<I, A1> methodReference) {
 		return findMethod(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	
-	public <I, O, U> Method findMethod(SerializableTriConsumer<I, O, U> methodReference) {
+	/**
+	 * Looks for the equivalent {@link Method} of a setter with two arguments
+	 *
+	 * @param methodReference a method reference refering to a 2-args setter
+	 * @param <I> the owning class of the method
+	 * @param <A1> the first argument type
+	 * @param <A2> the first argument type
+	 * @return the found method
+	 */
+	public <I, A1, A2> Method findMethod(SerializableTriConsumer<I, A1, A2> methodReference) {
 		return findMethod(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	
-	public <I> Constructor findConstructor(SerializableSupplier<I> methodReference) {
+	/**
+	 * Looks for the equivalent {@link Constructor} of constructor reference
+	 *
+	 * @param methodReference a method reference refering to a no-arg constructor
+	 * @param <O> the owning class of the constructor which is also the return/instance type
+	 * @return the found method
+	 */
+	public <O> Constructor findConstructor(SerializableSupplier<O> methodReference) {
 		return findConstructor(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	
-	public <I, O> Constructor findConstructor(SerializableFunction<I, O> methodReference) {
+	/**
+	 * Looks for the equivalent {@link Constructor} of 1-arg constructor reference
+	 *
+	 * @param methodReference a method reference refering to a 1-arg constructor
+	 * @param <O> the owning class of the constructor which is also the return/instance type
+	 * @param <A1> the first arugment type
+	 * @return the found method
+	 */
+	public <O, A1> Constructor findConstructor(SerializableFunction<A1, O> methodReference) {
 		return findConstructor(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	
-	public <I1, I2, O> Constructor findConstructor(SerializableBiFunction<I1, I2, O> methodReference) {
+	/**
+	 * Looks for the equivalent {@link Constructor} of 2-args constructor reference
+	 *
+	 * @param methodReference a method reference refering to a 2-args constructor
+	 * @param <O> the owning class of the constructor which is also the return/instance type
+	 * @param <A1> the second arugment type
+	 * @param <A2> the first arugment type
+	 * @return the found method
+	 */
+	public <A1, A2, O> Constructor findConstructor(SerializableBiFunction<A1, A2, O> methodReference) {
 		return findConstructor(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	
