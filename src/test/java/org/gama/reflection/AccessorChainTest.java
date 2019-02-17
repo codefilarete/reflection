@@ -125,7 +125,7 @@ public class AccessorChainTest {
 		assertEquals(boolean.class, getInputType(mutatorByMethod(City.class, "capital", boolean.class)));
 		assertEquals(int.class, getInputType(mutatorByMethodReference(City::setCitizenCount)));
 		assertEquals(boolean.class, getInputType(mutatorByMethodReference(City::setCapital)));
-		assertEquals(CharSequence.class, getInputType(new AccessorChainMutator<>(Arrays.asList(Object::toString), String::contains)));
+		assertEquals(CharSequence.class, getInputType(new AccessorChainMutator<>(Arrays.asList(Object::toString), mutatorByMethodReference(String::contains))));
 		assertEquals(String.class, getInputType(new PropertyAccessor(accessorByMethodReference(City::getName), mutatorByMethodReference(City::setName))));
 	}
 	
