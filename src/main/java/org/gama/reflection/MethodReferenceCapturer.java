@@ -18,6 +18,7 @@ import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.danekja.java.util.function.serializable.SerializableSupplier;
 import org.gama.lang.Reflections;
 import org.gama.lang.exception.Exceptions;
+import org.gama.lang.function.SerializableTriConsumer;
 import org.gama.lang.function.SerializableTriFunction;
 
 /**

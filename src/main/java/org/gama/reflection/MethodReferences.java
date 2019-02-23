@@ -13,6 +13,7 @@ import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.danekja.java.util.function.serializable.SerializableSupplier;
 import org.gama.lang.Reflections;
 import org.gama.lang.exception.Exceptions;
+import org.gama.lang.function.SerializableTriConsumer;
 import org.gama.lang.function.SerializableTriFunction;
 
 /**
@@ -49,7 +50,7 @@ public class MethodReferences {
 		return toMethodReferenceString(method);
 	}
 	
-	public static <A, B, C> String toMethodReferenceString(SerializableTriConsumer<A, B, C>  methodReference) {
+	public static <A, B, C> String toMethodReferenceString(SerializableTriConsumer<A, B, C> methodReference) {
 		Method method = SINGLETON.findMethod(methodReference);
 		return toMethodReferenceString(method);
 	}
@@ -177,10 +178,12 @@ public class MethodReferences {
 	 * THIS METHOD WILL ONLY WORK WITH A METHOD REFERENCE, NOT WITH AN ANONYMOUS LAMBDA FUNCTION.
 	 * This can't be enforced by signature, hence this warning.
 	 * 
+	 * Left public for cases not taking into account by other buildSerializedLambda(..) methods.
+	 * 
 	 * @param methodReference the method reference to hash
 	 * @return a SerializedLambda, not null
 	 */
-	private static SerializedLambda buildSerializedLambda(Serializable methodReference) {
+	public static SerializedLambda buildSerializedLambda(Serializable methodReference) {
 		// algorithm made possible thanks to https://stackoverflow.com/a/25625761
 		// (https://stackoverflow.com/questions/21887358/reflection-type-inference-on-java-8-lambdas)
 		Method writeReplace = Reflections.getMethod(methodReference.getClass(), "writeReplace");

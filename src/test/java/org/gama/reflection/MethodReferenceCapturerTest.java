@@ -16,6 +16,7 @@ import org.danekja.java.util.function.serializable.SerializableSupplier;
 import org.gama.lang.Reflections;
 import org.gama.lang.StringAppender;
 import org.gama.lang.collection.Arrays;
+import org.gama.lang.function.SerializableTriConsumer;
 import org.gama.lang.function.SerializableTriFunction;
 import org.gama.reflection.MethodReferenceCapturer.LRUCache;
 import org.junit.jupiter.api.Test;
