@@ -29,8 +29,27 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T> implements Ac
 		this.methodParameters = arguments;
 	}
 	
+	/**
+	 * Constructor for a getter-equivalent method
+	 * 
+	 * @param declaringClass type that declares the method
+	 * @param getterName name of the accessor
+	 */
+	public AccessorByMethod(Class<C> declaringClass, String getterName) {
+		this(Reflections.getMethod(declaringClass, getterName));
+	}
+	
+	/**
+	 * Constructor for a getter that already has an argument value
+	 * 
+	 * @param declaringClass type that declares the method
+	 * @param methodName a one-arg method
+	 * @param inputType argument type of the method
+	 * @param input the argument value
+	 * @param <I> argument type
+	 */
 	public <I> AccessorByMethod(Class<C> declaringClass, String methodName, Class<I> inputType, I input) {
-		this(Reflections.findMethod(declaringClass, methodName, inputType), input);
+		this(Reflections.getMethod(declaringClass, methodName, inputType), input);
 	}
 	
 	@Override

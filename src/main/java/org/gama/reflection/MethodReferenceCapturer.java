@@ -17,6 +17,7 @@ import org.danekja.java.util.function.serializable.SerializableConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.danekja.java.util.function.serializable.SerializableSupplier;
 import org.gama.lang.Reflections;
+import org.gama.lang.Reflections.MemberNotFoundException;
 import org.gama.lang.exception.Exceptions;
 import org.gama.lang.function.SerializableTriConsumer;
 import org.gama.lang.function.SerializableTriFunction;
@@ -161,7 +162,22 @@ public class MethodReferenceCapturer {
 	 */
 	public Method findMethod(SerializedLambda serializedLambda) {
 		String targetMethodRawSignature = MethodReferences.getTargetMethodRawSignature(serializedLambda);
-		return (Method) findExecutable(serializedLambda, targetMethodRawSignature);
+		return handleMethodCast(findExecutable(serializedLambda, targetMethodRawSignature));
+	}
+	
+	private Method handleMethodCast(Executable executable) {
+		Method method = Reflections.getMethod(executable.getDeclaringClass(), executable.getName(), executable.getParameterTypes());
+		if (executable.getDeclaringClass().getEnclosingClass() != null && !Modifier.isStatic(executable.getDeclaringClass().getModifiers())) {
+			throw new UnsupportedOperationException("Capturing by reference a method of a non-static inner class is not supported, make "
+					+ Reflections.toString(executable.getDeclaringClass()) + " static or an outer class of "
+					+ Reflections.toString(executable.getDeclaringClass().getEnclosingClass()));
+		}
+		if (method.isSynthetic() && Modifier.isStatic(executable.getModifiers())) {
+			// found case : package-private class defining a method, and lambda targets the method through a subclass, see StringBuilder::ensureCapacity
+			throw new UnsupportedOperationException("Found method is synthetic which means original one was wrapped by some bytecode"
+					+ " (generally to bypass visibility constraint)");
+		}
+		return method;
 	}
 	
 	/**
@@ -183,8 +199,8 @@ public class MethodReferenceCapturer {
 				Method method = (Method) executable;
 				Class returnType = method.getReturnType();
 				if (!Modifier.isStatic(returnType.getModifiers())) {
-					throw new UnsupportedOperationException("Capturing by reference a non-static inner classes constructor is not supported, make "
-							+ Reflections.toString(returnType) + " to be static or an outer class of " + Reflections.toString(returnType.getEnclosingClass()));
+					throw new UnsupportedOperationException("Capturing by reference a non-static inner class constructor is not supported, make "
+							+ Reflections.toString(returnType) + " static or an outer class of " + Reflections.toString(returnType.getEnclosingClass()));
 				} else {
 					// case here is a private constructor of a static inner class : for any (not really understood) reason, in such a case some bytecode
 					// wraps the call to the constructor so the serialized lambda is no more a direct access to it (hence the ClassCastException),
@@ -221,14 +237,16 @@ public class MethodReferenceCapturer {
 			try {
 				argsClasses = giveArgumentTypes(methodSignature);
 			} catch (ClassNotFoundException e) {
-				throw new IllegalArgumentException("Can't find method reference for "
+				throw new MemberNotFoundException("Can't find method reference for "
 						+ serializedLambda.getImplClass() + "." + serializedLambda.getImplMethodName(), e);
 			}
-			// method or constructor case ?
+			// Method or constructor case ?
+			// Note: we'll use getMethod(..) instead of findMethod(..) because we accept that it throws an exception in case of not found member
+			// due to that it can hardly happen
 			if (serializedLambda.getImplMethodName().equals("<init>")) {
 				return Reflections.getConstructor(clazz, argsClasses);
 			} else {
-				return Reflections.findMethod(clazz, serializedLambda.getImplMethodName(), argsClasses);
+				return Reflections.getMethod(clazz, serializedLambda.getImplMethodName(), argsClasses);
 			}
 		});
 	}

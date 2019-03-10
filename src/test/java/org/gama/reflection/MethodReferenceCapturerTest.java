@@ -1,7 +1,6 @@
 package org.gama.reflection;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +18,7 @@ import org.gama.lang.collection.Arrays;
 import org.gama.lang.function.SerializableTriConsumer;
 import org.gama.lang.function.SerializableTriFunction;
 import org.gama.reflection.MethodReferenceCapturer.LRUCache;
+import org.gama.reflection.jailed.PackagePrivateInheritedClass;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -42,6 +42,33 @@ public class MethodReferenceCapturerTest {
 				(SerializableTriConsumer<String, Integer, Integer>) String::codePointCount));
 		assertEquals(Reflections.getMethod(StringAppender.class, "ccat", Object[].class, Object.class), testInstance.findMethod(
 				(SerializableTriConsumer<StringAppender, Object[], Object>) StringAppender::ccat));
+	}
+	
+	@Test
+	public void testFindMethod_methodDefinedInPackagePrivateClass_throwsException() {
+		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
+		UnsupportedOperationException thrownException = assertThrows(UnsupportedOperationException.class,
+				() -> testInstance.findMethod((SerializableBiConsumer<PackagePrivateInheritedClass, Integer>) PackagePrivateInheritedClass::doSomethingWith));
+		assertEquals("Found method is synthetic which means original one was wrapped by some bytecode (generally to bypass visibility constraint)", thrownException.getMessage());
+		
+		thrownException = assertThrows(UnsupportedOperationException.class,
+				() -> testInstance.findMethod((SerializableBiConsumer<StringBuilder, Integer>) StringBuilder::ensureCapacity));
+		assertEquals("Found method is synthetic which means original one was wrapped by some bytecode (generally to bypass visibility constraint)", thrownException.getMessage());
+	}
+	
+	@Test
+	public void testFindMethod_methodDefinedInMethod_throwsException() {
+		class Toto {
+			public void doSomething() {
+				
+			}
+		}
+		
+		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
+		UnsupportedOperationException thrownException = assertThrows(UnsupportedOperationException.class,
+				() -> testInstance.findMethod((SerializableConsumer<Toto>) Toto::doSomething));
+		assertEquals("Capturing by reference a method of a non-static inner class is not supported," 
+				+ " make o.g.r.MethodReferenceCapturerTest$Toto static or an outer class of o.g.r.MethodReferenceCapturerTest", thrownException.getMessage());
 	}
 	
 	@Test
@@ -71,7 +98,7 @@ public class MethodReferenceCapturerTest {
 	}
 	
 	@Test
-	public void testFindConstructor_constructorIsInnerOne_static_onlyOneConstructorWithOneArgument() throws IllegalAccessException, InvocationTargetException, InstantiationException {
+	public void testFindConstructor_constructorIsInnerOne_static_onlyOneConstructorWithOneArgument() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		assertEquals(Reflections.getConstructor(StaticInnerClassWithOnlyOneConstructorWithOneArgument.class, int.class),
 				testInstance.findConstructor(StaticInnerClassWithOnlyOneConstructorWithOneArgument::new));
@@ -80,8 +107,8 @@ public class MethodReferenceCapturerTest {
 	@Test
 	public void testFindConstructor_constructorIsInnerOne_nonStatic_throwsException() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
-		assertEquals("Capturing by reference a non-static inner classes constructor is not supported" +
-						", make o.g.r.MethodReferenceCapturerTest$NonStaticInnerClass to be static or an outer class of o.g.r.MethodReferenceCapturerTest",
+		assertEquals("Capturing by reference a non-static inner class constructor is not supported" +
+						", make o.g.r.MethodReferenceCapturerTest$NonStaticInnerClass static or an outer class of o.g.r.MethodReferenceCapturerTest",
 				assertThrows(UnsupportedOperationException.class, () -> testInstance.findConstructor(NonStaticInnerClass::new)).getMessage());
 	}
 	

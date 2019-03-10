@@ -20,6 +20,7 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> {
 	private final SerializableFunction<C, T> methodReference;
 	private final String methodReferenceSignature;
 	private final String methodName;
+	private final String declaringClass;
 	
 	/**
 	 * 
@@ -32,7 +33,8 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> {
 		SerializedLambda serializedLambda = MethodReferences.buildSerializedLambda(methodReference);
 		// our description is made of SerializedLambda's one
 		methodName = serializedLambda.getImplMethodName();
-		this.methodReferenceSignature = serializedLambda.getImplClass()
+		declaringClass = serializedLambda.getImplClass().replace('/', '.');
+		this.methodReferenceSignature = declaringClass
 				.concat(".")
 				.concat(methodName)
 				// we cut the method signature before return type because it doesn't seem necessary and ugly with arrays
@@ -45,6 +47,10 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> {
 	
 	public String getMethodName() {
 		return this.methodName;
+	}
+	
+	public String getDeclaringClass() {
+		return declaringClass;
 	}
 	
 	@Override

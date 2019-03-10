@@ -19,6 +19,7 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> {
 	private final SerializableBiConsumer<C, T> methodReference;
 	private final String methodReferenceSignature;
 	private final String methodName;
+	private final String declaringClass;
 	
 	/**
 	 * 
@@ -31,7 +32,8 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> {
 		SerializedLambda serializedLambda = MethodReferences.buildSerializedLambda(methodReference);
 		// our description is made of SerializedLambda's one
 		methodName = serializedLambda.getImplMethodName();
-		this.methodReferenceSignature = serializedLambda.getImplClass()
+		declaringClass = serializedLambda.getImplClass().replace('/', '.');
+		this.methodReferenceSignature = declaringClass
 				.concat(".")
 				.concat(methodName)
 				.concat(".")
@@ -46,6 +48,10 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> {
 		return methodName;
 	}
 	
+	public String getDeclaringClass() {
+		return declaringClass;
+	}
+	
 	@Override
 	protected void doSet(C c, T t) {
 		this.methodReference.accept(c, t);
@@ -53,6 +59,6 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> {
 	
 	@Override
 	protected String getSetterDescription() {
-		return methodReferenceSignature;
+		return "method reference for " + methodReferenceSignature;
 	}
 }

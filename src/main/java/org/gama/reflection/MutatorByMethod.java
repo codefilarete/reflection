@@ -26,6 +26,23 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T> implements Muta
 		this.methodParameters = new Object[parametersLength];
 	}
 	
+	public MutatorByMethod(Method setter, Object ... arguments) {
+		this.setter = setter;
+		Reflections.ensureAccessible(setter);
+		this.methodParameters = arguments;
+	}
+	
+	/**
+	 * Constructor for a setter-equivalent method
+	 *
+	 * @param declaringClass type that declares the method
+	 * @param setterName name of the mutator
+	 * @param argTypes argument types
+	 */
+	public MutatorByMethod(Class<C> declaringClass, String setterName, Class ... argTypes) {
+		this(Reflections.getMethod(declaringClass, setterName, argTypes));
+	}
+	
 	@Override
 	public Method getSetter() {
 		return setter;

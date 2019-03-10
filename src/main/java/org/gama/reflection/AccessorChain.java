@@ -50,6 +50,10 @@ public class AccessorChain<C, T> implements IReversibleAccessor<C, T> {
 		this(new ArrayList<>(5));
 	}
 	
+	public AccessorChain(IAccessor ... accessors) {
+		this(Arrays.asList(accessors));
+	}
+	
 	public AccessorChain(List<IAccessor> accessors) {
 		this.accessors = accessors;
 	}

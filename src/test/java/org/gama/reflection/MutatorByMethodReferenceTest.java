@@ -3,6 +3,8 @@ package org.gama.reflection;
 import java.util.AbstractCollection;
 import java.util.AbstractSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Test;
 
@@ -42,6 +44,11 @@ public class MutatorByMethodReferenceTest {
 		assertNotEquals(testInstance1, testInstance5);
 	}
 	
+	@Test
+	public void testToString() {
+		MutatorByMethodReference<Map, BiConsumer> testInstance = new MutatorByMethodReference<>(Map::forEach);
+		assertEquals("method reference for java.util.Map.forEach.(Ljava/util/function/BiConsumer;)V", testInstance.getSetterDescription());
+	}
 	
 	public static class DummySet<E> extends AbstractSet<E> {
 		
