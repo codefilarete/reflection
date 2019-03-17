@@ -11,7 +11,8 @@ import org.gama.lang.Reflections.MemberNotFoundException;
 /**
  * @author mary
  */
-public class MutatorByMethod<C, T> extends AbstractMutator<C, T> implements MutatorByMember<C, T, Method>, IReversibleMutator<C, T> {
+public class MutatorByMethod<C, T> extends AbstractMutator<C, T>
+		implements MutatorByMember<C, T, Method>, IReversibleMutator<C, T>, ValueAccessPointByMethod {
 	
 	private final Method setter;
 	
@@ -46,6 +47,11 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T> implements Muta
 	@Override
 	public Method getSetter() {
 		return setter;
+	}
+	
+	@Override
+	public Method getMethod() {
+		return getSetter();
 	}
 	
 	@Override

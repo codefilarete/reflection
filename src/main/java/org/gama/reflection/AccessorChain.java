@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.gama.lang.Reflections;
 import org.gama.lang.collection.Arrays;
 import org.gama.lang.collection.Collections;
@@ -24,6 +25,10 @@ import org.gama.lang.collection.Iterables;
  * @author Guillaume Mary
  */
 public class AccessorChain<C, T> implements IReversibleAccessor<C, T> {
+	
+	public static <IN, A, OUT> AccessorChain<IN, OUT> chain(SerializableFunction<IN, A> function1, SerializableFunction<A, OUT> function2) {
+		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2));
+	}
 	
 	/**
 	 * Helper to get method input type. Set as static to benefit from its cache.

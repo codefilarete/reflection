@@ -236,7 +236,7 @@ public class MethodReferenceCapturer {
 			Class[] argsClasses;
 			try {
 				argsClasses = giveArgumentTypes(methodSignature);
-			} catch (ClassNotFoundException e) {
+			} catch (MemberNotFoundException e) {
 				throw new MemberNotFoundException("Can't find method reference for "
 						+ serializedLambda.getImplClass() + "." + serializedLambda.getImplMethodName(), e);
 			}
@@ -257,7 +257,7 @@ public class MethodReferenceCapturer {
 	 * @return an empty array if no argument were found, not null
 	 */
 	@Nonnull
-	Class[] giveArgumentTypes(String methodSignature) throws ClassNotFoundException {
+	Class[] giveArgumentTypes(String methodSignature) {
 		Class[] argsClasses;
 		int closeArgsIndex = methodSignature.indexOf(')');
 		if (closeArgsIndex != 1) {
@@ -272,6 +272,7 @@ public class MethodReferenceCapturer {
 	/**
 	 * Very simple implementation of a Least-Recently-Used cache
 	 */
+	@SuppressWarnings("squid:S2160") // right implementation of equals() doesn't matter
 	static class LRUCache extends LinkedHashMap<String, Executable> {
 		
 		private final int cacheSize;
@@ -305,7 +306,7 @@ public class MethodReferenceCapturer {
 			this.signatureChars = signature.toCharArray();
 		}
 		
-		Class[] parse() throws ClassNotFoundException {
+		Class[] parse() {
 			List<Class> result = new ArrayList<>(5);
 			while(currPos < signatureChars.length) {
 				// 4 cases to take into account : a combination of 2

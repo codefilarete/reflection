@@ -13,7 +13,8 @@ import org.gama.lang.Reflections.MemberNotFoundException;
 /**
  * @author Guillaume Mary
  */
-public class AccessorByMethod<C, T> extends AbstractAccessor<C, T> implements AccessorByMember<C, T, Method>, IReversibleAccessor<C, T> {
+public class AccessorByMethod<C, T> extends AbstractAccessor<C, T>
+		implements AccessorByMember<C, T, Method>, IReversibleAccessor<C, T>, ValueAccessPointByMethod {
 	
 	private final Method getter;
 	
@@ -55,6 +56,11 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T> implements Ac
 	@Override
 	public Method getGetter() {
 		return getter;
+	}
+	
+	@Override
+	public Method getMethod() {
+		return getGetter();
 	}
 	
 	@Override

@@ -4,8 +4,14 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.IntStream;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
+import org.danekja.java.util.function.serializable.SerializableBiFunction;
+import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.gama.lang.collection.Arrays;
 import org.gama.lang.collection.Iterables;
 import org.gama.lang.collection.Maps;
@@ -15,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
  * @author Guillaume Mary
@@ -22,39 +29,113 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MethodReferenceDispatcherTest {
 	
 	@Test
-	public void testRedirect_SerializableTriFunction() throws SQLException {
+	public void testRedirect_TriFunction() {
 		CharSequence testInstance;
 		
 		// SerializableTriFunction : a getter with 2 args
 		testInstance = new MethodReferenceDispatcher()
 				.redirect(CharSequence::subSequence, (i, j) -> "Hello " + i + j + " !")
-				.fallbackOn("Coucou world !")
+				.fallbackOn("Hello world !")
 				.build(CharSequence.class);
 		assertEquals("Hello 42666 !", testInstance.subSequence(42, 666));
 		// testing fallback (on chars() method)
 		StringBuilder appendedChars = new StringBuilder();
 		testInstance.chars().forEach(c -> appendedChars.append((char) c));
-		assertEquals("Coucou world !", appendedChars.toString());
-		assertEquals("Dispatcher to Coucou world !", testInstance.toString());
+		assertEquals("Hello world !", appendedChars.toString());
+		assertEquals("Dispatcher to Hello world !", testInstance.toString());
+	}
+	
+	@Test
+	public void testRedirect_TriFunction_BiConsumer() {
+		CharSequence testInstance;
+		
+		// SerializableTriFunction : a getter with 2 args
+		ModifiableInt modifiableInt = new ModifiableInt();
+		testInstance = new MethodReferenceDispatcher()
+				.redirect(CharSequence::subSequence, (i, j) -> {
+					modifiableInt.increment(i);
+					modifiableInt.increment(j);
+				})
+				.fallbackOn("Hello world !")
+				.build(CharSequence.class);
+		CharSequence actual = testInstance.subSequence(42, 666);
+		assertEquals(708, modifiableInt.getValue());
+		assertSame(testInstance, actual);
+		// testing fallback (on chars() method)
+		StringBuilder appendedChars = new StringBuilder();
+		testInstance.chars().forEach(c -> appendedChars.append((char) c));
+		assertEquals("Hello world !", appendedChars.toString());
+		assertEquals("Dispatcher to Hello world !", testInstance.toString());
+	}
+	
+	@Test
+	public void testRedirect_Function() {
+		Stream testInstance;
+		
+		// SerializableBiFunction : a getter with 1 arg
+		testInstance = new MethodReferenceDispatcher()
+				.redirect((SerializableFunction<Stream, Optional>) Stream::findFirst, () -> Optional.of(42))
+				.fallbackOn(Stream.of(1, null, 2))
+				.build(Stream.class);
+		assertEquals(Optional.of(42), testInstance.findFirst());
+		
+		// other methods are not intercepted
+		Stream stream = testInstance.filter(Objects::nonNull);
+		assertEquals(Arrays.asList(1, 2), Iterables.copy(stream.iterator()));
+	}
+	
+	@Test
+	public void testRedirect_Function_Runnable() {
+		Stream testInstance;
+		
+		// SerializableBiFunction : a getter with 1 arg
+		ModifiableInt modifiableInt = new ModifiableInt();
+		testInstance = new MethodReferenceDispatcher()
+				.redirect((SerializableFunction<Stream, Stream>) Stream::distinct, (Runnable) modifiableInt::increment)
+				.fallbackOn(Stream.of(1, null, 2))
+				.build(Stream.class);
+		
+		Stream actual = testInstance.distinct();
+		assertEquals(1, modifiableInt.getValue());
+		assertSame(testInstance, actual);
+		
+		// other methods are not intercepted
+		Stream stream = testInstance.filter(Objects::nonNull);
+		assertEquals(Arrays.asList(1, 2), Iterables.copy(stream.iterator()));
 	}
 	
 	@Test
 	public void testRedirect_BiFunction() {
-		CharSequence testInstance;
+		Stream testInstance;
 		
-		// SerializableBiFunction : a getter with 1 arg
+		// SerializableTriFunction : a getter with 2 args
 		testInstance = new MethodReferenceDispatcher()
-				.redirect(CharSequence::charAt, i -> 'H')
-				.fallbackOn("Coucou world !")
-				.build(CharSequence.class);
-		assertEquals('H', testInstance.charAt(1));
+				.redirect((SerializableBiFunction<Stream, Long, Stream>) Stream::limit, (Function<Long, Stream>) Stream::of)
+				.fallbackOn(Stream.of(1, null, 2))
+				.build(Stream.class);
+		Stream actual = testInstance.limit(42);
+		assertArrayEquals(Stream.of(42L).toArray(), actual.toArray());
+		// other methods are not intercepted
+		Stream stream = testInstance.filter(Objects::nonNull);
+		assertEquals(Arrays.asList(1, 2), Iterables.copy(stream.iterator()));
+	}
+	
+	@Test
+	public void testRedirect_BiFunction_Consumer() {
+		Stream testInstance;
 		
-		// SerializableFunction : a getter
+		// SerializableTriFunction : a getter with 2 args
+		ModifiableInt modifiableInt = new ModifiableInt();
 		testInstance = new MethodReferenceDispatcher()
-				.redirect(CharSequence::chars, () -> IntStream.range(-1, 3))
-				.fallbackOn("Coucou world !")
-				.build(CharSequence.class);
-		assertEquals(Arrays.asList(-1, 0, 1, 2), Iterables.copy(testInstance.chars().iterator()));
+				.redirect((SerializableBiFunction<Stream, Long, Stream>) Stream::limit, (Consumer<Long>) l -> modifiableInt.increment(l.intValue()))
+				.fallbackOn(Stream.of(1, null, 2))
+				.build(Stream.class);
+		Stream actual = testInstance.limit(42);
+		assertEquals(42, modifiableInt.getValue());
+		assertSame(testInstance, actual);
+		// other methods are not intercepted
+		Stream stream = testInstance.filter(Objects::nonNull);
+		assertEquals(Arrays.asList(1, 2), Iterables.copy(stream.iterator()));
 	}
 	
 	@Test
@@ -129,13 +210,15 @@ class MethodReferenceDispatcherTest {
 				.redirectThrower(PreparedStatement::setString, valuesCaptor::put)
 				.redirectThrower(PreparedStatement::setLong, valuesCaptor::put)
 				.redirectThrower(PreparedStatement::setInt, valuesCaptor::put)
-				.fallbackOn("Coucou world !")
+				// this fallback has no purpose in a real world of such a PreparedStatement, it's just a safeguard for bad written test
+				// because if a non captured method is called, an exception will be rised with this text. Currently, the fallback could be removed.
+				.fallbackOn("Hello world !")
 				.build(PreparedStatement.class);
 		
-		testInstance.setString(0, "coucou");
+		testInstance.setString(0, "Hello");
 		testInstance.setLong(1, 42);
 		testInstance.setInt(2, 666);
-		assertEquals(Maps.asHashMap(0, (Object) "coucou").add(1, 42L).add(2, 666), valuesCaptor);
+		assertEquals(Maps.asHashMap(0, (Object) "Hello").add(1, 42L).add(2, 666), valuesCaptor);
 	}
 	
 	@Test

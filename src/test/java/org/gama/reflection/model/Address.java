@@ -23,4 +23,8 @@ public class Address {
 	public List<Phone> getPhones() {
 		return phones;
 	}
+	
+	public City getCity() {
+		return city;
+	}
 }

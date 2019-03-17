@@ -7,7 +7,8 @@ import org.gama.lang.Reflections;
 /**
  * @author Guillaume Mary
  */
-public class AccessorByField<C, T> extends AbstractAccessor<C, T> implements AccessorByMember<C, T, Field>, IReversibleAccessor<C, T> {
+public class AccessorByField<C, T> extends AbstractAccessor<C, T>
+		implements AccessorByMember<C, T, Field>, IReversibleAccessor<C, T>, ValueAccessPointByField {
 	
 	private final Field field;
 	
@@ -19,6 +20,11 @@ public class AccessorByField<C, T> extends AbstractAccessor<C, T> implements Acc
 	@Override
 	public Field getGetter() {
 		return field;
+	}
+	
+	@Override
+	public Field getField() {
+		return getGetter();
 	}
 	
 	@Override

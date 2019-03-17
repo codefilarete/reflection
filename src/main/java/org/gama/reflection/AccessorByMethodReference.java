@@ -15,12 +15,14 @@ import org.gama.lang.Strings;
  * @see Accessors#accessorByMethodReference(SerializableFunction)
  * @see Accessors#accessorByMethodReference(SerializableFunction, SerializableBiConsumer) 
  */
-public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> {
+@SuppressWarnings("squid:S2160")	// because super.equals() is based on getDescription() it doesn't need to be overriden in this class
+public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> implements ValueAccessPointByMethodReference {
 	
 	private final SerializableFunction<C, T> methodReference;
 	private final String methodReferenceSignature;
 	private final String methodName;
 	private final String declaringClass;
+	private final SerializedLambda serializedLambda;
 	
 	/**
 	 * 
@@ -30,7 +32,7 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> {
 	public AccessorByMethodReference(SerializableFunction<C, T> methodReference) {
 		this.methodReference = methodReference;
 		// we dissect the method reference to find out its equivalent method so we can keep its signature which is crucial for our hashCode
-		SerializedLambda serializedLambda = MethodReferences.buildSerializedLambda(methodReference);
+		serializedLambda = MethodReferences.buildSerializedLambda(methodReference);
 		// our description is made of SerializedLambda's one
 		methodName = serializedLambda.getImplMethodName();
 		declaringClass = serializedLambda.getImplClass().replace('/', '.');
@@ -45,12 +47,19 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> {
 		return methodReference;
 	}
 	
+	@Override
 	public String getMethodName() {
 		return this.methodName;
 	}
 	
+	@Override
 	public String getDeclaringClass() {
 		return declaringClass;
+	}
+	
+	@Override
+	public SerializedLambda getSerializedLambda() {
+		return serializedLambda;
 	}
 	
 	@Override

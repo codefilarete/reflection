@@ -7,7 +7,8 @@ import org.gama.lang.Reflections;
 /**
  * @author mary
  */
-public class MutatorByField<C, T> extends AbstractMutator<C, T> implements MutatorByMember<C, T, Field>, IReversibleMutator<C, T> {
+public class MutatorByField<C, T> extends AbstractMutator<C, T>
+		implements MutatorByMember<C, T, Field>, IReversibleMutator<C, T>, ValueAccessPointByField {
 	
 	private final Field field;
 	
@@ -20,6 +21,11 @@ public class MutatorByField<C, T> extends AbstractMutator<C, T> implements Mutat
 	@Override
 	public Field getSetter() {
 		return field;
+	}
+	
+	@Override
+	public Field getField() {
+		return getSetter();
 	}
 	
 	@Override

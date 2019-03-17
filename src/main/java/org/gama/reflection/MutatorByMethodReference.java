@@ -14,12 +14,14 @@ import org.danekja.java.util.function.serializable.SerializableFunction;
  * @see Accessors#mutatorByMethodReference(SerializableBiConsumer)
  * @see Accessors#accessorByMethodReference(SerializableFunction, SerializableBiConsumer)
  */
-public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> {
+@SuppressWarnings("squid:S2160")	// because super.equals() is based on getDescription() it doesn't need to be overriden in this class 
+public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> implements ValueAccessPointByMethodReference {
 	
 	private final SerializableBiConsumer<C, T> methodReference;
 	private final String methodReferenceSignature;
 	private final String methodName;
 	private final String declaringClass;
+	private final SerializedLambda serializedLambda;
 	
 	/**
 	 * 
@@ -29,7 +31,7 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> {
 	public MutatorByMethodReference(SerializableBiConsumer<C, T> methodReference) {
 		this.methodReference = methodReference;
 		// we dissect the method reference to find out its equivalent method so we can keep its signature which is crucial for our hashCode
-		SerializedLambda serializedLambda = MethodReferences.buildSerializedLambda(methodReference);
+		serializedLambda = MethodReferences.buildSerializedLambda(methodReference);
 		// our description is made of SerializedLambda's one
 		methodName = serializedLambda.getImplMethodName();
 		declaringClass = serializedLambda.getImplClass().replace('/', '.');
@@ -44,12 +46,19 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> {
 		return methodReference;
 	}
 	
+	@Override
 	public String getMethodName() {
 		return methodName;
 	}
 	
+	@Override
 	public String getDeclaringClass() {
 		return declaringClass;
+	}
+	
+	@Override
+	public SerializedLambda getSerializedLambda() {
+		return serializedLambda;
 	}
 	
 	@Override
