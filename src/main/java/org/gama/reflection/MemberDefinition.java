@@ -142,9 +142,13 @@ public class MemberDefinition implements Comparable<MemberDefinition> {
 			result = MethodReferences.toMethodReferenceString(((AccessorByMethodReference) o).getMethodReference());
 		} else if (o instanceof MutatorByMember) {
 			Member member = ((MutatorByMember) o).getSetter();
-			result = member.getName();
+			if (member instanceof Method) {
+				result = Reflections.toString((Method) member);
+			} else {
+				result = Reflections.toString((Field) member);
+			}
 		} else if (o instanceof MutatorByMethodReference) {
-			result = MethodReferences.toMethodReferenceString(((AccessorByMethodReference) o).getMethodReference());
+			result = MethodReferences.toMethodReferenceString(((MutatorByMethodReference) o).getMethodReference());
 		} else if (o instanceof PropertyAccessor) {
 			IAccessor accessor = ((PropertyAccessor) o).getAccessor();
 			result = toString(accessor);

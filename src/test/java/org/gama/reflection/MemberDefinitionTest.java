@@ -43,4 +43,30 @@ class MemberDefinitionTest {
 		assertEquals(expectedMemberType, memberDefinition.getMemberType());
 	}
 	
+	static Object[][] testToString() {
+		return new Object[][] {
+				{ accessorByField(Person.class, "name"), "j.l.String o.g.r.m.Person.name" },
+				{ new AccessorByMethod<>(Person.class, "getName"), "j.l.String o.g.r.m.Person.getName()" },
+				{ new AccessorByMethodReference<>(Person::getName), "Person::getName" },
+				
+				// mutator
+				{ mutatorByField(Person.class, "name"), "j.l.String o.g.r.m.Person.name" },
+				{ new MutatorByMethod<>(Person.class, "setName", String.class), "void o.g.r.m.Person.setName(j.l.String)" },
+				{ new MutatorByMethodReference<>(Person::setName), "Person::setName" },
+				
+				{ new AccessorChain<>(Arrays.asList(new AccessorByMethodReference<>(Person::getAddress), new AccessorByMethodReference<>(Address::getCity))),
+						"Person::getAddress > Address::getCity" },
+				
+				{ new PropertyAccessor<>(new AccessorByMethodReference<>(Person::getName), new MutatorByMethodReference<>(Person::setName)), "Person::getName" },
+				{ new PropertyAccessor<>(new AccessorByMethod<>(Person.class, "getName"), new MutatorByMethod<>(Person.class, "setName", String.class)),
+						"j.l.String o.g.r.m.Person.getName()" },
+		};
+	}
+	
+	@ParameterizedTest
+	@MethodSource("testToString")
+	void toString(ValueAccessPoint valueAccessPoint, String expectedResult) {
+		assertEquals(expectedResult, MemberDefinition.toString(valueAccessPoint));
+	}
+	
 }
