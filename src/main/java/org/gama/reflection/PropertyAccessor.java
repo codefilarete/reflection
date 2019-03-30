@@ -1,5 +1,7 @@
 package org.gama.reflection;
 
+import org.danekja.java.util.function.serializable.SerializableBiConsumer;
+import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.gama.lang.bean.Objects;
 
 /**
@@ -9,6 +11,18 @@ import org.gama.lang.bean.Objects;
  * @see Accessors
  */
 public class PropertyAccessor<C, T> implements IReversibleAccessor<C, T>, IReversibleMutator<C, T> {
+	
+	/**
+	 * Static constructor, because its signature would conflict with the one with {@link IAccessor}, {@link IMutator}
+	 * @param accessor a method reference to a getter
+	 * @param mutator a method reference to a setter
+	 * @param <C> bean type
+	 * @param <T> property type
+	 * @return a {@link PropertyAccessor} that will access a property throught the given getter and getter
+	 */
+	public static <C, T> PropertyAccessor<C, T> fromLambda(SerializableFunction<C, T> accessor, SerializableBiConsumer<C, T> mutator) {
+		return new PropertyAccessor<>(new AccessorByMethodReference<>(accessor), new MutatorByMethodReference<>(mutator));
+	}
 	
 	private final IAccessor<C, T> accessor;
 	private final IMutator<C, T> mutator;
@@ -25,7 +39,6 @@ public class PropertyAccessor<C, T> implements IReversibleAccessor<C, T>, IRever
 		this.accessor = accessor;
 		this.mutator = mutator;
 	}
-	
 	public IAccessor<C, T> getAccessor() {
 		return accessor;
 	}
