@@ -20,7 +20,7 @@ public class ExceptionConverter {
 	
 	protected RuntimeException convertException(Throwable t, Object target, AbstractReflector reflector, Object... args) {
 		if (t instanceof NullPointerException) {
-			return new NullPointerException("Cannot call " + getReflectorDescription(reflector) + " on null instance");
+			return new NullPointerException("Cannot invoke " + getReflectorDescription(reflector) + " on null instance");
 		} else if (t instanceof InvocationTargetException || t instanceof IllegalAccessException) {
 			return Exceptions.asRuntimeException(t.getCause());
 		} else if (t instanceof IllegalArgumentException) {
