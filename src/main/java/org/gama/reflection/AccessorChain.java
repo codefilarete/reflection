@@ -1,9 +1,6 @@
 package org.gama.reflection;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,6 +12,8 @@ import org.gama.lang.Reflections;
 import org.gama.lang.collection.Arrays;
 import org.gama.lang.collection.Collections;
 import org.gama.lang.collection.Iterables;
+
+import static org.gama.reflection.Accessors.giveInputType;
 
 /**
  * Chain of {@link IAccessor}s that behaves as a {@link IAccessor}
@@ -29,11 +28,6 @@ public class AccessorChain<C, T> implements IReversibleAccessor<C, T> {
 	public static <IN, A, OUT> AccessorChain<IN, OUT> chain(SerializableFunction<IN, A> function1, SerializableFunction<A, OUT> function2) {
 		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2));
 	}
-	
-	/**
-	 * Helper to get method input type. Set as static to benefit from its cache.
-	 */
-	private static final MethodReferenceCapturer methodCapturer = new MethodReferenceCapturer();
 	
 	/**
 	 * Will throw a {@link NullPointerException} if a link in an accessor chain returns null.
@@ -175,7 +169,7 @@ public class AccessorChain<C, T> implements IReversibleAccessor<C, T> {
 		public Object consume(Object srcBean, IAccessor accessor) {
 			if (accessor instanceof IReversibleAccessor) {
 				IMutator mutator = ((IReversibleAccessor) accessor).toMutator();
-				Class inputType = getInputType(mutator);
+				Class inputType = giveInputType(mutator);
 				// NB: will throw an exception if type is not instanciable
 				Object value = Reflections.newInstance(giveValueType(accessor, inputType));
 				mutator.set(srcBean, value);
@@ -203,31 +197,5 @@ public class AccessorChain<C, T> implements IReversibleAccessor<C, T> {
 		}
 	}
 	
-	/**
-	 * @param mutator any {@link IMutator}
-	 * @return input type of a mutator : input value of a setter and type of a field
-	 */
-	public static Class getInputType(IMutator mutator) {
-		if (mutator instanceof MutatorByMember) {
-			Member member = ((MutatorByMember) mutator).getSetter();
-			if (member instanceof Method) {
-				return ((Method) member).getParameterTypes()[0];
-			} else if (member instanceof Field) {
-				return ((Field) member).getType();
-			} else {
-				// for future new MutatorByMember that are neither a Field nor a Method ... should not happen 
-				throw new UnsupportedOperationException("Mutator type is not implemented : " + mutator);
-			}
-		} else if (mutator instanceof MutatorByMethodReference) {
-			return methodCapturer.findMethod(((MutatorByMethodReference) mutator).getMethodReference()).getParameterTypes()[0];
-		} else if (mutator instanceof PropertyAccessor) {
-			return getInputType(((PropertyAccessor) mutator).getMutator());
-		} else if (mutator instanceof AccessorChainMutator) {
-			return getInputType(((AccessorChainMutator) mutator).getMutator());
-		} else {
-			// for future new MutatorByMember that are neither a Field nor a Method ... should not happen 
-			throw new UnsupportedOperationException("Mutator type is not implemented : " + mutator);
-		}
-	}
 	
 }

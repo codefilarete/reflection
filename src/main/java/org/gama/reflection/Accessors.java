@@ -5,11 +5,13 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.gama.lang.Reflections;
 import org.gama.lang.Strings;
+import org.gama.lang.collection.Iterables;
 import org.gama.lang.reflect.MethodDispatcher;
 
 /**
@@ -17,6 +19,11 @@ import org.gama.lang.reflect.MethodDispatcher;
  */
 @ParametersAreNonnullByDefault
 public final class Accessors {
+	
+	/**
+	 * Helper to get method input type. Set as static to benefit from its cache.
+	 */
+	private static final MethodReferenceCapturer methodCapturer = new MethodReferenceCapturer();
 	
 	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Field field) {
 		return accessorByMethod(field.getDeclaringClass(), field.getName());
@@ -39,7 +46,7 @@ public final class Accessors {
 		if (getter == null) {
 			// try for boolean
 			Field field = Reflections.findField(clazz, propertyName);
-			if (field != null && Boolean.class.isAssignableFrom(field.getType())) {
+			if (field != null && (boolean.class.isAssignableFrom(field.getType()) || Boolean.class.isAssignableFrom(field.getType()))) {
 				getter = Reflections.findMethod(clazz, "is" + capitalizedProperty);
 			} // nothing found : neither get nor is => return null
 		}
@@ -212,6 +219,65 @@ public final class Accessors {
 			}
 		} else {
 			throw new IllegalArgumentException("Member cannot be used as an accessor : " + member);
+		}
+	}
+	
+	
+	/**
+	 * Gives input type of a mutator. Implementation is based on well-known mutator classes and is not expected to be generic
+	 * 
+	 * @param mutator any {@link IMutator}
+	 * @return input type of a mutator : input value of a setter and type of a field
+	 */
+	public static Class giveInputType(IMutator mutator) {
+		if (mutator instanceof MutatorByMember) {
+			Member member = ((MutatorByMember) mutator).getSetter();
+			if (member instanceof Method) {
+				return ((Method) member).getParameterTypes()[0];
+			} else if (member instanceof Field) {
+				return ((Field) member).getType();
+			} else {
+				// for future new MutatorByMember that are neither a Field nor a Method ... should not happen 
+				throw new UnsupportedOperationException("Mutator type is not implemented : " + mutator);
+			}
+		} else if (mutator instanceof MutatorByMethodReference) {
+			return methodCapturer.findMethod(((MutatorByMethodReference) mutator).getMethodReference()).getParameterTypes()[0];
+		} else if (mutator instanceof PropertyAccessor) {
+			return giveInputType(((PropertyAccessor) mutator).getMutator());
+		} else if (mutator instanceof AccessorChainMutator) {
+			return giveInputType(((AccessorChainMutator) mutator).getMutator());
+		} else {
+			// for future new MutatorByMember that are neither a Field nor a Method ... should not happen 
+			throw new UnsupportedOperationException("Mutator type is not implemented : " + mutator);
+		}
+	}
+	
+	/**
+	 * Gives input type of a mutator. Implementation is based on well-known mutator classes and is not expected to be generic
+	 * 
+	 * @param accessor any {@link IAccessor}
+	 * @return input type of a mutator : input value of a setter and type of a field
+	 */
+	public static Class giveReturnType(IAccessor accessor) {
+		if (accessor instanceof AccessorByMember) {
+			Member member = ((AccessorByMember) accessor).getGetter();
+			if (member instanceof Method) {
+				return ((Method) member).getReturnType();
+			} else if (member instanceof Field) {
+				return ((Field) member).getType();
+			} else {
+				// for future new MutatorByMember that are neither a Field nor a Method ... should not happen 
+				throw new UnsupportedOperationException("Mutator type is not implemented : " + accessor);
+			}
+		} else if (accessor instanceof AccessorByMethodReference) {
+			return methodCapturer.findMethod(((AccessorByMethodReference) accessor).getMethodReference()).getReturnType();
+		} else if (accessor instanceof PropertyAccessor) {
+			return giveReturnType(((PropertyAccessor) accessor).getAccessor());
+		} else if (accessor instanceof AccessorChain) {
+			return giveReturnType(Iterables.last((List<IAccessor>) ((AccessorChain) accessor).getAccessors()));
+		} else {
+			// for future new MutatorByMember that are neither a Field nor a Method ... should not happen 
+			throw new UnsupportedOperationException("Accessor type is not implemented : " + accessor);
 		}
 	}
 	

@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import static org.gama.reflection.AccessorChain.getInputType;
 import static org.gama.reflection.Accessors.accessorByMethodReference;
 import static org.gama.reflection.Accessors.propertyAccessor;
 import static org.gama.reflection.Accessors.mutatorByField;
@@ -114,20 +113,4 @@ public class AccessorChainTest {
 		testInstance.setNullValueHandler(AccessorChain.RETURN_NULL);
 		assertNull(testInstance.get(object));
 	}
-	
-	@Test
-	public void testGetInputType() {
-		assertEquals(int.class, getInputType(propertyAccessor(City.class, "citizenCount")));
-		assertEquals(boolean.class, getInputType(propertyAccessor(City.class, "capital")));
-		assertEquals(int.class, getInputType(mutatorByField(City.class, "citizenCount")));
-		assertEquals(boolean.class, getInputType(mutatorByField(City.class, "capital")));
-		assertEquals(int.class, getInputType(mutatorByMethod(City.class, "citizenCount", int.class)));
-		assertEquals(boolean.class, getInputType(mutatorByMethod(City.class, "capital", boolean.class)));
-		assertEquals(int.class, getInputType(mutatorByMethodReference(City::setCitizenCount)));
-		assertEquals(boolean.class, getInputType(mutatorByMethodReference(City::setCapital)));
-		assertEquals(CharSequence.class, getInputType(new AccessorChainMutator<>(Arrays.asList(Object::toString), mutatorByMethodReference(String::contains))));
-		assertEquals(String.class, getInputType(new PropertyAccessor(accessorByMethodReference(City::getName), mutatorByMethodReference(City::setName))));
-	}
-	
-	
 }
