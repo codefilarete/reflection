@@ -69,6 +69,10 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T>
 		return Reflections.toString(getSetter());
 	}
 	
+	/**
+	 * @return an accessor based on the equivalent getter method if exists, else based on field direct access
+	 * @throws NonReversibleAccessor if neither getter nor field could be found
+	 */
 	@Override
 	public AccessorByMember<C, T, ? extends Member> toAccessor() {
 		Class<?> declaringClass = getSetter().getDeclaringClass();

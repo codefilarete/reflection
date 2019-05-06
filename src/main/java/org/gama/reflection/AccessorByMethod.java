@@ -134,6 +134,10 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T>
 		return Reflections.toString(getGetter());
 	}
 	
+	/**
+	 * @return a mutator based on the equivalent setter method if exists, else based on field direct access
+	 * @throws NonReversibleAccessor if neither setter nor field could be found
+	 */
 	@Override
 	public MutatorByMember<C, T, ? extends Member> toMutator() {
 		Class<?> declaringClass = getGetter().getDeclaringClass();
