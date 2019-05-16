@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableBiFunction;
@@ -14,14 +15,18 @@ import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.danekja.java.util.function.serializable.SerializableSupplier;
 import org.gama.lang.Reflections;
 import org.gama.lang.StringAppender;
+import org.gama.lang.Strings;
 import org.gama.lang.collection.Arrays;
+import org.gama.lang.function.Predicates;
 import org.gama.lang.function.SerializableTriConsumer;
 import org.gama.lang.function.SerializableTriFunction;
+import org.gama.lang.test.Assertions;
 import org.gama.reflection.MethodReferenceCapturer.LRUCache;
+import org.gama.reflection.MethodReferenceCapturer.MethodDefinition;
 import org.gama.reflection.jailed.PackagePrivateInheritedClass;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.gama.lang.function.Functions.chain;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -113,20 +118,42 @@ public class MethodReferenceCapturerTest {
 	}
 	
 	@Test
-	public void testGiveArgumentTypes() throws ClassNotFoundException {
-		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
-		assertArrayEquals(new Class[] { int.class }, testInstance.giveArgumentTypes("(I)V"));
-		assertArrayEquals(new Class[] { boolean.class }, testInstance.giveArgumentTypes("(Z)V"));
-		assertArrayEquals(new Class[] { int[].class }, testInstance.giveArgumentTypes("([I)V"));
-		assertArrayEquals(new Class[] { int[].class, boolean[].class }, testInstance.giveArgumentTypes("([I[Z)V"));
-		assertArrayEquals(new Class[] { int.class, int.class }, testInstance.giveArgumentTypes("(II)V"));
-		assertArrayEquals(new Class[] { Object[].class }, testInstance.giveArgumentTypes("([Ljava.lang.Object;)V"));
-		assertArrayEquals(new Class[] { int.class, Object[].class }, testInstance.giveArgumentTypes("(I[Ljava.lang.Object;)V"));
-		assertArrayEquals(new Class[] { Object[].class, int.class }, testInstance.giveArgumentTypes("([Ljava.lang.Object;I)V"));
-		assertArrayEquals(new Class[] { Object[].class, int[].class }, testInstance.giveArgumentTypes("([Ljava.lang.Object;[I)V"));
-		assertArrayEquals(new Class[] { Object.class }, testInstance.giveArgumentTypes("(Ljava.lang.Object;)V"));
-		assertArrayEquals(new Class[] { Object[].class, Object.class }, testInstance.giveArgumentTypes("([Ljava.lang.Object;Ljava.lang.Object;)V"));
-		assertArrayEquals(new Class[] { Object.class, Object.class }, testInstance.giveArgumentTypes("(Ljava.lang.Object;Ljava.lang.Object;)V"));
+	public void testGiveArgumentTypes_methodDefinition() {
+		Function[] propertiesToPrint = {
+				(Function<MethodDefinition, Class>) MethodDefinition::getDeclaringClass,
+				(Function<MethodDefinition, String>) MethodDefinition::getName,
+				// arrays are hardly comparable so we transform arguments into a List
+				chain(MethodDefinition::getArgumentTypes, Arrays::asList),
+				(Function<MethodDefinition, Class>) MethodDefinition::getReturnType
+		};
+		Assertions.assertEquals(MethodDefinition.methodDefinition(Object.class, "toString", new Class[0], String.class),
+				MethodReferenceCapturer.giveArgumentTypes(MethodReferences.buildSerializedLambda(Object::toString)),
+				Predicates.and(propertiesToPrint),
+				e -> Strings.footPrint(e, propertiesToPrint));
+		Assertions.assertEquals(MethodDefinition.methodDefinition(Integer.class, "shortValue", new Class[0], short.class),
+				MethodReferenceCapturer.giveArgumentTypes(MethodReferences.buildSerializedLambda(Integer::shortValue)),
+				Predicates.and(propertiesToPrint),
+				e -> Strings.footPrint(e, propertiesToPrint));
+		Assertions.assertEquals(MethodDefinition.methodDefinition(Collator.class, "setStrength", new Class[] { int.class }, void.class),
+				MethodReferenceCapturer.giveArgumentTypes(MethodReferences.buildSerializedLambda(Collator::setStrength)),
+				Predicates.and(propertiesToPrint),
+				e -> Strings.footPrint(e, propertiesToPrint));
+		Assertions.assertEquals(MethodDefinition.methodDefinition(String.class, "toCharArray", new Class[0], char[].class),
+				MethodReferenceCapturer.giveArgumentTypes(MethodReferences.buildSerializedLambda(String::toCharArray)),
+				Predicates.and(propertiesToPrint),
+				e -> Strings.footPrint(e, propertiesToPrint));
+		Assertions.assertEquals(MethodDefinition.methodDefinition(List.class, "toArray", new Class[] { Object[].class }, Object[].class),
+				MethodReferenceCapturer.giveArgumentTypes(MethodReferences.buildSerializedLambda((SerializableBiConsumer<List, Object[]>) List::toArray)),
+				Predicates.and(propertiesToPrint),
+				e -> Strings.footPrint(e, propertiesToPrint));
+		Assertions.assertEquals(MethodDefinition.methodDefinition(String.class, "codePointCount", new Class[] { int.class, int.class }, int.class),
+				MethodReferenceCapturer.giveArgumentTypes(MethodReferences.buildSerializedLambda((SerializableTriConsumer<String, Integer, Integer>) String::codePointCount)),
+				Predicates.and(propertiesToPrint),
+				e -> Strings.footPrint(e, propertiesToPrint));
+		Assertions.assertEquals(MethodDefinition.methodDefinition(StringAppender.class, "ccat", new Class[] { Object[].class, Object.class }, StringAppender.class),
+				MethodReferenceCapturer.giveArgumentTypes(MethodReferences.buildSerializedLambda((SerializableTriConsumer<StringAppender, Object[], Object>) StringAppender::ccat)),
+				Predicates.and(propertiesToPrint),
+				e -> Strings.footPrint(e, propertiesToPrint));
 	}
 	
 	@Test

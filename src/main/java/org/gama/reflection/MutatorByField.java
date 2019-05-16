@@ -29,6 +29,11 @@ public class MutatorByField<C, T> extends AbstractMutator<C, T>
 	}
 	
 	@Override
+	public Class<T> getPropertyType() {
+		return (Class<T>) field.getType();
+	}
+	
+	@Override
 	protected void doSet(C c, T t) throws IllegalAccessException {
 		getSetter().set(c, t);
 	}

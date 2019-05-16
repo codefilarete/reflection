@@ -64,6 +64,11 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T>
 	}
 	
 	@Override
+	public Class<T> getPropertyType() {
+		return (Class<T>) getMethod().getReturnType();
+	}
+	
+	@Override
 	public T get(C c) {
 		return get(c, methodParameters);
 	}

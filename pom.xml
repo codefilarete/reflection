@@ -40,6 +40,13 @@
 			<version>${jdk-serializable-functional.version}</version>
 			<type>jar</type>
 		</dependency>
+		<dependency>
+			<groupId>org.gama</groupId>
+			<artifactId>tools</artifactId>
+			<type>test-jar</type>
+			<version>1.0-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	
 	<build>

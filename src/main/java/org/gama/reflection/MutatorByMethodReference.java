@@ -4,6 +4,7 @@ import java.lang.invoke.SerializedLambda;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
+import org.gama.lang.Reflections;
 
 /**
  * Mutator constructed with a method reference to a setter ({@link java.util.function.BiConsumer}).
@@ -20,8 +21,9 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> implem
 	private final SerializableBiConsumer<C, T> methodReference;
 	private final String methodReferenceSignature;
 	private final String methodName;
-	private final String declaringClass;
+	private final Class declaringClass;
 	private final SerializedLambda serializedLambda;
+	private final Class propertyType;
 	
 	/**
 	 * 
@@ -34,8 +36,10 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> implem
 		serializedLambda = MethodReferences.buildSerializedLambda(methodReference);
 		// our description is made of SerializedLambda's one
 		methodName = serializedLambda.getImplMethodName();
-		declaringClass = serializedLambda.getImplClass().replace('/', '.');
-		this.methodReferenceSignature = declaringClass
+		String implementationClass = serializedLambda.getImplClass().replace('/', '.');
+		this.declaringClass = Reflections.forName(implementationClass);
+		this.propertyType = MethodReferenceCapturer.giveArgumentTypes(serializedLambda).getArgumentTypes()[0];
+		this.methodReferenceSignature = implementationClass
 				.concat(".")
 				.concat(methodName)
 				.concat(".")
@@ -52,7 +56,7 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> implem
 	}
 	
 	@Override
-	public String getDeclaringClass() {
+	public Class getDeclaringClass() {
 		return declaringClass;
 	}
 	
@@ -69,5 +73,10 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> implem
 	@Override
 	protected String getSetterDescription() {
 		return "method reference for " + methodReferenceSignature;
+	}
+	
+	@Override
+	public Class<C> getPropertyType() {
+		return propertyType;
 	}
 }

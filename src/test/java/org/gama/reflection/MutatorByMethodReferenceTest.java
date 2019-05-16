@@ -62,4 +62,19 @@ public class MutatorByMethodReferenceTest {
 			return 0;
 		}
 	}
+	
+	@Test
+	void getPropertyType() {
+		MutatorByMethodReference<DummySet, Object> testInstance1 = new MutatorByMethodReference<>(DummySet::contains);
+		assertEquals(Object.class, testInstance1.getPropertyType());
+
+		MutatorByMethodReference<DummySet, Object> testInstance2 = new MutatorByMethodReference<>(AbstractCollection::contains);
+		assertEquals(Object.class, testInstance2.getPropertyType());
+
+		MutatorByMethodReference<AbstractSet, Object> testInstance3 = new MutatorByMethodReference<>(AbstractCollection::contains);
+		assertEquals(Object.class, testInstance3.getPropertyType());
+
+		MutatorByMethodReference<StringBuilder, CharSequence> testInstance4 = new MutatorByMethodReference<>(StringBuilder::append);
+		assertEquals(CharSequence.class, testInstance4.getPropertyType());
+	}
 }

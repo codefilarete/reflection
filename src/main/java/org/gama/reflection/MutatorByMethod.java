@@ -55,6 +55,11 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T>
 	}
 	
 	@Override
+	public Class<T> getPropertyType() {
+		return (Class<T>) getMethod().getParameterTypes()[0];
+	}
+	
+	@Override
 	protected void doSet(C c, T t) throws IllegalAccessException, InvocationTargetException {
 		fixMethodParameters(t);
 		getSetter().invoke(c, methodParameters);

@@ -1,5 +1,9 @@
 package org.gama.reflection;
 
+import java.lang.reflect.Field;
+
+import org.gama.lang.Reflections.MemberNotFoundException;
+import org.gama.lang.StringAppender;
 import org.gama.lang.collection.Arrays;
 import org.gama.reflection.model.City;
 import org.junit.jupiter.api.Test;
@@ -12,6 +16,7 @@ import static org.gama.reflection.Accessors.mutatorByMethod;
 import static org.gama.reflection.Accessors.mutatorByMethodReference;
 import static org.gama.reflection.Accessors.propertyAccessor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Guillaume Mary
@@ -47,5 +52,15 @@ class AccessorsTest {
 		assertEquals(String.class, Accessors.giveReturnType(new PropertyAccessor(accessorByMethodReference(City::getName), mutatorByMethodReference(City::setName))));
 	}
 	
-	
+	@Test
+	void mutator() throws NoSuchFieldException {
+		Field appender = StringAppender.class.getDeclaredField("appender");
+		assertEquals(appender, Accessors.mutator(StringAppender.class, "appender", StringBuilder.class).getSetter());
+		assertEquals(appender, Accessors.mutator(StringAppender.class, "appender", CharSequence.class).getSetter());
+		
+		MemberNotFoundException thrownException = assertThrows(MemberNotFoundException.class,
+				() -> Accessors.mutator(StringAppender.class, "appender", String.class).getSetter());
+		assertEquals("Member type doesn't match expected one for field j.l.StringBuilder o.g.l.StringAppender.appender:" 
+				+ " expected j.l.String but is j.l.StringBuilder", thrownException.getMessage());
+	}
 }

@@ -28,6 +28,11 @@ public class AccessorByField<C, T> extends AbstractAccessor<C, T>
 	}
 	
 	@Override
+	public Class<T> getPropertyType() {
+		return (Class<T>) field.getType();
+	}
+	
+	@Override
 	protected T doGet(C c) throws IllegalAccessException {
 		return (T) getGetter().get(c);
 	}

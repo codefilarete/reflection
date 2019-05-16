@@ -10,6 +10,7 @@ import java.util.List;
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.gama.lang.Reflections;
+import org.gama.lang.Reflections.MemberNotFoundException;
 import org.gama.lang.Strings;
 import org.gama.lang.collection.Iterables;
 import org.gama.lang.reflect.MethodDispatcher;
@@ -103,9 +104,22 @@ public final class Accessors {
 	 */
 	@Nullable
 	public static <C, T> MutatorByMethod<C, T> mutatorByMethod(Class<C> clazz, String propertyName) {
-		Field propertyField = Reflections.getField(clazz, propertyName);
-		Class<T> inputType = (Class<T>) propertyField.getType();
-		return mutatorByMethod(clazz, propertyName, inputType);
+		Field propertyField;
+		try {
+			propertyField = Reflections.getField(clazz, propertyName);
+		} catch (MemberNotFoundException e) {
+			propertyField = null;
+		}
+		
+		if (propertyField != null) {
+			// a matching field exists, we benefit from it to have a better method definition
+			Class<T> inputType = (Class<T>) propertyField.getType();
+			return mutatorByMethod(clazz, propertyName, inputType);
+		} else {
+			// we do our best : no argument is given because we couldn't determine it
+			
+			return new MutatorByMethod<>(Reflections.getMethod(clazz, "set" + Strings.capitalize(propertyName)));
+		}
 	}
 	
 	public static <C, T> MutatorByMethodReference<C, T> mutatorByMethodReference(SerializableBiConsumer<C, T> setter) {
@@ -149,8 +163,8 @@ public final class Accessors {
 	}
 	
 	public static <C, T> PropertyAccessor<C, T> propertyAccessor(Class<C> clazz, String propertyName) {
-		IAccessor<C, T> propertyGetter = accessor(clazz, propertyName);
-		IMutator<C, T> propertySetter = mutator(clazz, propertyName);
+		AccessorByMember<C, T, ?> propertyGetter = accessor(clazz, propertyName);
+		IMutator<C, T> propertySetter = mutator(clazz, propertyName, propertyGetter.getPropertyType());
 		return new PropertyAccessor<>(propertyGetter, propertySetter);
 	}
 	
@@ -163,14 +177,14 @@ public final class Accessors {
 	 * @param <T> the type of the field (returned by the getter)
 	 * @return a new {@link IAccessor}
 	 */
-	public static <C, T> IAccessor<C, T> accessor(Class<C> clazz, String propertyName) {
-		IAccessor<C, T> propertyGetter = accessorByMethod(clazz, propertyName);
+	public static <C, T, M extends Member> AccessorByMember<C, T, M> accessor(Class<C> clazz, String propertyName) {
+		AccessorByMember<C, T, ?> propertyGetter = accessorByMethod(clazz, propertyName);
 		if (propertyGetter == null) {
 			// NB: we use getField instead of findField because the latest returns null if field wasn't found
 			// so AccessorByField will throw a NPE later
 			propertyGetter = new AccessorByField<>(Reflections.getField(clazz, propertyName));
 		}
-		return propertyGetter;
+		return (AccessorByMember<C, T, M>) propertyGetter;
 	}
 	
 	/**
@@ -182,14 +196,19 @@ public final class Accessors {
 	 * @param <T> the type of the field (first parameter of the setter)
 	 * @return a new {@link IMutator}
 	 */
-	public static <C, T> IMutator<C, T> mutator(Class<C> clazz, String propertyName) {
-		IMutator<C, T> propertySetter = mutatorByMethod(clazz, propertyName);
+	public static <C, T, M extends Member> MutatorByMember<C, T, M> mutator(Class<C> clazz, String propertyName, Class<T> propertyType) {
+		MutatorByMember<C, T, ?> propertySetter = mutatorByMethod(clazz, propertyName, propertyType);
 		if (propertySetter == null) {
 			// NB: we use getField instead of findField because the latest returns null if field wasn't found
 			// so AccessorByField will throw a NPE later
-			propertySetter = new MutatorByField<>(Reflections.getField(clazz, propertyName));
+			Field foundField = Reflections.getField(clazz, propertyName);
+			if (!propertyType.isAssignableFrom(foundField.getType())) {
+				throw new MemberNotFoundException("Member type doesn't match expected one for field " + Reflections.toString(foundField)
+						+ ": expected " + Reflections.toString(propertyType) + " but is " + Reflections.toString(foundField.getType()) );
+			}
+			propertySetter = new MutatorByField<>(foundField);
 		}
-		return propertySetter;
+		return (MutatorByMember<C, T, M>) propertySetter;
 	}
 	
 	/**

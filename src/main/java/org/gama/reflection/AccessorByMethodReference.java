@@ -4,6 +4,7 @@ import java.lang.invoke.SerializedLambda;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
+import org.gama.lang.Reflections;
 import org.gama.lang.Strings;
 
 /**
@@ -21,8 +22,9 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> impl
 	private final SerializableFunction<C, T> methodReference;
 	private final String methodReferenceSignature;
 	private final String methodName;
-	private final String declaringClass;
+	private final Class declaringClass;
 	private final SerializedLambda serializedLambda;
+	private final Class propertyType;
 	
 	/**
 	 * 
@@ -35,8 +37,10 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> impl
 		serializedLambda = MethodReferences.buildSerializedLambda(methodReference);
 		// our description is made of SerializedLambda's one
 		methodName = serializedLambda.getImplMethodName();
-		declaringClass = serializedLambda.getImplClass().replace('/', '.');
-		this.methodReferenceSignature = declaringClass
+		String implementationClass = serializedLambda.getImplClass().replace('/', '.');
+		this.declaringClass = Reflections.forName(implementationClass);
+		this.propertyType = MethodReferenceCapturer.giveArgumentTypes(serializedLambda).getReturnType();
+		this.methodReferenceSignature = implementationClass
 				.concat(".")
 				.concat(methodName)
 				// we cut the method signature before return type because it doesn't seem necessary and ugly with arrays
@@ -53,7 +57,7 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> impl
 	}
 	
 	@Override
-	public String getDeclaringClass() {
+	public Class getDeclaringClass() {
 		return declaringClass;
 	}
 	
@@ -70,5 +74,10 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> impl
 	@Override
 	protected String getGetterDescription() {
 		return "method reference for " + methodReferenceSignature;
+	}
+	
+	@Override
+	public Class<C> getPropertyType() {
+		return propertyType;
 	}
 }

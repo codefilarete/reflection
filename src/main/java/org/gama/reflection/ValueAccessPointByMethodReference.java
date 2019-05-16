@@ -11,7 +11,9 @@ public interface ValueAccessPointByMethodReference extends ValueAccessPoint {
 	
 	String getMethodName();
 	
-	String getDeclaringClass();
+	Class getDeclaringClass();
 	
 	SerializedLambda getSerializedLambda();
+	
+	Class getPropertyType();
 }

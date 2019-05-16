@@ -8,4 +8,6 @@ import java.lang.reflect.Member;
 public interface AccessorByMember<C, T, M extends Member> extends IAccessor<C, T>{
 	
 	M getGetter();
+	
+	Class<T> getPropertyType();
 }

@@ -232,10 +232,9 @@ public class MethodReferenceCapturer {
 				throw Exceptions.asRuntimeException(e);
 			}
 			// looking for argument types
-			String methodSignature = serializedLambda.getImplMethodSignature();
 			Class[] argsClasses;
 			try {
-				argsClasses = giveArgumentTypes(methodSignature);
+				argsClasses = giveArgumentTypes(serializedLambda).getArgumentTypes();
 			} catch (MemberNotFoundException e) {
 				throw new MemberNotFoundException("Can't find method reference for "
 						+ serializedLambda.getImplClass() + "." + serializedLambda.getImplMethodName(), e);
@@ -252,21 +251,26 @@ public class MethodReferenceCapturer {
 	}
 	
 	/**
-	 * Deduces argument types from a method signature extracted from a {@link SerializedLambda} through {@link SerializedLambda#getImplMethodSignature()}
-	 * @param methodSignature the result of {@link SerializedLambda#getImplMethodSignature()}
-	 * @return an empty array if no argument were found, not null
+	 * Deduces argument types from a method signature extracted from a {@link SerializedLambda}
+	 * @param serializedLambda a {@link SerializedLambda}
+	 * @return an object describing the method of the given method reference
 	 */
 	@Nonnull
-	Class[] giveArgumentTypes(String methodSignature) {
-		Class[] argsClasses;
+	public static MethodDefinition giveArgumentTypes(SerializedLambda serializedLambda) {
+		String methodSignature = serializedLambda.getImplMethodSignature();
+		Class declaringType = Reflections.forName(serializedLambda.getImplClass().replace('/', '.'));
+		String methodName = serializedLambda.getImplMethodName();
+		Class[] argTypes;
+		Class returnType;
 		int closeArgsIndex = methodSignature.indexOf(')');
 		if (closeArgsIndex != 1) {
 			String argumentTypeSignature = methodSignature.substring(1, closeArgsIndex);
-			argsClasses = new ArgumentTypeSignatureParser(argumentTypeSignature).parse();
+			argTypes = new ArgumentTypeSignatureParser(argumentTypeSignature).parse();
 		} else {
-			argsClasses = new Class[0];
+			argTypes = new Class[0];
 		}
-		return argsClasses;
+		returnType = new ArgumentTypeSignatureParser(methodSignature.substring(closeArgsIndex+1)).parse()[0];
+		return MethodDefinition.methodDefinition(declaringType, methodName, argTypes, returnType);
 	}
 	
 	/**
@@ -358,5 +362,48 @@ public class MethodReferenceCapturer {
 			return objectClass;
 		}
 		
+	}
+	
+	/**
+	 * A {@link MemberDefinition} dedicated to method
+	 */
+	public static class MethodDefinition extends MemberDefinition {
+		
+		/**
+		 * Factory method pattern because some computaiton can't be done in a constructor
+		 * 
+		 * @param declaringClass owning class of the method
+		 * @param methodName method name
+		 * @param argumentTypes method arguments type
+		 * @param returnType methos return type
+		 * @return a new {@link MethodDefinition}
+		 */
+		public static MethodDefinition methodDefinition(Class declaringClass, String methodName, Class[] argumentTypes, Class returnType) {
+			Class memberType;
+			try {
+				memberType = Reflections.onJavaBeanPropertyWrapperName(methodName, s -> returnType, s -> argumentTypes[0], s -> returnType);
+			} catch (MemberNotFoundException e) {
+				memberType = null;
+			}
+			return new MethodDefinition(declaringClass, methodName, argumentTypes, returnType, memberType);
+		}
+		
+		private final Class[] argumentTypes;
+		
+		private final Class returnType;
+		
+		private MethodDefinition(Class declaringClass, String methodName, Class[] argumentTypes, Class returnType, Class memberType) {
+			super(declaringClass, methodName, memberType);
+			this.argumentTypes = argumentTypes;
+			this.returnType = returnType;
+		}
+		
+		public Class[] getArgumentTypes() {
+			return argumentTypes;
+		}
+		
+		public Class getReturnType() {
+			return returnType;
+		}
 	}
 }

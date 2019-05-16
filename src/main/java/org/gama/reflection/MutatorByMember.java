@@ -8,4 +8,6 @@ import java.lang.reflect.Member;
 public interface MutatorByMember<C, T, M extends Member> extends IMutator<C, T> {
 	
 	M getSetter();
+	
+	Class<T> getPropertyType();
 }

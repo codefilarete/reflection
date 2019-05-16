@@ -69,7 +69,7 @@ public class MemberDefinition implements Comparable<MemberDefinition> {
 			}
 		} else if (o instanceof ValueAccessPointByMethodReference) {
 			memberName = Reflections.propertyName(((ValueAccessPointByMethodReference) o).getMethodName());
-			declarator = Reflections.forName(((ValueAccessPointByMethodReference) o).getDeclaringClass());
+			declarator = ((ValueAccessPointByMethodReference) o).getDeclaringClass();
 			Method method = METHOD_REFERENCE_CAPTURER.findMethod(((ValueAccessPointByMethodReference) o).getSerializedLambda());
 			if (o instanceof IAccessor) {
 				memberType = method.getReturnType();
@@ -162,7 +162,7 @@ public class MemberDefinition implements Comparable<MemberDefinition> {
 		return result;
 	}
 	
-	public Class getDeclaringClass() {
+	public <T> Class<T> getDeclaringClass() {
 		return declaringClass;
 	}
 	
