@@ -2,7 +2,7 @@ package org.gama.reflection;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
-import org.gama.lang.bean.Objects;
+import org.gama.lang.function.Predicates;
 
 /**
  * A class for managing accesses (reading and writing) of a bean property.
@@ -91,8 +91,8 @@ public class PropertyAccessor<C, T> implements IReversibleAccessor<C, T>, IRever
 		} else if (!(obj instanceof PropertyAccessor)) {
 			return super.equals(obj);
 		} else {
-			return Objects.equalsWithNull(this.getAccessor(), ((PropertyAccessor) obj).getAccessor())
-					&& Objects.equalsWithNull(this.getMutator(), ((PropertyAccessor) obj).getMutator());
+			return Predicates.equalOrNull(this.getAccessor(), ((PropertyAccessor) obj).getAccessor())
+					&& Predicates.equalOrNull(this.getMutator(), ((PropertyAccessor) obj).getMutator());
 		}
 	}
 	
