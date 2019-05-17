@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  */
 class AccessorsTest {
 	
-	
 	@Test
 	void giveInputType() {
 		assertEquals(int.class, Accessors.giveInputType(propertyAccessor(City.class, "citizenCount")));
@@ -62,5 +61,33 @@ class AccessorsTest {
 				() -> Accessors.mutator(StringAppender.class, "appender", String.class).getSetter());
 		assertEquals("Member type doesn't match expected one for field j.l.StringBuilder o.g.l.StringAppender.appender:" 
 				+ " expected j.l.String but is j.l.StringBuilder", thrownException.getMessage());
+	}
+	
+	@Test
+	void mutatorByMethod_noSetter() throws NoSuchMethodException {
+		assertEquals(Toto.class.getMethod("setMatchingField", Long.class), mutatorByMethod(Toto.class, "matchingField").getMethod());
+	}
+	
+	@Test
+	void mutatorByMethod_noMatchingField() {
+		MemberNotFoundException throwException = assertThrows(MemberNotFoundException.class, () -> mutatorByMethod(Toto.class, "noMatchingField"));
+		assertEquals("Method setNoMatchingField() on o.g.r.AccessorsTest$Toto was not found", throwException.getMessage());
+	}
+	
+	protected static class Toto {
+		
+		private Long matchingField;
+		
+		public Long getMatchingField() {
+			return matchingField;
+		}
+		
+		public void setMatchingField(Long matchingField) {
+			this.matchingField = matchingField;
+		}
+		
+		public Long getNoMatchingField() {
+			return null;
+		}
 	}
 }

@@ -117,22 +117,18 @@ public final class Accessors {
 			return mutatorByMethod(clazz, propertyName, inputType);
 		} else {
 			// we do our best : no argument is given because we couldn't determine it
-			
 			return new MutatorByMethod<>(Reflections.getMethod(clazz, "set" + Strings.capitalize(propertyName)));
 		}
 	}
 	
-	public static <C, T> MutatorByMethodReference<C, T> mutatorByMethodReference(SerializableBiConsumer<C, T> setter) {
-		return new MutatorByMethodReference<>(setter);
-	}
-	
 	/**
-	 * Shortcut to create a {@link MutatorByMethod} from a class, a property name, and its type
+	 * Shortcut to create a {@link MutatorByMethod} from a class, a property name, and its type.
 	 * Java bean naming convention will be applied to find out property setter name : prefixed with "set".
 	 * Returns null is setter method is not found.
 	 *
 	 * @param clazz any class 
 	 * @param propertyName a property name owned by the class or one of its parent
+	 * @param inputType property type
 	 * @param <C> owning class type
 	 * @param <T> setter input type, which is property type too
 	 * @return null if setter method is not found
@@ -142,6 +138,10 @@ public final class Accessors {
 		String capitalizedProperty = Strings.capitalize(propertyName);
 		Method setter = Reflections.findMethod(clazz, "set" + capitalizedProperty, inputType);
 		return setter == null ? null : new MutatorByMethod<>(setter);
+	}
+	
+	public static <C, T> MutatorByMethodReference<C, T> mutatorByMethodReference(SerializableBiConsumer<C, T> setter) {
+		return new MutatorByMethodReference<>(setter);
 	}
 	
 	public static <C, T> MutatorByField<C, T> mutatorByField(Field field) {
