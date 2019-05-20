@@ -1,5 +1,6 @@
 package org.gama.reflection;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -185,6 +186,19 @@ class MethodReferenceDispatcherTest {
 		
 		testInstance.setValues(42, "666");
 		assertEquals(Maps.asHashMap(42, "666"), valuesHolder);
+	}
+	
+	@Test
+	public void testRedirect_ThrowingConsumer() throws SQLException {
+		Connection testInstance;
+		
+		// ThrowingBiConsumer
+		Holder<Integer> xx = new Holder<>();
+		testInstance = new MethodReferenceDispatcher()
+				.redirectThrower(Connection::commit, () -> xx.set(42))
+				.build(Connection.class);
+		testInstance.commit();
+		assertEquals(42, (int) xx.get());
 	}
 	
 	@Test

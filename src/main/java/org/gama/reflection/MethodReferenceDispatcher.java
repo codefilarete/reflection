@@ -13,6 +13,7 @@ import org.danekja.java.util.function.serializable.SerializableBiFunction;
 import org.danekja.java.util.function.serializable.SerializableConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.gama.lang.function.SerializableThrowingBiConsumer;
+import org.gama.lang.function.SerializableThrowingConsumer;
 import org.gama.lang.function.SerializableThrowingFunction;
 import org.gama.lang.function.SerializableThrowingTriConsumer;
 import org.gama.lang.function.SerializableTriConsumer;
@@ -161,6 +162,11 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	 */
 	public <X, R, E extends Throwable> MethodReferenceDispatcher redirectThrower(SerializableThrowingFunction<X, R, E> methodToCapture, Callable<R> codeToInvoke) {
 		addInterceptor(METHOD_REFERENCE_CAPTURER.findMethod(buildSerializedLambda(methodToCapture)), (ArgsDigester) args -> codeToInvoke.call());
+		return this;
+	}
+	
+	public <X, E extends Throwable> MethodReferenceDispatcher redirectThrower(SerializableThrowingConsumer<X, E> methodToCapture, Runnable codeToInvoke) {
+		addInterceptor(METHOD_REFERENCE_CAPTURER.findMethod(buildSerializedLambda(methodToCapture)), (ArgsConsumer) args -> codeToInvoke.run());
 		return this;
 	}
 	
