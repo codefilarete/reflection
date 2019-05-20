@@ -34,14 +34,14 @@ public class MutatorByMethodTest {
 	@Test
 	public void testToMutator_reverseSetterDoesntExist_throwsException() {
 		MutatorByMethod<Toto, Integer> testInstance = new MutatorByMethod<>(Reflections.findMethod(Toto.class, "setFakeProperty", int.class));
-		assertEquals("Can't find a mutator for void o.g.r.MutatorByMethodTest$Toto.setFakeProperty(int)",
+		assertEquals("Can't find a mutator for o.g.r.MutatorByMethodTest$Toto.setFakeProperty(int)",
 				assertThrows(NonReversibleAccessor.class, testInstance::toAccessor).getMessage());
 	}
 	
 	@Test
 	public void testToString() {
 		MutatorByMethod<Toto, Integer> testInstance = new MutatorByMethod<>(Reflections.findMethod(Toto.class, "setA", int.class));
-		assertEquals("void o.g.r.MutatorByMethodTest$Toto.setA(int)", testInstance.toString());
+		assertEquals("o.g.r.MutatorByMethodTest$Toto.setA(int)", testInstance.toString());
 	}
 	
 	private static class Toto {

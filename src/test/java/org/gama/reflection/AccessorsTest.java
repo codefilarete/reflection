@@ -59,7 +59,7 @@ class AccessorsTest {
 		
 		MemberNotFoundException thrownException = assertThrows(MemberNotFoundException.class,
 				() -> Accessors.mutator(StringAppender.class, "appender", String.class).getSetter());
-		assertEquals("Member type doesn't match expected one for field j.l.StringBuilder o.g.l.StringAppender.appender:" 
+		assertEquals("Member type doesn't match expected one for field o.g.l.StringAppender.appender:" 
 				+ " expected j.l.String but is j.l.StringBuilder", thrownException.getMessage());
 	}
 	

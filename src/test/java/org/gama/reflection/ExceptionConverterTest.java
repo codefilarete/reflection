@@ -24,7 +24,7 @@ public class ExceptionConverterTest {
 		
 		Toto target = new Toto();
 		IllegalArgumentException thrownThrowable = assertThrows(IllegalArgumentException.class, () -> accessorByField.set(target, 0L));
-		assertEquals("Field j.l.Integer o.g.r.ExceptionConverterTest$Toto.a is not compatible with j.l.Long", thrownThrowable.getMessage());
+		assertEquals("Field o.g.r.ExceptionConverterTest$Toto.a is not compatible with j.l.Long", thrownThrowable.getMessage());
 	}
 	
 	@Test
@@ -37,7 +37,7 @@ public class ExceptionConverterTest {
 		
 		Tata target = new Tata();
 		IllegalArgumentException thrownThrowable = assertThrows(IllegalArgumentException.class, () -> mutatorByField.set(target, 0L));
-		assertEquals("Field j.l.Integer o.g.r.ExceptionConverterTest$Toto.a doesn't exist in o.g.r.ExceptionConverterTest$Tata", thrownThrowable.getMessage());
+		assertEquals("Field o.g.r.ExceptionConverterTest$Toto.a doesn't exist in o.g.r.ExceptionConverterTest$Tata", thrownThrowable.getMessage());
 	}
 	
 	@Test
@@ -50,7 +50,7 @@ public class ExceptionConverterTest {
 		
 		Toto target = new Toto();
 		IllegalArgumentException thrownThrowable = assertThrows(IllegalArgumentException.class, () -> mutatorByField.set(target, null));
-		assertEquals("Field int o.g.r.ExceptionConverterTest$Toto.b is not compatible with null", thrownThrowable.getMessage());
+		assertEquals("Field o.g.r.ExceptionConverterTest$Toto.b is not compatible with null", thrownThrowable.getMessage());
 	}
 	
 	private static class Toto {
