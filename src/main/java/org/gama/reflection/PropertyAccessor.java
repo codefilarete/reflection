@@ -20,7 +20,7 @@ public class PropertyAccessor<C, T> implements IReversibleAccessor<C, T>, IRever
 	 * @param <T> property type
 	 * @return a {@link PropertyAccessor} that will access a property throught the given getter and getter
 	 */
-	public static <C, T> PropertyAccessor<C, T> fromLambda(SerializableFunction<C, T> accessor, SerializableBiConsumer<C, T> mutator) {
+	public static <C, T> PropertyAccessor<C, T> fromMethodReference(SerializableFunction<C, T> accessor, SerializableBiConsumer<C, T> mutator) {
 		return new PropertyAccessor<>(new AccessorByMethodReference<>(accessor), new MutatorByMethodReference<>(mutator));
 	}
 	
