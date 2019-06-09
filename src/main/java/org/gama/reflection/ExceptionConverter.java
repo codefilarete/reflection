@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import org.gama.lang.Reflections;
 import org.gama.lang.StringAppender;
 import org.gama.lang.collection.Arrays;
+import org.gama.lang.collection.Iterables;
 import org.gama.lang.exception.Exceptions;
 import org.gama.lang.exception.NotImplementedException;
 
@@ -30,6 +31,8 @@ public class ExceptionConverter {
 				return convertObjectIsNotAnInstanceOfDeclaringClass(target, reflector);
 			} else if (t.getMessage().startsWith("Can not set")) {
 				return convertCannotSetFieldToObject(target, reflector, args.length > 0 ? args[0] : null);
+			} else if ("argument type mismatch".equals(t.getMessage())) {
+				return convertArgumentTypeMismatch((IllegalArgumentException) t, reflector, args);
 			} else {
 				return Exceptions.asRuntimeException(t);
 			}
@@ -47,9 +50,8 @@ public class ExceptionConverter {
 	}
 	
 	public String giveMessageForWrongNumberOfArguments(Method method, Object[] args) {
-		Class<?>[] parameterTypes = method.getParameterTypes();
-		StringAppender parameterFormatter = new StringAppender(100);
-		parameterFormatter.ccat(parameterTypes, ", ");
+		TypeAppender parameterFormatter = new TypeAppender(100);
+		parameterFormatter.ccat(method.getParameterTypes(), ", ");
 		return ": expected " + parameterFormatter.toString()
 				+ " but " + (Arrays.isEmpty(args) ? "none" : new StringAppender(100).ccat(args, ", ").wrap("(", ")"))
 				+ " was given";
@@ -97,6 +99,24 @@ public class ExceptionConverter {
 		}
 	}
 	
+	private IllegalArgumentException convertArgumentTypeMismatch(IllegalArgumentException t, AbstractReflector reflector, Object... args) {
+		if (reflector instanceof MutatorByMethod) {
+			TypeAppender parameterFormatter = new TypeAppender(100);
+			parameterFormatter.cat(getReflectorDescription(reflector), " expects ")
+					.ccat(((MutatorByMethod) reflector).getMethod().getParameterTypes(), ", ")
+					.cat(" as argument, but ")
+					.ccat(Iterables.collectToList(Arrays.asList(args), Object::getClass), ", ")
+					.cat(" was given");
+			throw new IllegalArgumentException(parameterFormatter.toString());
+		} else {
+			// actually I'm not sure that something else than a MutatorByMethod can raise an "argument type mismatch" exception
+			// so this code may be never get called
+			throw t;
+		}
+	}
+	
+	
+	
 	private String getReflectorDescription(AbstractReflector reflector) {
 		if (reflector instanceof AbstractAccessor) {
 			return ((AbstractAccessor) reflector).getGetterDescription();
@@ -105,6 +125,18 @@ public class ExceptionConverter {
 			return ((AbstractMutator) reflector).getSetterDescription();
 		}
 		throw new IllegalArgumentException("Unknown reflector " + reflector);
+	}
+	
+	private static class TypeAppender extends StringAppender {
+		
+		private TypeAppender(int capacity) {
+			super(capacity);
+		}
+		
+		@Override
+		public StringAppender cat(Object s) {
+			return s instanceof Class ? super.cat(Reflections.toString((Class) s)) : super.cat(s);
+		}
 	}
 	
 }

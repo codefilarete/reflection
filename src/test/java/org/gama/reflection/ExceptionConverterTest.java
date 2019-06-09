@@ -1,6 +1,7 @@
 package org.gama.reflection;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import org.gama.lang.Reflections;
 import org.junit.jupiter.api.Test;
@@ -53,11 +54,27 @@ public class ExceptionConverterTest {
 		assertEquals("Field o.g.r.ExceptionConverterTest$Toto.b is not compatible with null", thrownThrowable.getMessage());
 	}
 	
+	@Test
+	public void testConvertException_typeMismatch() {
+		Method methodSetA = Reflections.getMethod(Toto.class, "setA", Integer.class);
+		Reflections.ensureAccessible(methodSetA);
+		
+		MutatorByMethod<Toto, Object> accessorByMethod = new MutatorByMethod<>(methodSetA);
+		
+		Toto target = new Toto();
+		IllegalArgumentException thrownThrowable = assertThrows(IllegalArgumentException.class, () -> accessorByMethod.set(target, "42"));
+		assertEquals("o.g.r.ExceptionConverterTest$Toto.setA(j.l.Integer) expects j.l.Integer as argument, but j.l.String was given", thrownThrowable.getMessage());
+	}
+	
 	private static class Toto {
 		
 		private Integer a;
 		
 		private int b;
+		
+		public void setA(Integer a) {
+			this.a = a;
+		}
 	}
 	
 	private static class Tata {

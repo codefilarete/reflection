@@ -62,7 +62,12 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T>
 	@Override
 	protected void doSet(C c, T t) throws IllegalAccessException, InvocationTargetException {
 		fixMethodParameters(t);
-		getSetter().invoke(c, methodParameters);
+		try {
+			getSetter().invoke(c, methodParameters);
+		} catch (RuntimeException e) {
+			// converting "argument type mismatch" cases
+			throw new ExceptionConverter().convertException(e, c, this, t);
+		}
 	}
 	
 	protected void fixMethodParameters(T t) {
