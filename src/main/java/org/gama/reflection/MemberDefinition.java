@@ -1,9 +1,11 @@
 package org.gama.reflection;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.List;
 
 import org.gama.lang.Reflections;
@@ -127,31 +129,22 @@ public class MemberDefinition implements Comparable<MemberDefinition> {
 	
 	/**
 	 * @param o any {@link ValueAccessPoint}
-	 * @return a short representation of the given {@link ValueAccessPoint}
+	 * @return a short representation of the given {@link ValueAccessPoint} : owner + name (spearator depends on accessor kind)
 	 */
-	public static String toString(ValueAccessPoint o) {
+	public static String toString(@Nullable ValueAccessPoint o) {
 		String result;
-		if (o instanceof AccessorByMember) {
-			Member member = ((AccessorByMember) o).getGetter();
-			if (member instanceof Method) {
-				result = Reflections.toString((Method) member);
-			} else {
-				result = Reflections.toString((Field) member);
-			}
+		if (o == null) {
+			result = "null";
+		} else if (o instanceof AccessorByMember) {
+			result = toString(((AccessorByMember) o).getGetter());
 		} else if (o instanceof AccessorByMethodReference) {
 			result = MethodReferences.toMethodReferenceString(((AccessorByMethodReference) o).getMethodReference());
 		} else if (o instanceof MutatorByMember) {
-			Member member = ((MutatorByMember) o).getSetter();
-			if (member instanceof Method) {
-				result = Reflections.toString((Method) member);
-			} else {
-				result = Reflections.toString((Field) member);
-			}
+			result = toString(((MutatorByMember) o).getSetter());
 		} else if (o instanceof MutatorByMethodReference) {
 			result = MethodReferences.toMethodReferenceString(((MutatorByMethodReference) o).getMethodReference());
 		} else if (o instanceof PropertyAccessor) {
-			IAccessor accessor = ((PropertyAccessor) o).getAccessor();
-			result = toString(accessor);
+			result = toString(((PropertyAccessor) o).getAccessor());
 		} else if (o instanceof AccessorChain) {
 			StringAppender chainPrint = new StringAppender();
 			((AccessorChain) o).getAccessors().forEach(accessor -> chainPrint.cat(toString((IAccessor) accessor)).cat(" > "));
@@ -160,6 +153,26 @@ public class MemberDefinition implements Comparable<MemberDefinition> {
 			throw new UnsupportedOperationException("Don't know how find out member definition for " + Reflections.toString(o.getClass()));
 		}
 		return result;
+	}
+	
+	private static String toString(Member member) {
+		String result;
+		if (member instanceof Method) {
+			result = Reflections.toString((Method) member);
+		} else {
+			result = Reflections.toString((Field) member);
+		}
+		return result;
+	}
+	
+	/**
+	 * @param accessPoints several {@link ValueAccessPoint}s
+	 * @return the concatenation of each call to {@link #toString(ValueAccessPoint)} for every element of the collection, separated by ">"
+	 */
+	public static String toString(Collection<ValueAccessPoint> accessPoints) {
+		StringAppender chainPrint = new StringAppender();
+		accessPoints.forEach(accessor -> chainPrint.cat(toString(accessor)).cat(" > "));
+		return chainPrint.cutTail(3).toString();
 	}
 	
 	public <T> Class<T> getDeclaringClass() {

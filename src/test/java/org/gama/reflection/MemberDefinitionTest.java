@@ -4,6 +4,7 @@ import org.gama.lang.collection.Arrays;
 import org.gama.reflection.model.Address;
 import org.gama.reflection.model.City;
 import org.gama.reflection.model.Person;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -60,6 +61,7 @@ class MemberDefinitionTest {
 				{ new PropertyAccessor<>(new AccessorByMethodReference<>(Person::getName), new MutatorByMethodReference<>(Person::setName)), "Person::getName" },
 				{ new PropertyAccessor<>(new AccessorByMethod<>(Person.class, "getName"), new MutatorByMethod<>(Person.class, "setName", String.class)),
 						"o.g.r.m.Person.getName()" },
+				{ null, "null" }
 		};
 	}
 	
@@ -67,6 +69,17 @@ class MemberDefinitionTest {
 	@MethodSource("testToString")
 	void toString(ValueAccessPoint valueAccessPoint, String expectedResult) {
 		assertEquals(expectedResult, MemberDefinition.toString(valueAccessPoint));
+	}
+	
+	@Test
+	void toString_collection() {
+		assertEquals("Person::getAddress > Address::getCity", MemberDefinition.toString(Arrays.asList(
+				new AccessorByMethodReference<>(Person::getAddress),
+				new AccessorByMethodReference<>(Address::getCity))));
+		assertEquals("Person::getAddress > Address::getCity > o.g.r.m.Person.name", MemberDefinition.toString(Arrays.asList(
+				new AccessorByMethodReference<>(Person::getAddress),
+				new AccessorByMethodReference<>(Address::getCity),
+				accessorByField(Person.class, "name"))));
 	}
 	
 }
