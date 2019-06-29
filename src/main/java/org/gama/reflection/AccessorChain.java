@@ -4,8 +4,10 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.gama.lang.Reflections;
@@ -181,7 +183,7 @@ public class AccessorChain<C, T> implements IReversibleAccessor<C, T> {
 		}
 		
 		/**
-		 * Expected to give concrete class to be instanciated. Necessary for
+		 * Expected to give concrete class to be instanciated.
 		 * @param accessor the current accessor that returned null, given for a fine grained adjustment of returned type
 		 * @param valueType expected compatible type, this of accessor
 		 * @return a concrete and instanciable type compatible with acccessor input type
@@ -189,6 +191,8 @@ public class AccessorChain<C, T> implements IReversibleAccessor<C, T> {
 		protected Class giveValueType(IAccessor accessor, Class valueType) {
 			if (List.class.equals(valueType)) {
 				return ArrayList.class;
+			} else if (Set.class.equals(valueType)) {
+				return HashSet.class;
 			} else if (Map.class.equals(valueType)) {
 				return HashMap.class;
 			} else {
