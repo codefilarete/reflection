@@ -57,7 +57,7 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> impl
 	}
 	
 	@Override
-	public Class getDeclaringClass() {
+	public Class<C> getDeclaringClass() {
 		return declaringClass;
 	}
 	
@@ -77,7 +77,7 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> impl
 	}
 	
 	@Override
-	public Class<C> getPropertyType() {
+	public Class<T> getPropertyType() {
 		return propertyType;
 	}
 }

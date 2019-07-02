@@ -20,7 +20,7 @@ public class PropertyAccessorTest {
 	@Test
 	public void testOf_fieldInput() {
 		Field numberField = Reflections.findField(Phone.class, "number");
-		PropertyAccessor<Phone, String> numberAccessor = Accessors.of(numberField);
+		PropertyAccessor<Phone, String> numberAccessor = Accessors.accessor(numberField);
 		assertEquals(new AccessorByField<>(numberField), numberAccessor.getAccessor());
 		assertEquals(new MutatorByField<>(numberField), numberAccessor.getMutator());
 	}
@@ -29,7 +29,7 @@ public class PropertyAccessorTest {
 	public void testOf_methodInput() {
 		Field numberField = Reflections.findField(Phone.class, "number");
 		Method numberGetter = Reflections.findMethod(Phone.class, "getNumber");
-		PropertyAccessor<Phone, String> numberAccessor = Accessors.of(numberGetter);
+		PropertyAccessor<Phone, String> numberAccessor = Accessors.accessor(numberGetter);
 		assertEquals(new AccessorByMethod<>(numberGetter), numberAccessor.getAccessor());
 		// As there's no setter for "number" field, the mutator is an field one, not a method one
 		assertEquals(new MutatorByField<>(numberField), numberAccessor.getMutator());
@@ -37,7 +37,7 @@ public class PropertyAccessorTest {
 		
 		Method nameGetter = Reflections.findMethod(City.class, "getName");
 		Method nameSetter = Reflections.findMethod(City.class, "setName", String.class);
-		PropertyAccessor<City, String> nameAccessor = Accessors.of(nameGetter);
+		PropertyAccessor<City, String> nameAccessor = Accessors.accessor(nameGetter);
 		assertEquals(new AccessorByMethod<>(nameGetter), nameAccessor.getAccessor());
 		// As a setter exists for "name" field, the mutator is a method one, not a field one
 		assertEquals(new MutatorByMethod<>(nameSetter), nameAccessor.getMutator());
@@ -47,7 +47,7 @@ public class PropertyAccessorTest {
 	public void testOf_nonConventionalMethodInput_exceptionThrown() {
 		Method nameGetter = Reflections.findMethod(City.class, "name");
 		
-		assertThrows(MemberNotFoundException.class, () -> Accessors.of(nameGetter),
+		assertThrows(MemberNotFoundException.class, () -> Accessors.accessor(nameGetter),
 				"Field wrapper j.l.String o.g.r.m.City.name() doesn't feet encapsulation naming convention");
 	}
 	

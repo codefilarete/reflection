@@ -56,7 +56,7 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> implem
 	}
 	
 	@Override
-	public Class getDeclaringClass() {
+	public Class<C> getDeclaringClass() {
 		return declaringClass;
 	}
 	
@@ -76,7 +76,7 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> implem
 	}
 	
 	@Override
-	public Class<C> getPropertyType() {
+	public Class<T> getPropertyType() {
 		return propertyType;
 	}
 }

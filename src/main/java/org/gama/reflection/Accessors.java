@@ -15,6 +15,8 @@ import org.gama.lang.Strings;
 import org.gama.lang.collection.Iterables;
 import org.gama.lang.reflect.MethodDispatcher;
 
+import static org.gama.lang.Reflections.propertyName;
+
 /**
  * @author Guillaume Mary
  */
@@ -169,7 +171,7 @@ public final class Accessors {
 	}
 	
 	/**
-	 * Create an {@link IAccessor} for the given property of the given class. Do it with conventional getter or a direct access to the field.
+	 * Creates an {@link IAccessor} for the given property of the given class. Does it with conventional getter or a direct access to the field.
 	 * 
 	 * @param clazz the class owning the property
 	 * @param propertyName the name of the property
@@ -188,7 +190,50 @@ public final class Accessors {
 	}
 	
 	/**
-	 * Create an {@link IMutator} for the given property of the given class. Do it with conventional setter or a direct access to the field.
+	 * Creates an {@link IAccessor} for the given property of the given class. Does it with conventional getter or a direct access to the field.
+	 * 
+	 * @param clazz the class owning the property
+	 * @param propertyName the name of the property
+	 * @param <C> the type of the class owning the property
+	 * @param <T> the type of the field (returned by the getter)
+	 * @return a new {@link IAccessor}
+	 */
+	public static <C, T, M extends Member> AccessorByMember<C, T, M> accessor(Class<C> clazz, String propertyName, Class<T> propertyType) {
+		AccessorByMember<C, T, ?> propertyGetter = accessorByMethod(clazz, propertyName);
+		if (propertyGetter == null) {
+			// NB: we use getField instead of findField because the latest returns null if field wasn't found
+			// so AccessorByField will throw a NPE later
+			Field foundField = Reflections.getField(clazz, propertyName);
+			if (!Reflections.isAssignableFrom(propertyType, foundField.getType())) {
+				throw new MemberNotFoundException("Member type doesn't match expected one for field " + Reflections.toString(foundField)
+						+ ": expected " + Reflections.toString(propertyType) + " but is " + Reflections.toString(foundField.getType()) );
+			}
+			propertyGetter = new AccessorByField<>(foundField);
+		}
+		return (AccessorByMember<C, T, M>) propertyGetter;
+	}
+	
+	/**
+	 * Creates an {@link IMutator} for the given property of the given class. Does it with conventional setter or a direct access to the field.
+	 *
+	 * @param clazz the class owning the property
+	 * @param propertyName the name of the property
+	 * @param <C> the type of the class owning the property
+	 * @param <T> the type of the field (first parameter of the setter)
+	 * @return a new {@link IMutator}
+	 */
+	public static <C, T, M extends Member> MutatorByMember<C, T, M> mutator(Class<C> clazz, String propertyName) {
+		MutatorByMember<C, T, ?> propertySetter = mutatorByMethod(clazz, propertyName);
+		if (propertySetter == null) {
+			// NB: we use getField instead of findField because the latest returns null if field wasn't found
+			// so AccessorByField will throw a NPE later
+			propertySetter = new MutatorByField<>(Reflections.getField(clazz, propertyName));
+		}
+		return (MutatorByMember<C, T, M>) propertySetter;
+	}
+	
+	/**
+	 * Creates an {@link IMutator} for the given property of the given class. Does it with conventional setter or a direct access to the field.
 	 *
 	 * @param clazz the class owning the property
 	 * @param propertyName the name of the property
@@ -202,13 +247,29 @@ public final class Accessors {
 			// NB: we use getField instead of findField because the latest returns null if field wasn't found
 			// so AccessorByField will throw a NPE later
 			Field foundField = Reflections.getField(clazz, propertyName);
-			if (!propertyType.isAssignableFrom(foundField.getType())) {
+			if (!Reflections.isAssignableFrom(propertyType, foundField.getType())) {
 				throw new MemberNotFoundException("Member type doesn't match expected one for field " + Reflections.toString(foundField)
 						+ ": expected " + Reflections.toString(propertyType) + " but is " + Reflections.toString(foundField.getType()) );
 			}
 			propertySetter = new MutatorByField<>(foundField);
 		}
 		return (MutatorByMember<C, T, M>) propertySetter;
+	}
+	
+	public static <C, E> PropertyAccessor<C, E> accessor(SerializableFunction<C, E> getter) {
+		AccessorByMethodReference<C, E> methodReference = accessorByMethodReference(getter);
+		return new PropertyAccessor<>(
+				methodReference,
+				mutator(methodReference.getDeclaringClass(), propertyName(methodReference.getMethodName()), methodReference.getPropertyType())
+		);
+	}
+	
+	public static <C, E> PropertyAccessor<C, E> mutator(SerializableBiConsumer<C, E> setter) {
+		MutatorByMethodReference<C, E> methodReference = mutatorByMethodReference(setter);
+		return new PropertyAccessor<>(
+				accessor(methodReference.getDeclaringClass(), propertyName(methodReference.getMethodName()), methodReference.getPropertyType()),
+				methodReference
+		);
 	}
 	
 	/**
@@ -218,7 +279,7 @@ public final class Accessors {
 	 * @param <T> the type of the {@link Member}
 	 * @return a new {@link PropertyAccessor} with accessor and mutator alloqing to access to the member
 	 */
-	public static <C, T> PropertyAccessor<C, T> of(Member member) {
+	public static <C, T> PropertyAccessor<C, T> accessor(Member member) {
 		if (member instanceof Field) {
 			return new PropertyAccessor<>(new AccessorByField<>((Field) member));
 		} else if (member instanceof Method) {
