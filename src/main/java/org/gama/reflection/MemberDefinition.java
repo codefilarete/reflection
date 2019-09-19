@@ -29,10 +29,11 @@ public class MemberDefinition implements Comparable<MemberDefinition> {
 	 * Gives a {@link MemberDefinition} that are similar if they access the same property, whatever type they are : doesn't make difference
 	 * between a {@link MutatorByField}, {@link AccessorByMethod} or {@link AccessorByMethodReference} if the goal is to access the same field.
 	 * 
-	 * @param o any {@link ValueAccessPoint}
+	 * @param o any {@link ValueAccessPoint}, null autorized but will throw an {@link UnsupportedOperationException}
 	 * @return a common representation of given input
+	 * @throws UnsupportedOperationException when member can't be found because given {@link ValueAccessPoint} is not a known concrete type
 	 */
-	public static MemberDefinition giveMemberDefinition(ValueAccessPoint o) {
+	public static MemberDefinition giveMemberDefinition(@Nullable ValueAccessPoint o) {
 		MemberDefinition result;
 		if (o instanceof AbstractReflector) {
 			result = giveMemberDefinition((AbstractReflector) o);
@@ -41,7 +42,7 @@ public class MemberDefinition implements Comparable<MemberDefinition> {
 		} else if (o instanceof AccessorChain) {
 			result = giveMemberDefinition((AccessorChain) o);
 		} else {
-			throw new UnsupportedOperationException("Don't know how find out member definition for " + Reflections.toString(o.getClass()));
+			throw new UnsupportedOperationException("Don't know how find out member definition for " + (o == null ? "null" : Reflections.toString(o.getClass())));
 		}
 		return result;
 	}

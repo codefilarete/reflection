@@ -1,6 +1,7 @@
 package org.gama.reflection;
 
 import org.gama.lang.collection.Arrays;
+import org.gama.lang.test.Assertions;
 import org.gama.reflection.model.Address;
 import org.gama.reflection.model.City;
 import org.gama.reflection.model.Person;
@@ -42,6 +43,12 @@ class MemberDefinitionTest {
 		assertEquals(expectedDeclaringClass, memberDefinition.getDeclaringClass());
 		assertEquals(expectedName, memberDefinition.getName());
 		assertEquals(expectedMemberType, memberDefinition.getMemberType());
+	}
+	
+	@Test
+	void testGiveMemberDefinition_nullArgument() {
+		Assertions.assertThrows(() -> giveMemberDefinition(null), Assertions.hasExceptionInCauses(UnsupportedOperationException.class)
+				.andProjection(Assertions.hasMessage("Don't know how find out member definition for null")));
 	}
 	
 	static Object[][] testToString() {
