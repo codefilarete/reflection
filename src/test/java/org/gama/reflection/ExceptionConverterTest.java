@@ -25,7 +25,7 @@ public class ExceptionConverterTest {
 		
 		Toto target = new Toto();
 		IllegalArgumentException thrownThrowable = assertThrows(IllegalArgumentException.class, () -> accessorByField.set(target, 0L));
-		assertEquals("Field o.g.r.ExceptionConverterTest$Toto.a is not compatible with j.l.Long", thrownThrowable.getMessage());
+		assertEquals("Field o.g.r.ExceptionConverterTest$Toto.a of type j.l.Integer is not compatible with j.l.Long", thrownThrowable.getMessage());
 	}
 	
 	@Test
@@ -51,7 +51,7 @@ public class ExceptionConverterTest {
 		
 		Toto target = new Toto();
 		IllegalArgumentException thrownThrowable = assertThrows(IllegalArgumentException.class, () -> mutatorByField.set(target, null));
-		assertEquals("Field o.g.r.ExceptionConverterTest$Toto.b is not compatible with null", thrownThrowable.getMessage());
+		assertEquals("Field o.g.r.ExceptionConverterTest$Toto.b of type int is not compatible with null", thrownThrowable.getMessage());
 	}
 	
 	@Test

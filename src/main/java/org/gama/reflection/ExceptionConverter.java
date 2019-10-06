@@ -93,7 +93,7 @@ public class ExceptionConverter {
 			return new IllegalArgumentException("Field " + Reflections.toString(getter) + " doesn't exist in " + Reflections.toString(target.getClass()));
 		} else if (!getter.getType().isInstance(arg)) {
 			return new IllegalArgumentException("Field " + Reflections.toString(getter)
-					+ " is not compatible with " + (arg == null ? "null" : Reflections.toString(arg.getClass())));
+					+ " of type " + Reflections.toString(getter.getType()) + " is not compatible with " + (arg == null ? "null" : Reflections.toString(arg.getClass())));
 		} else {
 			return new RuntimeException("Can not set " + arg + " to " + target);
 		}
