@@ -73,7 +73,7 @@ public class ExceptionConverter {
 	}
 	
 	public String giveMessageForConvertObjectIsNotAnInstanceOfDeclaringClass(Object target, Class<?> declaringClass) {
-		return ": expected " + declaringClass.getName() + " but " + target.getClass().getName() + " was given";
+		return ": expected " + Reflections.toString(declaringClass) + " but " + Reflections.toString(target.getClass()) + " was given";
 	}
 	
 	private RuntimeException convertCannotSetFieldToObject(Object target, AbstractReflector reflector, Object arg) {

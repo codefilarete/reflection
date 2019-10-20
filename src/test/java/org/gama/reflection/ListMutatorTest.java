@@ -3,10 +3,10 @@ package org.gama.reflection;
 import java.util.List;
 
 import org.gama.lang.collection.Arrays;
+import org.gama.lang.test.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Guillaume Mary
@@ -35,6 +35,6 @@ public class ListMutatorTest {
 		List<String> sample = Arrays.asList("a", "b", "c");
 		
 		testInstance.setIndex(-1);
-		assertThrows(ArrayIndexOutOfBoundsException.class, () -> testInstance.set(sample, "x"));
+		Assertions.assertThrows(() -> testInstance.set(sample, "x"), Assertions.hasExceptionInCauses(ArrayIndexOutOfBoundsException.class));
 	}
 }

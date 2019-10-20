@@ -20,6 +20,11 @@ public abstract class AbstractAccessor<C, T> extends AbstractReflector<C> implem
 	
 	protected abstract T doGet(C c) throws IllegalAccessException, InvocationTargetException;
 	
+	@Override
+	protected String getDescription() {
+		return getGetterDescription();
+	}
+	
 	protected abstract String getGetterDescription();
 	
 	/**

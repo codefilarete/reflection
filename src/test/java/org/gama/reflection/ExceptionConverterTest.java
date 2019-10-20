@@ -24,8 +24,9 @@ public class ExceptionConverterTest {
 		MutatorByField<Toto, Object> accessorByField = new MutatorByField<>(field_a);
 		
 		Toto target = new Toto();
-		IllegalArgumentException thrownThrowable = assertThrows(IllegalArgumentException.class, () -> accessorByField.set(target, 0L));
-		assertEquals("Field o.g.r.ExceptionConverterTest$Toto.a of type j.l.Integer is not compatible with j.l.Long", thrownThrowable.getMessage());
+		RuntimeException thrownThrowable = assertThrows(RuntimeException.class, () -> accessorByField.set(target, 0L));
+		assertEquals("Error while applying mutator for field o.g.r.ExceptionConverterTest$Toto.a on instance of o.g.r.ExceptionConverterTest$Toto with value 0", thrownThrowable.getMessage());
+		assertEquals("Field o.g.r.ExceptionConverterTest$Toto.a of type j.l.Integer is not compatible with j.l.Long", thrownThrowable.getCause().getMessage());
 	}
 	
 	@Test
@@ -37,8 +38,9 @@ public class ExceptionConverterTest {
 		MutatorByField<Tata, Object> mutatorByField = new MutatorByField<>(field_a);
 		
 		Tata target = new Tata();
-		IllegalArgumentException thrownThrowable = assertThrows(IllegalArgumentException.class, () -> mutatorByField.set(target, 0L));
-		assertEquals("Field o.g.r.ExceptionConverterTest$Toto.a doesn't exist in o.g.r.ExceptionConverterTest$Tata", thrownThrowable.getMessage());
+		RuntimeException thrownThrowable = assertThrows(RuntimeException.class, () -> mutatorByField.set(target, 0L));
+		assertEquals("Error while applying mutator for field o.g.r.ExceptionConverterTest$Toto.a on instance of o.g.r.ExceptionConverterTest$Tata with value 0", thrownThrowable.getMessage());
+		assertEquals("Field o.g.r.ExceptionConverterTest$Toto.a doesn't exist in o.g.r.ExceptionConverterTest$Tata", thrownThrowable.getCause().getMessage());
 	}
 	
 	@Test
@@ -50,8 +52,9 @@ public class ExceptionConverterTest {
 		MutatorByField<Toto, Object> mutatorByField = new MutatorByField<>(field_b);
 		
 		Toto target = new Toto();
-		IllegalArgumentException thrownThrowable = assertThrows(IllegalArgumentException.class, () -> mutatorByField.set(target, null));
-		assertEquals("Field o.g.r.ExceptionConverterTest$Toto.b of type int is not compatible with null", thrownThrowable.getMessage());
+		RuntimeException thrownThrowable = assertThrows(RuntimeException.class, () -> mutatorByField.set(target, null));
+		assertEquals("Error while applying mutator for field o.g.r.ExceptionConverterTest$Toto.b on instance of o.g.r.ExceptionConverterTest$Toto with value null", thrownThrowable.getMessage());
+		assertEquals("Field o.g.r.ExceptionConverterTest$Toto.b of type int is not compatible with null", thrownThrowable.getCause().getMessage());
 	}
 	
 	@Test
@@ -62,8 +65,9 @@ public class ExceptionConverterTest {
 		MutatorByMethod<Toto, Object> accessorByMethod = new MutatorByMethod<>(methodSetA);
 		
 		Toto target = new Toto();
-		IllegalArgumentException thrownThrowable = assertThrows(IllegalArgumentException.class, () -> accessorByMethod.set(target, "42"));
-		assertEquals("o.g.r.ExceptionConverterTest$Toto.setA(j.l.Integer) expects j.l.Integer as argument, but j.l.String was given", thrownThrowable.getMessage());
+		RuntimeException thrownThrowable = assertThrows(RuntimeException.class, () -> accessorByMethod.set(target, "42"));
+		assertEquals("Error while applying o.g.r.ExceptionConverterTest$Toto.setA(j.l.Integer) on instance of o.g.r.ExceptionConverterTest$Toto with value 42", thrownThrowable.getMessage());
+		assertEquals("o.g.r.ExceptionConverterTest$Toto.setA(j.l.Integer) expects j.l.Integer as argument, but j.l.String was given", thrownThrowable.getCause().getMessage());
 	}
 	
 	private static class Toto {

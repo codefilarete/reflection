@@ -87,12 +87,14 @@ public class AccessorChainTest {
 	
 	@Test
 	public void testGet_accessorIsAWrongOne_throwsIllegalArgumentException() {
-		// field "number" doesn't exist on Collection "phones" => get(..) should throw IllegalArgumentException
+		// field "number" doesn't exist on Collection "phones" => get(..) should throw exception
 		DataSet dataSet = new DataSet();
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, Arrays.asList(new Phone("123"))));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
-		assertThrows(IllegalArgumentException.class, () -> testInstance.get(object));
+		RuntimeException thrownException = assertThrows(RuntimeException.class, () -> testInstance.get(object));
+		assertEquals("Error while applying accessor for field o.g.r.m.Phone.number on instance of j.u.ArrayList", thrownException.getMessage());
+		assertEquals("Field o.g.r.m.Phone.number doesn't exist in j.u.ArrayList", thrownException.getCause().getMessage());
 	}
 	
 	@Test

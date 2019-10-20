@@ -29,8 +29,9 @@ public class MutatorByMethodTest {
 	public void testSet_withWrongArgument() {
 		MutatorByMethod<Toto, Object> testInstance = new MutatorByMethod<>(Reflections.findMethod(Toto.class, "setA", int.class));
 		Toto toto = new Toto();
-		IllegalArgumentException thrownException = assertThrows(IllegalArgumentException.class, () -> testInstance.set(toto, "42"));
-		assertEquals("o.g.r.MutatorByMethodTest$Toto.setA(int) expects int as argument, but j.l.String was given", thrownException.getMessage());
+		RuntimeException thrownException = assertThrows(RuntimeException.class, () -> testInstance.set(toto, "42"));
+		assertEquals("Error while applying o.g.r.MutatorByMethodTest$Toto.setA(int) on instance of o.g.r.MutatorByMethodTest$Toto with value 42", thrownException.getMessage());
+		assertEquals("o.g.r.MutatorByMethodTest$Toto.setA(int) expects int as argument, but j.l.String was given", thrownException.getCause().getMessage());
 	}
 	
 	@Test

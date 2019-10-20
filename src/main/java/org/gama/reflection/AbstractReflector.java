@@ -1,11 +1,26 @@
 package org.gama.reflection;
 
+import org.gama.lang.Reflections;
+
 /**
  * @author Guillaume Mary
  */
-public class AbstractReflector<C> {
+public abstract class AbstractReflector<C> {
+	
+	private final ExceptionConverter exceptionConverter;
+	
+	protected AbstractReflector() {
+		this.exceptionConverter = new ExceptionConverter();
+	}
 	
 	protected void handleException(Throwable t, C target, Object... args) {
-		throw new ExceptionConverter().convertException(t, target, this, args);
+		RuntimeException convertedException = exceptionConverter.convertException(t, target, this, args);
+		String message = "Error while applying " + getDescription() + " on instance of " + Reflections.toString(target.getClass());
+		if (args != null && args.length > 0) {
+			message = message.concat(" with value " + args[0]);
+		}
+		throw new RuntimeException(message, convertedException);
 	}
+	
+	protected abstract String getDescription();
 }

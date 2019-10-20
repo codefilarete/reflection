@@ -18,6 +18,11 @@ public abstract class AbstractMutator<C, T> extends AbstractReflector<C> impleme
 	
 	protected abstract void doSet(C c, T t) throws IllegalAccessException, InvocationTargetException;
 	
+	@Override
+	protected String getDescription() {
+		return getSetterDescription();
+	}
+	
 	protected abstract String getSetterDescription();
 	
 	/**
