@@ -35,12 +35,12 @@ public class MemberDefinition implements Comparable<MemberDefinition> {
 	 */
 	public static MemberDefinition giveMemberDefinition(@Nullable ValueAccessPoint o) {
 		MemberDefinition result;
-		if (o instanceof AbstractReflector) {
-			result = giveMemberDefinition((AbstractReflector) o);
+		if (o instanceof AccessorChain) {
+			result = giveMemberDefinition((AccessorChain) o);
 		} else if (o instanceof PropertyAccessor) {
 			result = giveMemberDefinition((AbstractReflector) ((PropertyAccessor) o).getAccessor());
-		} else if (o instanceof AccessorChain) {
-			result = giveMemberDefinition((AccessorChain) o);
+		} else if (o instanceof AbstractReflector) {
+			result = giveMemberDefinition((AbstractReflector) o);
 		} else {
 			throw new UnsupportedOperationException("Don't know how find out member definition for " + (o == null ? "null" : Reflections.toString(o.getClass())));
 		}

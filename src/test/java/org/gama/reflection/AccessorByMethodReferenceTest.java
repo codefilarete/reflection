@@ -37,7 +37,7 @@ public class AccessorByMethodReferenceTest {
 	@Test
 	public void testToString() {
 		AccessorByMethodReference<String, char[]> testInstance = new AccessorByMethodReference<>(String::toCharArray);
-		assertEquals("method reference for java.lang.String.toCharArray()", testInstance.getGetterDescription());
+		assertEquals("j.l.String::toCharArray", testInstance.toString());
 	}
 	
 	private static String myToString(Integer i) {

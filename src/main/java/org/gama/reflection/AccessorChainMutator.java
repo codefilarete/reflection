@@ -95,6 +95,31 @@ public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implement
 		}
 	}
 	
+	@Override
+	public boolean equals(Object other) {
+		return super.equals(other) && this.mutator.equals(((AccessorChainMutator) other).mutator);
+	}
+	
+	@Override
+	public int hashCode() {
+		return 31 * super.hashCode() + this.mutator.hashCode();
+	}
+	
+	/**
+	 * Overriden to take mutator into account
+	 * @return getters and final setter aggregated
+	 */
+	@Override
+	protected String getDescription() {
+		// NB: arrow mark is totally arbitrary and is only here to distinguish mutator from accessor part
+		return super.getDescription() + " <- " + this.mutator.toString();
+	}
+	
+	@Override
+	public String toString() {
+		return getDescription();
+	}
+	
 	/**
 	 * Aimed at giving a simple and readable description of a collection of accessor
 	 */

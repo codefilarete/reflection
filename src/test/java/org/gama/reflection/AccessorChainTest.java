@@ -20,6 +20,7 @@ import static org.gama.reflection.Accessors.mutatorByMethodReference;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Guillaume Mary
@@ -93,8 +94,10 @@ public class AccessorChainTest {
 		Object object = new Person(new Address(null, Arrays.asList(new Phone("123"))));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
 		RuntimeException thrownException = assertThrows(RuntimeException.class, () -> testInstance.get(object));
-		assertEquals("Error while applying accessor for field o.g.r.m.Phone.number on instance of j.u.ArrayList", thrownException.getMessage());
-		assertEquals("Field o.g.r.m.Phone.number doesn't exist in j.u.ArrayList", thrownException.getCause().getMessage());
+		assertEquals("Error while applying [accessor for field o.g.r.m.Person.address, accessor for field o.g.r.m.Address.phones," 
+				+ " accessor for field o.g.r.m.Phone.number] on instance of o.g.r.m.Person", thrownException.getMessage());
+		assertEquals("Error while applying accessor for field o.g.r.m.Phone.number on instance of j.u.ArrayList", thrownException.getCause().getMessage());
+		assertEquals("Field o.g.r.m.Phone.number doesn't exist in j.u.ArrayList", thrownException.getCause().getCause().getMessage());
 	}
 	
 	@Test
@@ -103,7 +106,12 @@ public class AccessorChainTest {
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, null));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
-		assertThrows(NullPointerException.class, () -> testInstance.get(object));
+		RuntimeException thrownException = assertThrows(RuntimeException.class, () -> testInstance.get(object));
+		assertEquals("Error while applying [accessor for field o.g.r.m.Person.address, accessor for field o.g.r.m.Address.phones," 
+				+ " accessor for field o.g.r.m.Phone.number] on instance of o.g.r.m.Person", thrownException.getMessage());
+		assertTrue(thrownException.getCause() instanceof NullPointerException);
+		assertEquals("Cannot invoke [accessor for field o.g.r.m.Person.address, accessor for field o.g.r.m.Address.phones," 
+				+ " accessor for field o.g.r.m.Phone.number] on null instance", thrownException.getCause().getMessage());
 	}
 	
 	@Test

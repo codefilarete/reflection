@@ -25,7 +25,7 @@ import static org.gama.reflection.Accessors.giveInputType;
  * 
  * @author Guillaume Mary
  */
-public class AccessorChain<C, T> implements IReversibleAccessor<C, T> {
+public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReversibleAccessor<C, T> {
 	
 	public static <IN, A, OUT> AccessorChain<IN, OUT> chain(SerializableFunction<IN, A> function1, SerializableFunction<A, OUT> function2) {
 		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2));
@@ -81,7 +81,7 @@ public class AccessorChain<C, T> implements IReversibleAccessor<C, T> {
 	}
 	
 	@Override
-	public T get(C c) {
+	public T doGet(C c) {
 		Object target = c;
 		Object previousTarget;
 		for (IAccessor accessor : accessors) {
@@ -127,6 +127,21 @@ public class AccessorChain<C, T> implements IReversibleAccessor<C, T> {
 			throw new UnsupportedOperationException("Last accessor cannot be reverted because it's not " + IReversibleAccessor.class.getName()
 					+ ": " + lastAccessor);
 		}
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return this == other || (other instanceof AccessorChain && accessors.equals(((AccessorChain) other).accessors));
+	}
+	
+	@Override
+	public int hashCode() {
+		return accessors.hashCode();
+	}
+	
+	@Override
+	protected String getGetterDescription() {
+		return accessors.toString();
 	}
 	
 	/**

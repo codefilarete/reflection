@@ -108,9 +108,8 @@ public class PropertyAccessor<C, T> implements IReversibleAccessor<C, T>, IRever
 	 */
 	@Override
 	public String toString() {
-		if (getAccessor() instanceof AbstractAccessor) {
-			return ((AbstractAccessor<C, T>) getAccessor()).getGetterDescription();
-		}
-		return super.toString();
+		return "property accessor by " + (getAccessor() instanceof AbstractAccessor
+				? ((AbstractAccessor<C, T>) getAccessor()).getGetterDescription()
+				: getAccessor().toString());
 	}
 }

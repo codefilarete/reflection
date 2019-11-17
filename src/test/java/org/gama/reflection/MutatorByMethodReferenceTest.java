@@ -47,7 +47,7 @@ public class MutatorByMethodReferenceTest {
 	@Test
 	public void testToString() {
 		MutatorByMethodReference<Map, BiConsumer> testInstance = new MutatorByMethodReference<>(Map::forEach);
-		assertEquals("method reference for java.util.Map.forEach.(Ljava/util/function/BiConsumer;)V", testInstance.getSetterDescription());
+		assertEquals("j.u.Map::forEach", testInstance.toString());
 	}
 	
 	public static class DummySet<E> extends AbstractSet<E> {

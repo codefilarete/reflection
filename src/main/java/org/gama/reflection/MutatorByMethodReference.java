@@ -72,11 +72,20 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> implem
 	
 	@Override
 	protected String getSetterDescription() {
-		return "method reference for " + methodReferenceSignature;
+		return methodReferenceSignature;
 	}
 	
 	@Override
 	public Class<T> getPropertyType() {
 		return propertyType;
+	}
+	
+	/**
+	 * Overriden because parent toString() is based on getter description which is the one in the lambda and is not compact nor easy to read
+	 * @return the refered method in the form DeclaringClass::methodName
+	 */
+	@Override
+	public String toString() {
+		return Reflections.toString(declaringClass) + "::" + methodName;
 	}
 }

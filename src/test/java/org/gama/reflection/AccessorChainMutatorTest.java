@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Guillaume Mary
@@ -142,7 +143,10 @@ public class AccessorChainMutatorTest {
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor);
 		Object object = new Person(null);
 		AccessorChainMutator testInstance = new AccessorChain(accessors).toMutator();
-		assertThrows(NullPointerException.class, () -> testInstance.set(object, new Address(new City("Toto"), null)));
+		Throwable thrownException = assertThrows(RuntimeException.class, () -> testInstance.set(object, new Address(new City("Toto"), null)));
+		assertEquals("Error while applying [accessor for field o.g.r.m.Person.address] <- mutator for field o.g.r.m.Address.phones on instance of o.g.r.m.Person", thrownException.getMessage());
+		assertTrue(thrownException.getCause() instanceof NullPointerException);
+		assertEquals("Cannot invoke [accessor for field o.g.r.m.Person.address] on null instance", thrownException.getCause().getMessage());
 	}
 	
 	@Test
