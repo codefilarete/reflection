@@ -26,7 +26,6 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> implem
 	private final Class propertyType;
 	
 	/**
-	 * 
 	 * @param methodReference a setter, ANY ANONYMOUS LAMBDA IS NOT SUPPORTED
 	 * @throws RuntimeException with a compound {@link ReflectiveOperationException} in case of method reference dissect failure
 	 */
@@ -39,8 +38,8 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> implem
 		String implementationClass = serializedLambda.getImplClass().replace('/', '.');
 		this.declaringClass = Reflections.forName(implementationClass);
 		this.propertyType = MethodReferenceCapturer.giveArgumentTypes(serializedLambda).getArgumentTypes()[0];
-		this.methodReferenceSignature = implementationClass
-				.concat(".")
+		this.methodReferenceSignature = Reflections.toString(declaringClass)
+				.concat("::")
 				.concat(methodName)
 				.concat(".")
 				.concat(serializedLambda.getImplMethodSignature());
@@ -78,14 +77,5 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> implem
 	@Override
 	public Class<T> getPropertyType() {
 		return propertyType;
-	}
-	
-	/**
-	 * Overriden because parent toString() is based on getter description which is the one in the lambda and is not compact nor easy to read
-	 * @return the refered method in the form DeclaringClass::methodName
-	 */
-	@Override
-	public String toString() {
-		return Reflections.toString(declaringClass) + "::" + methodName;
 	}
 }

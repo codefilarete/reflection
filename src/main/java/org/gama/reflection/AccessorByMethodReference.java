@@ -40,8 +40,8 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> impl
 		String implementationClass = serializedLambda.getImplClass().replace('/', '.');
 		this.declaringClass = Reflections.forName(implementationClass);
 		this.propertyType = MethodReferenceCapturer.giveArgumentTypes(serializedLambda).getReturnType();
-		this.methodReferenceSignature = implementationClass
-				.concat(".")
+		this.methodReferenceSignature = Reflections.toString(declaringClass)
+				.concat("::")
 				.concat(methodName)
 				// we cut the method signature before return type because it doesn't seem necessary and ugly with arrays
 				.concat(Strings.head(serializedLambda.getImplMethodSignature(), ")").toString());
@@ -79,14 +79,5 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> impl
 	@Override
 	public Class<T> getPropertyType() {
 		return propertyType;
-	}
-	
-	/**
-	 * Overriden because parent toString() is based on getter description which is the one in the lambda and is not compact nor easy to read
-	 * @return the refered method in the form DeclaringClass::methodName
-	 */
-	@Override
-	public String toString() {
-		return Reflections.toString(declaringClass) + "::" + methodName;
 	}
 }

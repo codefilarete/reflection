@@ -175,7 +175,7 @@ public class MethodReferenceCapturer {
 		if (method.isSynthetic() && Modifier.isStatic(executable.getModifiers())) {
 			// found case : package-private class defining a method, and lambda targets the method through a subclass, see StringBuilder::ensureCapacity
 			throw new UnsupportedOperationException("Found method is synthetic which means original one was wrapped by some bytecode"
-					+ " (generally to bypass visibility constraint)");
+					+ " (generally to bypass visibility constraint) : " + Reflections.toString(method));
 		}
 		return method;
 	}
