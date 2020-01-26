@@ -15,7 +15,8 @@ public abstract class AbstractReflector<C> {
 	
 	protected void handleException(Throwable t, C target, Object... args) {
 		RuntimeException convertedException = exceptionConverter.convertException(t, target, this, args);
-		String message = "Error while applying " + getDescription() + " on instance of " + Reflections.toString(target.getClass());
+		String message = "Error while applying " + getDescription()
+				+ " on instance " + (target == null ? "null" : ("of " + Reflections.toString(target.getClass())));
 		if (args != null && args.length > 0) {
 			message = message.concat(" with value " + args[0]);
 		}
