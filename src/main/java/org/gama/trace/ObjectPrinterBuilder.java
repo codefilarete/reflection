@@ -144,7 +144,13 @@ public class ObjectPrinterBuilder<C> {
 			String separator = ",";
 			printableProperties.forEach((propName, getter) -> {
 				// we prevent subclass property accessor of being invoked on parent class
-				boolean getterCompliesWithInstance = ((ValueAccessPointByMethodReference) getter).getDeclaringClass().isInstance(object);
+				boolean getterCompliesWithInstance;
+				if (getter instanceof ValueAccessPointByMethodReference) {
+					getterCompliesWithInstance = ((ValueAccessPointByMethodReference) getter).getDeclaringClass().isInstance(object);
+				} else {
+					// necessarly AccessorByMethod, see printerFor(Class)
+					getterCompliesWithInstance = ((AccessorByMethod) getter).getGetter().getDeclaringClass().isInstance(object);
+				}
 				if (getterCompliesWithInstance) {
 					final Object value = getter.get(object);
 					Entry<Class, Function<Object, String>> foundOverringPrinter = Iterables.find(overridenPrinters.entrySet(),
