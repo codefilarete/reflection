@@ -40,9 +40,7 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> implem
 		this.propertyType = MethodReferenceCapturer.giveArgumentTypes(serializedLambda).getArgumentTypes()[0];
 		this.methodReferenceSignature = Reflections.toString(declaringClass)
 				.concat("::")
-				.concat(methodName)
-				.concat(".")
-				.concat(serializedLambda.getImplMethodSignature());
+				.concat(methodName);	// we cut the method signature before return type because it doesn't seem necessary and ugly with arrays
 	}
 	
 	public SerializableBiConsumer<C, T> getMethodReference() {

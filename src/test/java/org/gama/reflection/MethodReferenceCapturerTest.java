@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import static org.gama.lang.function.Functions.chain;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Guillaume Mary
@@ -54,11 +55,11 @@ public class MethodReferenceCapturerTest {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		UnsupportedOperationException thrownException = assertThrows(UnsupportedOperationException.class,
 				() -> testInstance.findMethod((SerializableBiConsumer<PackagePrivateInheritedClass, Integer>) PackagePrivateInheritedClass::doSomethingWith));
-		assertEquals("Found method is synthetic which means original one was wrapped by some bytecode (generally to bypass visibility constraint)", thrownException.getMessage());
+		assertTrue(thrownException.getMessage().startsWith("Found method is synthetic which means original one was wrapped by some bytecode (generally to bypass visibility constraint)"));
 		
 		thrownException = assertThrows(UnsupportedOperationException.class,
 				() -> testInstance.findMethod((SerializableBiConsumer<StringBuilder, Integer>) StringBuilder::ensureCapacity));
-		assertEquals("Found method is synthetic which means original one was wrapped by some bytecode (generally to bypass visibility constraint)", thrownException.getMessage());
+		assertTrue(thrownException.getMessage().startsWith("Found method is synthetic which means original one was wrapped by some bytecode (generally to bypass visibility constraint)"));
 	}
 	
 	@Test

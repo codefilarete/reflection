@@ -5,7 +5,6 @@ import java.lang.invoke.SerializedLambda;
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.gama.lang.Reflections;
-import org.gama.lang.Strings;
 
 /**
  * Accessor constructed with a method reference to a getter ({@link java.util.function.Function}).
@@ -42,9 +41,7 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> impl
 		this.propertyType = MethodReferenceCapturer.giveArgumentTypes(serializedLambda).getReturnType();
 		this.methodReferenceSignature = Reflections.toString(declaringClass)
 				.concat("::")
-				.concat(methodName)
-				// we cut the method signature before return type because it doesn't seem necessary and ugly with arrays
-				.concat(Strings.head(serializedLambda.getImplMethodSignature(), ")").toString());
+				.concat(methodName);	// we cut the method signature before return type because it doesn't seem necessary and ugly with arrays
 	}
 	
 	public SerializableFunction<C, T> getMethodReference() {
