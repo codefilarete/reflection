@@ -186,8 +186,7 @@ public class MethodReferenceCapturer {
 	 * @return the found Method
 	 */
 	public Constructor findConstructor(SerializedLambda serializedLambda) {
-		String targetMethodRawSignature = MethodReferences.getTargetMethodRawSignature(serializedLambda);
-		return handleConstructorCast(findExecutable(serializedLambda, targetMethodRawSignature));
+		return handleConstructorCast(findExecutable(serializedLambda));
 	}
 	
 	private Constructor handleConstructorCast(Executable executable) {
@@ -213,6 +212,92 @@ public class MethodReferenceCapturer {
 				throw e;
 			}
 		}
+	}
+	
+	/**
+	 * Looks for the equivalent {@link Executable} of a {@link SerializableFunction}
+	 *
+	 * @param methodReference a method reference refering to a getter
+	 * @param <I> the owning class of the {@link Executable}
+	 * @param <O> the return type of the function
+	 * @return the found method
+	 */
+	public <I, O> Executable findExecutable(SerializableFunction<I, O> methodReference) {
+		return findExecutable(MethodReferences.buildSerializedLambda(methodReference));
+	}
+	
+	/**
+	 * Looks for the equivalent {@link Executable} of a {@link SerializableBiFunction}
+	 *
+	 * @param methodReference a method reference refering to a 1-arg getter
+	 * @param <I> the owning class of the {@link Executable}
+	 * @param <A1> the argument type
+	 * @param <O> the return type of the function
+	 * @return the found {@link Executable}
+	 */
+	public <I, A1, O> Executable findExecutable(SerializableBiFunction<I, A1, O> methodReference) {
+		return findExecutable(MethodReferences.buildSerializedLambda(methodReference));
+	}
+	
+	/**
+	 * Looks for the equivalent {@link Executable} of a {@link SerializableTriFunction}
+	 *
+	 * @param methodReference a method reference refering to a 2-args getter
+	 * @param <I> the owning class of the {@link Executable}
+	 * @param <A1> the first argument type
+	 * @param <A2> the second argument type
+	 * @param <O> the return type of the function
+	 * @return the found {@link Executable}
+	 */
+	public <I, A1, A2, O> Executable findExecutable(SerializableTriFunction<I, A1, A2, O> methodReference) {
+		return findExecutable(MethodReferences.buildSerializedLambda(methodReference));
+	}
+	
+	/**
+	 * Looks for the equivalent {@link Executable} of a {@link SerializableConsumer}
+	 *
+	 * @param methodReference a method reference refering to a no-arg no-return function
+	 * @param <I> the owning class of the {@link Executable}
+	 * @return the found {@link Executable}
+	 */
+	public <I> Executable findExecutable(SerializableConsumer<I> methodReference) {
+		return findExecutable(MethodReferences.buildSerializedLambda(methodReference));
+	}
+	
+	/**
+	 * Looks for the equivalent {@link Executable} of a {@link SerializableBiConsumer}
+	 *
+	 * @param methodReference a method reference refering to a setter
+	 * @param <I> the owning class of the {@link Executable}
+	 * @param <A1> the input type of the consumer
+	 * @return the found {@link Executable}
+	 */
+	public <I, A1> Executable findExecutable(SerializableBiConsumer<I, A1> methodReference) {
+		return findExecutable(MethodReferences.buildSerializedLambda(methodReference));
+	}
+	
+	/**
+	 * Looks for the equivalent {@link Executable} of a {@link SerializableTriConsumer}
+	 *
+	 * @param methodReference a method reference refering to a 2-args setter
+	 * @param <I> the owning class of the {@link Executable}
+	 * @param <A1> the first argument type
+	 * @param <A2> the first argument type
+	 * @return the found {@link Executable}
+	 */
+	public <I, A1, A2> Executable findExecutable(SerializableTriConsumer<I, A1, A2> methodReference) {
+		return findExecutable(MethodReferences.buildSerializedLambda(methodReference));
+	}
+	
+	/**
+	 * Find any {@link Executable} behind the given {@link SerializedLambda}
+	 *
+	 * @param serializedLambda any non null {@link SerializedLambda}
+	 * @return the {@link Executable} in the given {@link SerializedLambda}
+	 */
+	private Executable findExecutable(SerializedLambda serializedLambda) {
+		String targetMethodRawSignature = MethodReferences.getTargetMethodRawSignature(serializedLambda);
+		return findExecutable(serializedLambda, targetMethodRawSignature);
 	}
 	
 	/**

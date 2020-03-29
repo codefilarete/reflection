@@ -41,12 +41,31 @@ public class MethodReferenceCapturerTest {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		assertEquals(Reflections.getMethod(Object.class, "toString"), testInstance.findMethod(Object::toString));
 		assertEquals(Reflections.getMethod(Integer.class, "shortValue"), testInstance.findMethod(Integer::shortValue));
+		assertEquals(Reflections.getMethod(Runnable.class, "run"), testInstance.findExecutable(Runnable::run));
 		assertEquals(Reflections.getMethod(Collator.class, "setStrength", int.class), testInstance.findMethod(Collator::setStrength));
 		assertEquals(Reflections.getMethod(String.class, "toCharArray"), testInstance.findMethod(String::toCharArray));
+		assertEquals(Reflections.getMethod(List.class, "toArray", Object[].class), testInstance.findMethod((SerializableBiFunction<List, Object[], Object[]>) List::toArray));
 		assertEquals(Reflections.getMethod(List.class, "toArray", Object[].class), testInstance.findMethod((SerializableBiConsumer<List, Object[]>) List::toArray));
 		assertEquals(Reflections.getMethod(String.class, "codePointCount", int.class, int.class), testInstance.findMethod(
 				(SerializableTriConsumer<String, Integer, Integer>) String::codePointCount));
 		assertEquals(Reflections.getMethod(StringAppender.class, "ccat", Object[].class, Object.class), testInstance.findMethod(
+				(SerializableTriConsumer<StringAppender, Object[], Object>) StringAppender::ccat));
+	}
+	
+	@Test
+	public void testFindExecutable() {
+		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
+		assertEquals(Reflections.getMethod(Object.class, "toString"), testInstance.findExecutable(Object::toString));
+		assertEquals(Reflections.getMethod(Integer.class, "shortValue"), testInstance.findExecutable(Integer::shortValue));
+		assertEquals(Reflections.getMethod(Runnable.class, "run"), testInstance.findExecutable(Runnable::run));
+		assertEquals(Reflections.getMethod(ThreadLocal.class, "get"), testInstance.findExecutable(ThreadLocal<Object>::get));
+		assertEquals(Reflections.getMethod(Collator.class, "setStrength", int.class), testInstance.findExecutable(Collator::setStrength));
+		assertEquals(Reflections.getMethod(String.class, "toCharArray"), testInstance.findExecutable(String::toCharArray));
+		assertEquals(Reflections.getMethod(List.class, "toArray", Object[].class), testInstance.findExecutable((SerializableBiFunction<List, Object[], Object[]>) List::toArray));
+		assertEquals(Reflections.getMethod(List.class, "toArray", Object[].class), testInstance.findExecutable((SerializableBiConsumer<List, Object[]>) List::toArray));
+		assertEquals(Reflections.getMethod(String.class, "codePointCount", int.class, int.class), testInstance.findExecutable(
+				(SerializableTriConsumer<String, Integer, Integer>) String::codePointCount));
+		assertEquals(Reflections.getMethod(StringAppender.class, "ccat", Object[].class, Object.class), testInstance.findExecutable(
 				(SerializableTriConsumer<StringAppender, Object[], Object>) StringAppender::ccat));
 	}
 	
