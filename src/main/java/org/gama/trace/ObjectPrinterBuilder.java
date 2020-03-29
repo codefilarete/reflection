@@ -16,8 +16,8 @@ import org.gama.lang.collection.Iterables;
 import org.gama.lang.collection.KeepOrderSet;
 import org.gama.reflection.AccessorByMethod;
 import org.gama.reflection.AccessorByMethodReference;
+import org.gama.reflection.AccessorDefinition;
 import org.gama.reflection.IAccessor;
-import org.gama.reflection.MemberDefinition;
 import org.gama.reflection.ValueAccessPointByMethodReference;
 import org.gama.reflection.ValueAccessPointSet;
 
@@ -109,7 +109,7 @@ public class ObjectPrinterBuilder<C> {
 	public ObjectPrinter<C> build() {
 		LinkedHashMap<String, IAccessor<C, Object>> printingFunctionByPropertyName = new LinkedHashMap<>();
 		for (IAccessor<C, Object> printableProperty : printableProperties) {
-			String methodName = MemberDefinition.giveMemberDefinition(printableProperty).getName();
+			String methodName = AccessorDefinition.giveDefinition(printableProperty).getName();
 			if (!excludedProperties.contains(printableProperty)) {
 				printingFunctionByPropertyName.put(methodName, printableProperty);
 			}

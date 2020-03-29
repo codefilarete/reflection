@@ -9,8 +9,8 @@ import java.util.Map;
  */
 public class ValueAccessPointComparator implements Comparator<ValueAccessPoint> {
 	
-	/** Since {@link MemberDefinition} computation can be costly we use a cache, it may be shared between instances */
-	private final Map<ValueAccessPoint, MemberDefinition> cache;
+	/** Since {@link AccessorDefinition} computation can be costly we use a cache, it may be shared between instances */
+	private final Map<ValueAccessPoint, AccessorDefinition> cache;
 	
 	/**
 	 * Default constructor
@@ -20,19 +20,19 @@ public class ValueAccessPointComparator implements Comparator<ValueAccessPoint> 
 	}
 	
 	/**
-	 * Constuctor that uses the given cache for {@link MemberDefinition} computation.
+	 * Constuctor that uses the given cache for {@link AccessorDefinition} computation.
 	 * 
-	 * @param cache a {@link Map} used as cache for finding {@link MemberDefinition} of a {@link ValueAccessPoint}
+	 * @param cache a {@link Map} used as cache for finding {@link AccessorDefinition} of a {@link ValueAccessPoint}
 	 */
-	public ValueAccessPointComparator(Map<ValueAccessPoint, MemberDefinition> cache) {
+	public ValueAccessPointComparator(Map<ValueAccessPoint, AccessorDefinition> cache) {
 		this.cache = cache;
 	}
 	
 	@Override
 	public int compare(ValueAccessPoint o1, ValueAccessPoint o2) {
-		MemberDefinition memberDefinition1 = cache.computeIfAbsent(o1, MemberDefinition::giveMemberDefinition);
-		MemberDefinition memberDefinition2 = cache.computeIfAbsent(o2, MemberDefinition::giveMemberDefinition);
-		return memberDefinition1.compareTo(memberDefinition2);
+		AccessorDefinition accessorDefinition1 = cache.computeIfAbsent(o1, AccessorDefinition::giveDefinition);
+		AccessorDefinition accessorDefinition2 = cache.computeIfAbsent(o2, AccessorDefinition::giveDefinition);
+		return accessorDefinition1.compareTo(accessorDefinition2);
 	}
 	
 }

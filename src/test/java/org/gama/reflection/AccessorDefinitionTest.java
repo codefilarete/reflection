@@ -11,13 +11,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.gama.reflection.Accessors.accessorByField;
 import static org.gama.reflection.Accessors.mutatorByField;
-import static org.gama.reflection.MemberDefinition.giveMemberDefinition;
+import static org.gama.reflection.AccessorDefinition.giveDefinition;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Guillaume Mary
  */
-class MemberDefinitionTest {
+class AccessorDefinitionTest {
 	
 	static Object[][] testGiveMemberDefinition() {
 		return new Object[][] {
@@ -39,15 +39,15 @@ class MemberDefinitionTest {
 	@ParameterizedTest
 	@MethodSource("testGiveMemberDefinition")
 	void testGiveMemberDefinition(ValueAccessPoint o, Class expectedDeclaringClass, String expectedName, Class expectedMemberType) {
-		MemberDefinition memberDefinition = giveMemberDefinition(o);
-		assertEquals(expectedDeclaringClass, memberDefinition.getDeclaringClass());
-		assertEquals(expectedName, memberDefinition.getName());
-		assertEquals(expectedMemberType, memberDefinition.getMemberType());
+		AccessorDefinition accessorDefinition = giveDefinition(o);
+		assertEquals(expectedDeclaringClass, accessorDefinition.getDeclaringClass());
+		assertEquals(expectedName, accessorDefinition.getName());
+		assertEquals(expectedMemberType, accessorDefinition.getMemberType());
 	}
 	
 	@Test
 	void testGiveMemberDefinition_nullArgument() {
-		Assertions.assertThrows(() -> giveMemberDefinition(null), Assertions.hasExceptionInCauses(UnsupportedOperationException.class)
+		Assertions.assertThrows(() -> giveDefinition(null), Assertions.hasExceptionInCauses(UnsupportedOperationException.class)
 				.andProjection(Assertions.hasMessage("Don't know how find out member definition for null")));
 	}
 	
@@ -75,15 +75,15 @@ class MemberDefinitionTest {
 	@ParameterizedTest
 	@MethodSource("testToString")
 	void toString(ValueAccessPoint valueAccessPoint, String expectedResult) {
-		assertEquals(expectedResult, MemberDefinition.toString(valueAccessPoint));
+		assertEquals(expectedResult, AccessorDefinition.toString(valueAccessPoint));
 	}
 	
 	@Test
 	void toString_collection() {
-		assertEquals("Person::getAddress > Address::getCity", MemberDefinition.toString(Arrays.asList(
+		assertEquals("Person::getAddress > Address::getCity", AccessorDefinition.toString(Arrays.asList(
 				new AccessorByMethodReference<>(Person::getAddress),
 				new AccessorByMethodReference<>(Address::getCity))));
-		assertEquals("Person::getAddress > Address::getCity > o.g.r.m.Person.name", MemberDefinition.toString(Arrays.asList(
+		assertEquals("Person::getAddress > Address::getCity > o.g.r.m.Person.name", AccessorDefinition.toString(Arrays.asList(
 				new AccessorByMethodReference<>(Person::getAddress),
 				new AccessorByMethodReference<>(Address::getCity),
 				accessorByField(Person.class, "name"))));

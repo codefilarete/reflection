@@ -450,9 +450,9 @@ public class MethodReferenceCapturer {
 	}
 	
 	/**
-	 * A {@link MemberDefinition} dedicated to method
+	 * A {@link AccessorDefinition} dedicated to method
 	 */
-	public static class MethodDefinition extends MemberDefinition {
+	public static class MethodDefinition extends AccessorDefinition {
 		
 		/**
 		 * Factory method pattern because some computaiton can't be done in a constructor

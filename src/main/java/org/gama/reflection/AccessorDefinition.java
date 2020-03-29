@@ -16,31 +16,31 @@ import org.gama.lang.collection.Iterables;
 /**
  * A representation of "class member", in a sense of property accessor. So it means Fields, Methods and MethodReferences.
  * Main goal is to make a majority of {@link ValueAccessPoint} comparable between each other even if they are not of same type :
- * a {@link MutatorByField} would have the same {@link MemberDefinition} as an {@link AccessorByMethod} for the same property.
+ * a {@link MutatorByField} would have the same {@link AccessorDefinition} as an {@link AccessorByMethod} for the same property.
  * 
  * @author Guillaume Mary
- * @see #giveMemberDefinition(ValueAccessPoint)
+ * @see #giveDefinition(ValueAccessPoint)
  */
-public class MemberDefinition implements Comparable<MemberDefinition> {
+public class AccessorDefinition implements Comparable<AccessorDefinition> {
 	
 	private static final MethodReferenceCapturer METHOD_REFERENCE_CAPTURER = new MethodReferenceCapturer();
 	
 	/**
-	 * Gives a {@link MemberDefinition} that are similar if they access the same property, whatever type they are : doesn't make difference
+	 * Gives a {@link AccessorDefinition} that are similar if they access the same property, whatever type they are : doesn't make difference
 	 * between a {@link MutatorByField}, {@link AccessorByMethod} or {@link AccessorByMethodReference} if the goal is to access the same field.
 	 * 
 	 * @param o any {@link ValueAccessPoint}, null autorized but will throw an {@link UnsupportedOperationException}
 	 * @return a common representation of given input
 	 * @throws UnsupportedOperationException when member can't be found because given {@link ValueAccessPoint} is not a known concrete type
 	 */
-	public static MemberDefinition giveMemberDefinition(@Nullable ValueAccessPoint o) {
-		MemberDefinition result;
+	public static AccessorDefinition giveDefinition(@Nullable ValueAccessPoint o) {
+		AccessorDefinition result;
 		if (o instanceof AccessorChain) {
-			result = giveMemberDefinition((AccessorChain) o);
+			result = giveDefinition((AccessorChain) o);
 		} else if (o instanceof PropertyAccessor) {
-			result = giveMemberDefinition((AbstractReflector) ((PropertyAccessor) o).getAccessor());
+			result = giveDefinition((AbstractReflector) ((PropertyAccessor) o).getAccessor());
 		} else if (o instanceof AbstractReflector) {
-			result = giveMemberDefinition((AbstractReflector) o);
+			result = giveDefinition((AbstractReflector) o);
 		} else {
 			throw new UnsupportedOperationException("Don't know how find out member definition for " + (o == null ? "null" : Reflections.toString(o.getClass())));
 		}
@@ -50,9 +50,9 @@ public class MemberDefinition implements Comparable<MemberDefinition> {
 	/**
 	 * Dedicated to accessor / mutator by field, method and method reference
 	 * @param o one to accessor / mutator by field, method and method reference
-	 * @return a {@link MemberDefinition} describing input
+	 * @return a {@link AccessorDefinition} describing input
 	 */
-	private static MemberDefinition giveMemberDefinition(AbstractReflector o) {
+	private static AccessorDefinition giveDefinition(AbstractReflector o) {
 		String memberName = null;
 		Class declarator = null;
 		Class memberType = null;
@@ -81,20 +81,20 @@ public class MemberDefinition implements Comparable<MemberDefinition> {
 			}
 		}
 		
-		return new MemberDefinition(declarator, memberName, memberType);
+		return new AccessorDefinition(declarator, memberName, memberType);
 	}
 	
 	/**
 	 * Dedicated to {@link AccessorChain}
 	 * @param o an {@link AccessorChain}
-	 * @return a {@link MemberDefinition} describing input
+	 * @return a {@link AccessorDefinition} describing input
 	 */
-	private static MemberDefinition giveMemberDefinition(AccessorChain o) {
+	private static AccessorDefinition giveDefinition(AccessorChain o) {
 		StringAppender stringAppender = new StringAppender() {
 			@Override
 			public StringAppender cat(Object s) {
 				if (s instanceof IAccessor) {
-					return super.cat(giveMemberDefinition((IAccessor) s).getName());
+					return super.cat(giveDefinition((IAccessor) s).getName());
 				} else {
 					return super.cat(s);
 				}
@@ -103,10 +103,10 @@ public class MemberDefinition implements Comparable<MemberDefinition> {
 		stringAppender.ccat(o.getAccessors(), ".");
 		IAccessor firstAccessor = (IAccessor) Iterables.first(o.getAccessors());
 		IAccessor lastAccessor = (IAccessor) Iterables.last(o.getAccessors());
-		return new MemberDefinition(
-				giveMemberDefinition(firstAccessor).getDeclaringClass(),
+		return new AccessorDefinition(
+				giveDefinition(firstAccessor).getDeclaringClass(),
 				stringAppender.toString(),
-				giveMemberDefinition(lastAccessor).getMemberType()
+				giveDefinition(lastAccessor).getMemberType()
 		);
 	}
 	
@@ -122,7 +122,7 @@ public class MemberDefinition implements Comparable<MemberDefinition> {
 	 * @param name name of the member
 	 * @param memberType member type (input for setter, return type for getter, type for field)
 	 */
-	public MemberDefinition(Class declaringClass, String name, Class memberType) {
+	public AccessorDefinition(Class declaringClass, String name, Class memberType) {
 		this.declaringClass = declaringClass;
 		this.name = name;
 		this.memberType = memberType;
@@ -185,17 +185,17 @@ public class MemberDefinition implements Comparable<MemberDefinition> {
 	}
 	
 	/**
-	 * Implementation to complies with presence of {@link #compareTo(MemberDefinition)}
+	 * Implementation to complies with presence of {@link #compareTo(AccessorDefinition)}
 	 * 
 	 * @param obj another object
-	 * @return true if {@link #compareTo(MemberDefinition)} returns 0
+	 * @return true if {@link #compareTo(AccessorDefinition)} returns 0
 	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
-		} else if (obj instanceof MemberDefinition) {
-			return compareTo((MemberDefinition) obj) == 0;
+		} else if (obj instanceof AccessorDefinition) {
+			return compareTo((AccessorDefinition) obj) == 0;
 		} else {
 			return false;
 		}
@@ -210,7 +210,7 @@ public class MemberDefinition implements Comparable<MemberDefinition> {
 	}
 	
 	@Override
-	public int compareTo(@Nonnull MemberDefinition o) {
+	public int compareTo(@Nonnull AccessorDefinition o) {
 		if (name.equals(o.name)) {
 			ClassIterator classIterator1 = new ClassIterator(declaringClass);
 			ClassIterator classIterator2 = new ClassIterator(o.declaringClass);
