@@ -56,7 +56,7 @@ public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implement
 	}
 	
 	/**
-	 * Overriden to keep track of the guilty mutator that returned null
+	 * Overriden to keep track of the culprit mutator that returned null
 	 * 
 	 * @param targetBean bean on which accessor was invoked
 	 * @param accessor accessor that returned null when invoked on targetBean

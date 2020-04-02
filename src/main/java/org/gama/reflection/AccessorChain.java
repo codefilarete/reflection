@@ -153,6 +153,9 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReve
 		
 	}
 	
+	/**
+	 * Class that will throw a {@link NullPointerException} when a null value is encountered
+	 */
 	private static class NullPointerExceptionThrowerOnNullValue implements NullValueHandler {
 		@Override
 		public Object consume(Object srcBean, IAccessor accessor) {
