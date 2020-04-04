@@ -3,7 +3,6 @@ package org.gama.reflection;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 import org.gama.lang.Reflections;
 import org.gama.lang.Reflections.MemberNotFoundException;
@@ -16,21 +15,10 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T>
 	
 	private final Method setter;
 	
-	protected final Object[] methodParameters;
-	
 	public MutatorByMethod(Method setter) {
 		super();
 		this.setter = setter;
 		Reflections.ensureAccessible(setter);
-		int parametersLength = this.setter.getParameterTypes().length;
-		// method parameters instanciation to avoid extra array instanciation on each set(..) call 
-		this.methodParameters = new Object[parametersLength];
-	}
-	
-	public MutatorByMethod(Method setter, Object ... arguments) {
-		this.setter = setter;
-		Reflections.ensureAccessible(setter);
-		this.methodParameters = arguments;
 	}
 	
 	/**
@@ -61,17 +49,12 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T>
 	
 	@Override
 	protected void doSet(C c, T t) throws IllegalAccessException, InvocationTargetException {
-		fixMethodParameters(t);
 		try {
-			getSetter().invoke(c, methodParameters);
+			getSetter().invoke(c, t);
 		} catch (RuntimeException e) {
 			// converting "argument type mismatch" cases
 			throw new ExceptionConverter().convertException(e, c, this, t);
 		}
-	}
-	
-	protected void fixMethodParameters(T t) {
-		this.methodParameters[0] = t;
 	}
 	
 	@Override
@@ -105,13 +88,11 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T>
 		// we base our implementation on the setter description because a setAccessible() call on the member changes its internal state
 		// and I don't think it sould be taken into account for comparison
 		return this == other ||
-				(other instanceof MutatorByMethod
-						&& getSetterDescription().equals(((MutatorByMethod) other).getSetterDescription())
-						&& Arrays.equals(methodParameters, ((MutatorByMethod) other).methodParameters));
+				(other instanceof MutatorByMethod && getSetterDescription().equals(((MutatorByMethod) other).getSetterDescription()));
 	}
 	
 	@Override
 	public int hashCode() {
-		return 31 * getSetter().hashCode() + Arrays.hashCode(methodParameters);
+		return getSetter().hashCode();
 	}
 }
