@@ -8,9 +8,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.gama.lang.Reflections;
+import org.gama.lang.bean.Objects;
 import org.gama.lang.collection.Arrays;
 import org.gama.lang.collection.Collections;
 import org.gama.lang.collection.Iterables;
@@ -29,6 +31,46 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReve
 	
 	public static <IN, A, OUT> AccessorChain<IN, OUT> chain(SerializableFunction<IN, A> function1, SerializableFunction<A, OUT> function2) {
 		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2));
+	}
+	
+	/**
+	 * Creates a chain that :
+	 * - returns null when any accessor on path returns null
+	 * - initializes values (instanciate bean) on path when its mutator is used
+	 * (voluntary dissimetric behavior)
+	 *
+	 * @param accessors list of {@link IAccessor} to be used by chain
+	 * @see #RETURN_NULL
+	 * @see ValueInitializerOnNullValue#giveValueType(IAccessor, Class)
+	 * @see #forModel(List, BiFunction) 
+	 */
+	public static <IN, OUT> AccessorChain<IN, OUT> forModel(List<IAccessor> accessors) {
+		return forModel(accessors, null);
+	}
+	
+	/**
+	 * Creates a chain that :
+	 * - returns null when any accessor on path returns null
+	 * - initializes values (instanciate bean) on path when its mutator is used
+	 * (voluntary dissimetric behavior)
+	 * 
+	 * @param accessors list of {@link IAccessor} to be used by chain
+	 * @param valueTypeDeterminer must be given if a bean type is badly determined by default mecanism
+	 * 		  (returning Object on generic for instance, or wrong Collection concrete type), null accepted (means default mecanism)
+	 * @see #RETURN_NULL
+	 * @see ValueInitializerOnNullValue#giveValueType(IAccessor, Class)
+	 */
+	public static <IN, OUT> AccessorChain<IN, OUT> forModel(List<IAccessor> accessors, @Nullable BiFunction<IAccessor, Class, Class> valueTypeDeterminer) {
+		return new AccessorChain<IN, OUT>(accessors) {
+			
+			private final AccessorChainMutator<IN, Object, OUT> mutator = (AccessorChainMutator<IN, Object, OUT>) super.toMutator()
+					.setNullValueHandler(new ValueInitializerOnNullValue(valueTypeDeterminer));
+			
+			@Override
+			public AccessorChainMutator toMutator() {
+				return mutator;
+			}
+		}.setNullValueHandler(AccessorChain.RETURN_NULL);
 	}
 	
 	/**
@@ -185,13 +227,24 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReve
 	 * Instanciated types can be controlled through {@link #giveValueType(IAccessor, Class)}.
 	 */
 	public static class ValueInitializerOnNullValue implements NullValueHandler {
+		
+		private final BiFunction<IAccessor, Class, Class> valueTypeDeterminer;
+		
+		public ValueInitializerOnNullValue() {
+			this(null);
+		}
+		
+		public ValueInitializerOnNullValue(@Nullable BiFunction<IAccessor, Class, Class> valueTypeDeterminer) {
+			this.valueTypeDeterminer = Objects.preventNull(valueTypeDeterminer, ValueInitializerOnNullValue::giveValueType);
+		}
+		
 		@Override
 		public Object consume(Object srcBean, IAccessor accessor) {
 			if (accessor instanceof IReversibleAccessor) {
 				IMutator mutator = ((IReversibleAccessor) accessor).toMutator();
 				Class inputType = giveInputType(mutator);
 				// NB: will throw an exception if type is not instanciable
-				Object value = Reflections.newInstance(giveValueType(accessor, inputType));
+				Object value = Reflections.newInstance(valueTypeDeterminer.apply(accessor, inputType));
 				mutator.set(srcBean, value);
 				return value;
 			} else {
@@ -206,7 +259,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReve
 		 * @param valueType expected compatible type, this of accessor
 		 * @return a concrete and instanciable type compatible with acccessor input type
 		 */
-		protected Class giveValueType(IAccessor accessor, Class valueType) {
+		public static Class giveValueType(IAccessor accessor, Class valueType) {
 			if (List.class.equals(valueType)) {
 				return ArrayList.class;
 			} else if (Set.class.equals(valueType)) {

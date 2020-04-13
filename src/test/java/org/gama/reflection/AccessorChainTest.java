@@ -1,9 +1,12 @@
 package org.gama.reflection;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.gama.lang.Reflections;
 import org.gama.lang.collection.Arrays;
+import org.gama.reflection.AccessorChain.ValueInitializerOnNullValue;
 import org.gama.reflection.model.Address;
 import org.gama.reflection.model.City;
 import org.gama.reflection.model.Person;
@@ -16,7 +19,6 @@ import static org.gama.reflection.Accessors.accessorByMethodReference;
 import static org.gama.reflection.Accessors.propertyAccessor;
 import static org.gama.reflection.Accessors.mutatorByField;
 import static org.gama.reflection.Accessors.mutatorByMethod;
-import static org.gama.reflection.Accessors.mutatorByMethodReference;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -57,7 +59,7 @@ public class AccessorChainTest {
 		return Arrays.asList(accessors);
 	}
 	
-	public static Object[][] testGetData() {
+	public static Object[][] get_data() {
 		DataSet dataSet = new DataSet();
 		return new Object[][] {
 				{ list(dataSet.cityNameAccessor),
@@ -80,14 +82,14 @@ public class AccessorChainTest {
 	}
 	
 	@ParameterizedTest
-	@MethodSource("testGetData")
-	public void testGet(List<IAccessor> accessors, Object object, Object expected) {
+	@MethodSource("get_data")
+	public void get(List<IAccessor> accessors, Object object, Object expected) {
 		AccessorChain<Object, Object> accessorChain = new AccessorChain<>(accessors);
 		assertEquals(expected, accessorChain.get(object));
 	}
 	
 	@Test
-	public void testGet_accessorIsAWrongOne_throwsIllegalArgumentException() {
+	public void get_accessorIsAWrongOne_throwsIllegalArgumentException() {
 		// field "number" doesn't exist on Collection "phones" => get(..) should throw exception
 		DataSet dataSet = new DataSet();
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
@@ -101,7 +103,7 @@ public class AccessorChainTest {
 	}
 	
 	@Test
-	public void testGet_nullValueOnPath_defaultNullHandler_throwsNullPointerException() {
+	public void get_nullValueOnPath_defaultNullHandler_throwsNullPointerException() {
 		DataSet dataSet = new DataSet();
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, null));
@@ -115,12 +117,57 @@ public class AccessorChainTest {
 	}
 	
 	@Test
-	public void testGet_nullValueOnPath_nullHandler() {
+	public void get_nullValueOnPath_nullHandler() {
 		DataSet dataSet = new DataSet();
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, null));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
 		testInstance.setNullValueHandler(AccessorChain.RETURN_NULL);
 		assertNull(testInstance.get(object));
+	}
+	
+	@Test
+	public void forModel_getWithSomeNullOnPath_returnsNull() {
+		DataSet dataSet = new DataSet();
+		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(list(dataSet.personAddressAccessor,
+				dataSet.addressCityAccessor, dataSet.cityNameAccessor), null);
+		assertNull(testInstance.get(new Person(null)));
+		assertNull(testInstance.get(new Person(new Address(null, null))));
+	}
+	
+	@Test
+	public void forModel_setWithSomeNullOnPath_instanciateBeansOnPath() {
+		DataSet dataSet = new DataSet();
+		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(list(dataSet.personAddressAccessor,
+				dataSet.addressCityAccessor, dataSet.cityNameAccessor), null);
+		Person pawn = new Person(null);
+		testInstance.toMutator().set(pawn, "toto");
+		assertNull(pawn.getAddress().getCity().getName());
+	}
+	
+	@Test
+	public void forModel_setUsesValueTypeDeterminer() {
+		DataSet dataSet = new DataSet();
+		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(list(dataSet.personAddressAccessor,
+				dataSet.addressPhonesAccessor, new ListAccessor<>(0)), (accessor, valueType) -> {
+			if (accessor == dataSet.addressPhonesAccessor) {
+				return MyList.class;	// we return a special List that prevent IndexOutOfBoundsException
+			} else {
+				return ValueInitializerOnNullValue.giveValueType(accessor, valueType);
+			}
+		});
+		Person pawn = new Person(null);
+		Phone newPhone = new Phone();
+		testInstance.toMutator().set(pawn, newPhone);
+		assertEquals(MyList.class, pawn.getAddress().getPhones().getClass());
+		assertEquals(newPhone, pawn.getAddress().getPhones().get(0));
+	}
+	
+	private static class MyList<E> extends ArrayList<E> {
+		
+		MyList() {
+			super();
+			add(null); // we add one element to allow ListAccessor(0) to set a value in this list, else a IndexOutOfBoundsException is thrown
+		}
 	}
 }
