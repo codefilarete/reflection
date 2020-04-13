@@ -38,7 +38,7 @@ public class AccessorDefinition implements Comparable<AccessorDefinition> {
 		if (o instanceof AccessorChain) {
 			result = giveDefinition((AccessorChain) o);
 		} else if (o instanceof PropertyAccessor) {
-			result = giveDefinition((AbstractReflector) ((PropertyAccessor) o).getAccessor());
+			result = giveDefinition(((PropertyAccessor) o).getAccessor());
 		} else if (o instanceof AbstractReflector) {
 			result = giveDefinition((AbstractReflector) o);
 		} else {
