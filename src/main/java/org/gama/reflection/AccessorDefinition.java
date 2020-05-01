@@ -14,7 +14,7 @@ import org.gama.lang.bean.ClassIterator;
 import org.gama.lang.collection.Iterables;
 
 /**
- * A representation of "class member", in a sense of property accessor. So it means Fields, Methods and MethodReferences.
+ * A common representation of "class member", in a sense of property accessor. So it means Fields, Methods and MethodReferences.
  * Main goal is to make a majority of {@link ValueAccessPoint} comparable between each other even if they are not of same type :
  * a {@link MutatorByField} would have the same {@link AccessorDefinition} as an {@link AccessorByMethod} for the same property.
  * 
