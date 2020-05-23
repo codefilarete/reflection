@@ -9,7 +9,7 @@ import org.gama.lang.Reflections;
 import org.gama.lang.StringAppender;
 import org.gama.lang.ThreadLocals;
 import org.gama.lang.collection.Iterables;
-import org.gama.lang.function.ThrowingRunnable;
+import org.gama.lang.function.ThrowingConsumer;
 
 /**
  * @param <C> source bean type
@@ -24,7 +24,7 @@ public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implement
 	 * Will be used to give better exception message when {@link NullPointerException} will be thrown by {@link #set(Object, Object)}.
 	 * Using a ThreadLocal is quite an overkill design, but can't find a less intrusive & thread-safe way to do it. 
 	 */
-	private static final ThreadLocal<IAccessor> NULL_RETURNING_MUTATOR = new ThreadLocal<>();
+	private static final ThreadLocal<IAccessor> CURRENT_NULL_RETURNING_MUTATOR = new ThreadLocal<>();
 	
 	private final IMutator<X, T> mutator;
 	
@@ -45,10 +45,10 @@ public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implement
 	@Override
 	public void set(C c, T t) {
 		final Object[] finalTarget = new Object[1];
-		ThreadLocals.doWithThreadLocal(NULL_RETURNING_MUTATOR, () -> null, (ThrowingRunnable<NullPointerException>) () -> {
+		ThreadLocals.doWithThreadLocal(CURRENT_NULL_RETURNING_MUTATOR, () -> null, (ThrowingConsumer<IAccessor, NullPointerException>) nullReturningMutator -> {
 			X target = get(c);
 			if (target == null) {
-				throwNullPointerException(c);
+				throwNullPointerException(c, nullReturningMutator);
 			}
 			finalTarget[0] = target;
 		});
@@ -64,15 +64,15 @@ public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implement
 	 */
 	@Override
 	protected Object onNullValue(Object targetBean, IAccessor accessor) {
-		NULL_RETURNING_MUTATOR.set(accessor);
+		CURRENT_NULL_RETURNING_MUTATOR.set(accessor);
 		return super.onNullValue(targetBean, accessor);
 	}
 	
-	private void throwNullPointerException(Object srcBean) {
+	private void throwNullPointerException(Object srcBean, IAccessor nullReturningMutator) {
 		String accessorDescription = new AccessorPathBuilder().ccat(getAccessors(), ".").toString();
-		List<IAccessor> head = Iterables.head(getAccessors(), NULL_RETURNING_MUTATOR.get());
-		head.add(NULL_RETURNING_MUTATOR.get());
-		String nullProviderDescription = new AccessorPathBuilder().ccat(head, ".").toString();
+		List<IAccessor> pathToNullPointerException = Iterables.head(getAccessors(), nullReturningMutator);
+		pathToNullPointerException.add(nullReturningMutator);
+		String nullProviderDescription = new AccessorPathBuilder().ccat(pathToNullPointerException, ".").toString();
 		throw new NullPointerException("Call of " + accessorDescription + " on " + srcBean + " returned null, because "
 				+ nullProviderDescription + " returned null");
 	}
