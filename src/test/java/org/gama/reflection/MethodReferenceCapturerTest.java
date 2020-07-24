@@ -82,18 +82,27 @@ public class MethodReferenceCapturerTest {
 	}
 	
 	@Test
-	public void testFindMethod_methodDefinedInMethod_throwsException() {
-		class Toto {
+	public void testFindMethod_methodDefinedInMethod_throwsException() throws NoSuchMethodException {
+		class Tata {
 			public void doSomething() {
 				
 			}
 		}
 		
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
-		UnsupportedOperationException thrownException = assertThrows(UnsupportedOperationException.class,
-				() -> testInstance.findMethod((SerializableConsumer<Toto>) Toto::doSomething));
-		assertEquals("Capturing by reference a method of a non-static inner class is not supported," 
-				+ " make o.g.r.MethodReferenceCapturerTest$Toto static or an outer class of o.g.r.MethodReferenceCapturerTest", thrownException.getMessage());
+		assertEquals(Tata.class.getMethod("doSomething"), testInstance.findMethod((SerializableConsumer<Tata>) Tata::doSomething));
+	}
+	
+	@Test
+	public void testFindMethod_methodDefinedInMethod_throwsException2() throws NoSuchMethodException {
+		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
+		assertEquals(Tata.class.getMethod("doSomething"), testInstance.findMethod((SerializableConsumer<Tata>) Tata::doSomething));
+	}
+
+	private class Tata {
+		public void doSomething() {
+			
+		}
 	}
 	
 	@Test

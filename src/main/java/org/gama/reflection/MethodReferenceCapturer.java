@@ -167,11 +167,6 @@ public class MethodReferenceCapturer {
 	
 	private Method handleMethodCast(Executable executable) {
 		Method method = Reflections.getMethod(executable.getDeclaringClass(), executable.getName(), executable.getParameterTypes());
-		if (executable.getDeclaringClass().getEnclosingClass() != null && !Modifier.isStatic(executable.getDeclaringClass().getModifiers())) {
-			throw new UnsupportedOperationException("Capturing by reference a method of a non-static inner class is not supported, make "
-					+ Reflections.toString(executable.getDeclaringClass()) + " static or an outer class of "
-					+ Reflections.toString(executable.getDeclaringClass().getEnclosingClass()));
-		}
 		if (method.isSynthetic() && Modifier.isStatic(executable.getModifiers())) {
 			// found case : package-private class defining a method, and lambda targets the method through a subclass, see StringBuilder::ensureCapacity
 			throw new UnsupportedOperationException("Found method is synthetic which means original one was wrapped by some bytecode"
