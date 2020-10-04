@@ -7,6 +7,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableBiFunction;
@@ -47,8 +48,8 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	 * @param <R> result type of the given function
 	 * @return this
 	 */
-	public <X, R> MethodReferenceDispatcher redirect(SerializableFunction<X, R> methodToCapture, Callable<R> codeToInvoke) {
-		addInterceptor(METHOD_REFERENCE_CAPTURER.findMethod(methodToCapture), (ArgsDigester) args -> codeToInvoke.call());
+	public <X, R> MethodReferenceDispatcher redirect(SerializableFunction<X, R> methodToCapture, Supplier<R> codeToInvoke) {
+		addInterceptor(METHOD_REFERENCE_CAPTURER.findMethod(methodToCapture), (ArgsDigester) args -> codeToInvoke.get());
 		return this;
 	}
 	
@@ -149,9 +150,9 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	}
 	
 	/**
-	 * Same as {@link #redirect(SerializableFunction, Callable)}, but dedicated to intercepted methods that has a {@code throws} clause : currently naming it "redirect"
-	 * leads to some casting of the argument because compiler doesn't dictinct method references that has a throws clause from those that don't have one, so, to prevent
-	 * boilerplate casting, method must be named differenlty : {@code redirectThrower}.
+	 * Same as {@link #redirect(SerializableFunction, Supplier)}, but dedicated to intercepted methods that has a {@code throws} clause.
+	 * Naming it "redirect" would lead to some casting of the argument because compiler doesn't dictinct method references that has a throws clause
+	 * from those that don't have one, so, to prevent boilerplate casting, method must be named differenlty : {@code redirectThrower}.
 	 *
 	 * @param methodToCapture the no-args method to be intercepted
 	 * @param codeToInvoke the code to be called instead of the the method 
@@ -160,8 +161,8 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	 * @param <E> exception type that may be thrown by captured method
 	 * @return this
 	 */
-	public <X, R, E extends Throwable> MethodReferenceDispatcher redirectThrower(SerializableThrowingFunction<X, R, E> methodToCapture, Callable<R> codeToInvoke) {
-		addInterceptor(METHOD_REFERENCE_CAPTURER.findMethod(buildSerializedLambda(methodToCapture)), (ArgsDigester) args -> codeToInvoke.call());
+	public <X, R, E extends Throwable> MethodReferenceDispatcher redirectThrower(SerializableThrowingFunction<X, R, E> methodToCapture, Supplier<R> codeToInvoke) {
+		addInterceptor(METHOD_REFERENCE_CAPTURER.findMethod(buildSerializedLambda(methodToCapture)), (ArgsDigester) args -> codeToInvoke.get());
 		return this;
 	}
 	
@@ -171,9 +172,9 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	}
 	
 	/**
-	 * Same as {@link #redirect(SerializableBiConsumer, Consumer)}, but dedicated to intercepted methods that has a {@code throws} clause : currently naming it "redirect"
-	 * leads to some casting of the argument because compiler doesn't dictinct method references that has a throws clause from those that don't have one, so, to prevent
-	 * boilerplate casting, method must be named differenlty : {@code redirectThrower}.
+	 * Same as {@link #redirect(SerializableBiConsumer, Consumer)}, but dedicated to intercepted methods that has a {@code throws} clause.
+	 * Naming it "redirect" would lead to some casting of the argument because compiler doesn't dictinct method references that has a throws clause
+	 * from those that don't have one, so, to prevent boilerplate casting, method must be named differenlty : {@code redirectThrower}.
 	 *
 	 * @param methodToCapture the no-args method to be intercepted
 	 * @param codeToInvoke the code to be called instead of the the method 
@@ -188,9 +189,9 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	}
 	
 	/**
-	 * Same as {@link #redirect(SerializableTriConsumer, BiConsumer)}, but dedicated to intercepted methods that has a {@code throws} clause : currently naming it "redirect"
-	 * leads to some casting of the argument because compiler doesn't dictinct method references that has a throws clause from those that don't have one, so, to prevent
-	 * boilerplate casting, method must be named differenlty : {@code redirectThrower}.
+	 * Same as {@link #redirect(SerializableTriConsumer, BiConsumer)}, but dedicated to intercepted methods that has a {@code throws} clause.
+	 * Naming it "redirect" would lead to some casting of the argument because compiler doesn't dictinct method references that has a throws clause
+	 * from those that don't have one, so, to prevent boilerplate casting, method must be named differenlty : {@code redirectThrower}.
 	 *
 	 * @param methodToCapture the no-args method to be intercepted
 	 * @param codeToInvoke the code to be called instead of the the method 
