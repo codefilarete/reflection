@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Guillaume Mary
  */
-public class AccessorChainMutatorTest {
+class AccessorChainMutatorTest {
 	
 	private static class DataSet {
 		private final AccessorByField<City, String> cityNameAccessor;
@@ -71,7 +71,7 @@ public class AccessorChainMutatorTest {
 		}
 	}
 	
-	public static Object[][] testGetMutatorData() {
+	static Object[][] testGetMutatorData() {
 		DataSet dataSet = new DataSet();
 		return new Object[][]{
 				{ dataSet.cityNameAccessor, dataSet.cityNameMutator },
@@ -86,7 +86,7 @@ public class AccessorChainMutatorTest {
 		};
 	}
 	
-	public static Object[][] testGetMutator_exception_data() {
+	static Object[][] testGetMutator_exception_data() {
 		DataSet dataSet = new DataSet();
 		return new Object[][]{
 				{ dataSet.charAtAccessor },    // chartAt() has no mutator equivalent
@@ -96,21 +96,21 @@ public class AccessorChainMutatorTest {
 	
 	@ParameterizedTest
 	@MethodSource("testGetMutatorData")
-	public void testGetMutator(IReversibleAccessor accessor, IMutator expected) {
+	void testGetMutator(IReversibleAccessor accessor, IMutator expected) {
 		assertEquals(expected, accessor.toMutator());
 	}
 	
 	@ParameterizedTest
 	@MethodSource("testGetMutator_exception_data")
-	public void testGetMutator_exception(IReversibleAccessor accessor) {
+	void testGetMutator_exception(IReversibleAccessor accessor) {
 		assertThrows(MemberNotFoundException.class, accessor::toMutator);
 	}
 	
-	public static List<IAccessor> list(IAccessor ... accessors) {
+	static List<IAccessor> list(IAccessor ... accessors) {
 		return Arrays.asList(accessors);
 	}
 	
-	public static Object[][] testSetData() {
+	static Object[][] setData() {
 		DataSet dataSet = new DataSet();
 		return new Object[][] {
 				{ list(dataSet.cityNameAccessor),
@@ -129,8 +129,8 @@ public class AccessorChainMutatorTest {
 	}
 	
 	@ParameterizedTest
-	@MethodSource("testSetData")
-	public void testSet(List<IAccessor> accessors, Object object, Object expected) {
+	@MethodSource("setData")
+	void set(List<IAccessor> accessors, Object object, Object expected) {
 		AccessorChain<Object, Object> accessorChain = new AccessorChain<>(accessors);
 		AccessorChainMutator testInstance = accessorChain.toMutator();
 		testInstance.set(object, expected);
@@ -138,7 +138,7 @@ public class AccessorChainMutatorTest {
 	}
 	
 	@Test
-	public void testSet_nullValueOnPath_throwsNullPointerException() {
+	void set_nullValueOnPath_throwsNullPointerException() {
 		DataSet dataSet = new DataSet();
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor);
 		Object object = new Person(null);
@@ -150,7 +150,7 @@ public class AccessorChainMutatorTest {
 	}
 	
 	@Test
-	public void testSet_nullValueOnPath_withInitializer_objectsAreInstanciated() {
+	void set_nullValueOnPath_withInitializer_objectsAreInstanciated() {
 		DataSet dataSet = new DataSet();
 		IMutator<List<Phone>, Phone> phoneAdder = List::add;
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor);
@@ -164,7 +164,7 @@ public class AccessorChainMutatorTest {
 	}
 	
 	@Test
-	public void testSet_nullValueOnPath_nullHandler() {
+	void set_nullValueOnPath_nullHandler() {
 		DataSet dataSet = new DataSet();
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor);
 		Person person = new Person(new Address(null, null));
@@ -174,7 +174,7 @@ public class AccessorChainMutatorTest {
 		assertEquals("Call of address.phones.get(2) on " + person + " returned null, because address.phones returned null", nullPointerException.getMessage());
 	}
 	
-	public static Object[][] testPathDescription() {
+	static Object[][] testPathDescription() {
 		DataSet dataSet = new DataSet();
 		return new Object[][] {
 				{ list(
@@ -203,7 +203,7 @@ public class AccessorChainMutatorTest {
 	
 	@ParameterizedTest
 	@MethodSource("testPathDescription")
-	public void testPathDescription(List<IAccessor> accessors, String expectedResult) {
+	void testPathDescription(List<IAccessor> accessors, String expectedResult) {
 		AccessorPathBuilder testInstance = new AccessorPathBuilder();
 		assertEquals(expectedResult, testInstance.ccat(accessors, ".").toString());
 	}

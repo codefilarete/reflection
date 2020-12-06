@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Guillaume Mary
  */
-public class AccessorChainTest {
+class AccessorChainTest {
 	
 	private static class DataSet {
 		private final AccessorByField<City, String> cityNameAccessor;
@@ -55,11 +55,11 @@ public class AccessorChainTest {
 		}
 	}
 	
-	public static List<IAccessor> list(IAccessor ... accessors) {
+	static List<IAccessor> list(IAccessor ... accessors) {
 		return Arrays.asList(accessors);
 	}
 	
-	public static Object[][] get_data() {
+	static Object[][] get_data() {
 		DataSet dataSet = new DataSet();
 		return new Object[][] {
 				{ list(dataSet.cityNameAccessor),
@@ -83,13 +83,13 @@ public class AccessorChainTest {
 	
 	@ParameterizedTest
 	@MethodSource("get_data")
-	public void get(List<IAccessor> accessors, Object object, Object expected) {
+	void get(List<IAccessor> accessors, Object object, Object expected) {
 		AccessorChain<Object, Object> accessorChain = new AccessorChain<>(accessors);
 		assertEquals(expected, accessorChain.get(object));
 	}
 	
 	@Test
-	public void get_accessorIsAWrongOne_throwsIllegalArgumentException() {
+	void get_accessorIsAWrongOne_throwsIllegalArgumentException() {
 		// field "number" doesn't exist on Collection "phones" => get(..) should throw exception
 		DataSet dataSet = new DataSet();
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
@@ -103,7 +103,7 @@ public class AccessorChainTest {
 	}
 	
 	@Test
-	public void get_nullValueOnPath_defaultNullHandler_throwsNullPointerException() {
+	void get_nullValueOnPath_defaultNullHandler_throwsNullPointerException() {
 		DataSet dataSet = new DataSet();
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, null));
@@ -117,7 +117,7 @@ public class AccessorChainTest {
 	}
 	
 	@Test
-	public void get_nullValueOnPath_nullHandler() {
+	void get_nullValueOnPath_nullHandler() {
 		DataSet dataSet = new DataSet();
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, null));
@@ -127,7 +127,7 @@ public class AccessorChainTest {
 	}
 	
 	@Test
-	public void forModel_getWithSomeNullOnPath_returnsNull() {
+	void forModel_getWithSomeNullOnPath_returnsNull() {
 		DataSet dataSet = new DataSet();
 		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(list(dataSet.personAddressAccessor,
 				dataSet.addressCityAccessor, dataSet.cityNameAccessor), null);
@@ -136,17 +136,17 @@ public class AccessorChainTest {
 	}
 	
 	@Test
-	public void forModel_setWithSomeNullOnPath_instanciateBeansOnPath() {
+	void forModel_setWithSomeNullOnPath_instanciateBeansOnPath() {
 		DataSet dataSet = new DataSet();
 		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(list(dataSet.personAddressAccessor,
 				dataSet.addressCityAccessor, dataSet.cityNameAccessor), null);
 		Person pawn = new Person(null);
 		testInstance.toMutator().set(pawn, "toto");
-		assertNull(pawn.getAddress().getCity().getName());
+		assertEquals("toto", pawn.getAddress().getCity().getName());
 	}
 	
 	@Test
-	public void forModel_setUsesValueTypeDeterminer() {
+	void forModel_setUsesValueTypeDeterminer() {
 		DataSet dataSet = new DataSet();
 		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(list(dataSet.personAddressAccessor,
 				dataSet.addressPhonesAccessor, new ListAccessor<>(0)), (accessor, valueType) -> {

@@ -11,6 +11,9 @@ public class City {
 	
 	private boolean capital;
 	
+	public City() {
+	}
+	
 	public City(String name) {
 		this.name = name;
 	}

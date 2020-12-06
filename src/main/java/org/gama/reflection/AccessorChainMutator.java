@@ -9,7 +9,7 @@ import org.gama.lang.Reflections;
 import org.gama.lang.StringAppender;
 import org.gama.lang.ThreadLocals;
 import org.gama.lang.collection.Iterables;
-import org.gama.lang.function.ThrowingConsumer;
+import org.gama.lang.function.ThrowingRunnable;
 
 /**
  * @param <C> source bean type
@@ -45,10 +45,10 @@ public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implement
 	@Override
 	public void set(C c, T t) {
 		final Object[] finalTarget = new Object[1];
-		ThreadLocals.doWithThreadLocal(CURRENT_NULL_RETURNING_MUTATOR, () -> null, (ThrowingConsumer<IAccessor, NullPointerException>) nullReturningMutator -> {
-			X target = get(c);
+		ThreadLocals.doWithThreadLocal(CURRENT_NULL_RETURNING_MUTATOR, () -> null, (ThrowingRunnable<NullPointerException>) () -> {
+			X target = get(c);	// Warn : this line changes state of CURRENT_NULL_RETURNING_MUTATOR by invoking onNullValue()
 			if (target == null) {
-				throwNullPointerException(c, nullReturningMutator);
+				throwNullPointerException(c);
 			}
 			finalTarget[0] = target;
 		});
@@ -68,8 +68,9 @@ public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implement
 		return super.onNullValue(targetBean, accessor);
 	}
 	
-	private void throwNullPointerException(Object srcBean, IAccessor nullReturningMutator) {
+	private void throwNullPointerException(Object srcBean) {
 		String accessorDescription = new AccessorPathBuilder().ccat(getAccessors(), ".").toString();
+		IAccessor nullReturningMutator = CURRENT_NULL_RETURNING_MUTATOR.get();
 		List<IAccessor> pathToNullPointerException = Iterables.head(getAccessors(), nullReturningMutator);
 		pathToNullPointerException.add(nullReturningMutator);
 		String nullProviderDescription = new AccessorPathBuilder().ccat(pathToNullPointerException, ".").toString();
