@@ -1,5 +1,6 @@
 package org.gama.reflection;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -15,7 +16,7 @@ public class ValueAccessPointSet extends TreeSet<ValueAccessPoint> {
 		super(new ValueAccessPointComparator());
 	}
 	
-	public ValueAccessPointSet(Set<? extends ValueAccessPoint> set) {
+	public ValueAccessPointSet(Collection<? extends ValueAccessPoint> set) {
 		this();
 		addAll(set);
 	}
