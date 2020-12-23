@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.text.Collator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -34,10 +35,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Guillaume Mary
  */
-public class MethodReferenceCapturerTest {
+class MethodReferenceCapturerTest {
 	
 	@Test
-	public void testFindMethod() {
+	void findMethod() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		assertEquals(Reflections.getMethod(Object.class, "toString"), testInstance.findMethod(Object::toString));
 		assertEquals(Reflections.getMethod(Integer.class, "shortValue"), testInstance.findMethod(Integer::shortValue));
@@ -53,7 +54,7 @@ public class MethodReferenceCapturerTest {
 	}
 	
 	@Test
-	public void testFindExecutable() {
+	void findExecutable() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		assertEquals(Reflections.getMethod(Object.class, "toString"), testInstance.findExecutable(Object::toString));
 		assertEquals(Reflections.getMethod(Integer.class, "shortValue"), testInstance.findExecutable(Integer::shortValue));
@@ -70,7 +71,7 @@ public class MethodReferenceCapturerTest {
 	}
 	
 	@Test
-	public void testFindMethod_methodDefinedInPackagePrivateClass_throwsException() {
+	void findMethod_methodDefinedInPackagePrivateClass_throwsException() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		UnsupportedOperationException thrownException = assertThrows(UnsupportedOperationException.class,
 				() -> testInstance.findMethod((SerializableBiConsumer<PackagePrivateInheritedClass, Integer>) PackagePrivateInheritedClass::doSomethingWith));
@@ -82,7 +83,7 @@ public class MethodReferenceCapturerTest {
 	}
 	
 	@Test
-	public void testFindMethod_methodDefinedInMethod_throwsException() throws NoSuchMethodException {
+	void findMethod_methodDefinedInMethod_throwsException() throws NoSuchMethodException {
 		class Tata {
 			public void doSomething() {
 				
@@ -94,7 +95,7 @@ public class MethodReferenceCapturerTest {
 	}
 	
 	@Test
-	public void testFindMethod_methodDefinedInMethod_throwsException2() throws NoSuchMethodException {
+	void findMethod_methodDefinedInMethod_throwsException2() throws NoSuchMethodException {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		assertEquals(Tata.class.getMethod("doSomething"), testInstance.findMethod((SerializableConsumer<Tata>) Tata::doSomething));
 	}
@@ -106,40 +107,47 @@ public class MethodReferenceCapturerTest {
 	}
 	
 	@Test
-	public void testFindConstructor_0arg() {
+	void findConstructor_0arg() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		assertEquals(Reflections.getConstructor(String.class), testInstance.findConstructor((SerializableSupplier<String>) String::new));
 	}
 	
 	@Test
-	public void testFindConstructor_1arg() {
+	void findConstructor_1arg() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		assertEquals(Reflections.getConstructor(String.class, String.class), testInstance.findConstructor((SerializableFunction<String, String>) String::new));
 		assertEquals(Reflections.getConstructor(String.class, char[].class), testInstance.findConstructor((SerializableFunction<char[], String>) String::new));
 	}
 	
 	@Test
-	public void testFindConstructor_2args() {
+	void findConstructor_2args() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		assertEquals(Reflections.getConstructor(HashMap.class, int.class, float.class),
 				testInstance.findConstructor((SerializableBiFunction<Integer, Float, HashMap>) HashMap::new));
 	}
 	
 	@Test
-	public void testFindConstructor_constructorIsInnerOne_static() {
+	void findConstructor_3args() {
+		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
+		assertEquals(Reflections.getConstructor(Locale.class, String.class, String.class, String.class),
+				testInstance.findConstructor((SerializableTriFunction<String, String, String, Locale>) Locale::new));
+	}
+	
+	@Test
+	void findConstructor_constructorIsInnerOne_static() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		assertEquals(Reflections.getConstructor(StaticInnerClass.class), testInstance.findConstructor(StaticInnerClass::new));
 	}
 	
 	@Test
-	public void testFindConstructor_constructorIsInnerOne_static_onlyOneConstructorWithOneArgument() {
+	void findConstructor_constructorIsInnerOne_static_onlyOneConstructorWithOneArgument() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		assertEquals(Reflections.getConstructor(StaticInnerClassWithOnlyOneConstructorWithOneArgument.class, int.class),
 				testInstance.findConstructor(StaticInnerClassWithOnlyOneConstructorWithOneArgument::new));
 	}
 	
 	@Test
-	public void testFindConstructor_constructorIsInnerOne_nonStatic_throwsException() {
+	void findConstructor_constructorIsInnerOne_nonStatic_throwsException() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
 		assertEquals("Capturing by reference a non-static inner class constructor is not supported" +
 						", make o.g.r.MethodReferenceCapturerTest$NonStaticInnerClass static or an outer class of o.g.r.MethodReferenceCapturerTest",
@@ -147,7 +155,7 @@ public class MethodReferenceCapturerTest {
 	}
 	
 	@Test
-	public void testGiveArgumentTypes_methodDefinition() {
+	void testGiveArgumentTypes_methodDefinition() {
 		Function[] propertiesToPrint = {
 				(Function<MethodDefinition, Class>) MethodDefinition::getDeclaringClass,
 				(Function<MethodDefinition, String>) MethodDefinition::getName,
@@ -186,7 +194,7 @@ public class MethodReferenceCapturerTest {
 	}
 	
 	@Test
-	public void testLRUCache() {
+	void testLRUCache() {
 		LRUCache testInstance = new LRUCache(3);
 		Constructor<String> dummyExecutable = Reflections.getDefaultConstructor(String.class);
 		testInstance.put("b", dummyExecutable);
@@ -202,7 +210,7 @@ public class MethodReferenceCapturerTest {
 	}
 	
 	@Test
-	public void testToMethodReferenceString() throws NoSuchMethodException {
+	void testToMethodReferenceString() throws NoSuchMethodException {
 		assertEquals("String::concat", MethodReferences.toMethodReferenceString(String.class.getMethod("concat", String.class)));
 		SerializableFunction<String, char[]> toCharArray = String::toCharArray;
 		assertEquals("String::toCharArray", MethodReferences.toMethodReferenceString(toCharArray));
