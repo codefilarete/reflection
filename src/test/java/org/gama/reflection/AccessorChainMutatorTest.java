@@ -1,7 +1,6 @@
 package org.gama.reflection;
 
-import java.util.List;
-
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.gama.lang.Reflections;
 import org.gama.lang.Reflections.MemberNotFoundException;
 import org.gama.lang.collection.Arrays;
@@ -14,15 +13,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * @author Guillaume Mary
  */
 class AccessorChainMutatorTest {
-	
+
 	private static class DataSet {
 		private final AccessorByField<City, String> cityNameAccessor;
 		private final AccessorByField<Address, City> addressCityAccessor;
@@ -34,7 +33,7 @@ class AccessorChainMutatorTest {
 		private final AccessorByMethod<String, Character> charAtAccessor;
 		private final AccessorByMethod<String, Character[]> toCharArrayAccessor;
 		private final ArrayAccessor<String> charArrayAccessor;
-		
+
 		private final MutatorByField<City, String> cityNameMutator;
 		private final MutatorByField<Address, City> addressCityMutator;
 		private final MutatorByField<Person, Address> personAddressMutator;
@@ -45,7 +44,7 @@ class AccessorChainMutatorTest {
 		private final MutatorByMethod<String, Character> charAtMutator;
 		private final MutatorByMethod<String, Character[]> toCharArrayMutator;
 		private final ArrayMutator<String> charArrayMutator;
-		
+
 		private DataSet() {
 			cityNameAccessor = Accessors.accessorByField(City.class, "name");
 			addressCityAccessor = Accessors.accessorByField(Address.class, "city");
@@ -57,7 +56,7 @@ class AccessorChainMutatorTest {
 			charAtAccessor = new AccessorByMethod<>(Reflections.findMethod(String.class, "charAt", int.class));
 			toCharArrayAccessor = new AccessorByMethod<>(Reflections.findMethod(String.class, "toCharArray"));
 			charArrayAccessor = new ArrayAccessor<>(2);
-			
+
 			cityNameMutator = Accessors.mutatorByField(City.class, "name");
 			addressCityMutator = Accessors.mutatorByField(Address.class, "city");
 			personAddressMutator = Accessors.mutatorByField(Person.class, "address");
@@ -70,7 +69,7 @@ class AccessorChainMutatorTest {
 			charArrayMutator = new ArrayMutator<>(2);
 		}
 	}
-	
+
 	static Object[][] testGetMutatorData() {
 		DataSet dataSet = new DataSet();
 		return new Object[][]{
@@ -82,10 +81,10 @@ class AccessorChainMutatorTest {
 				{ dataSet.phoneNumberAccessor, dataSet.phoneNumberMutator },
 				{ dataSet.phoneNumberMethodAccessor, dataSet.phoneNumberMutator },
 				{ dataSet.charArrayAccessor, dataSet.charArrayMutator }
-			
+
 		};
 	}
-	
+
 	static Object[][] testGetMutator_exception_data() {
 		DataSet dataSet = new DataSet();
 		return new Object[][]{
@@ -93,23 +92,23 @@ class AccessorChainMutatorTest {
 				{ dataSet.toCharArrayAccessor },    // toCharArray() has no mutator equivalent
 		};
 	}
-	
+
 	@ParameterizedTest
 	@MethodSource("testGetMutatorData")
 	void testGetMutator(IReversibleAccessor accessor, IMutator expected) {
-		assertEquals(expected, accessor.toMutator());
+		assertThat(accessor.toMutator()).isEqualTo(expected);
 	}
-	
+
 	@ParameterizedTest
 	@MethodSource("testGetMutator_exception_data")
 	void testGetMutator_exception(IReversibleAccessor accessor) {
-		assertThrows(MemberNotFoundException.class, accessor::toMutator);
+		assertThatExceptionOfType(MemberNotFoundException.class).isThrownBy(accessor::toMutator);
 	}
-	
+
 	static List<IAccessor> list(IAccessor ... accessors) {
 		return Arrays.asList(accessors);
 	}
-	
+
 	static Object[][] setData() {
 		DataSet dataSet = new DataSet();
 		return new Object[][] {
@@ -127,28 +126,30 @@ class AccessorChainMutatorTest {
 						new char[] { '1', '2', '3' }, '0' },
 		};
 	}
-	
+
 	@ParameterizedTest
 	@MethodSource("setData")
 	void set(List<IAccessor> accessors, Object object, Object expected) {
 		AccessorChain<Object, Object> accessorChain = new AccessorChain<>(accessors);
 		AccessorChainMutator testInstance = accessorChain.toMutator();
 		testInstance.set(object, expected);
-		assertEquals(expected, accessorChain.get(object));
+		assertThat(accessorChain.get(object)).isEqualTo(expected);
 	}
-	
+
 	@Test
 	void set_nullValueOnPath_throwsNullPointerException() {
 		DataSet dataSet = new DataSet();
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor);
 		Object object = new Person(null);
 		AccessorChainMutator testInstance = new AccessorChain(accessors).toMutator();
-		Throwable thrownException = assertThrows(RuntimeException.class, () -> testInstance.set(object, new Address(new City("Toto"), null)));
-		assertEquals("Error while applying [accessor for field o.g.r.m.Person.address] <- mutator for field o.g.r.m.Address.phones on instance of o.g.r.m.Person", thrownException.getMessage());
-		assertTrue(thrownException.getCause() instanceof NullPointerException);
-		assertEquals("Cannot invoke [accessor for field o.g.r.m.Person.address] on null instance", thrownException.getCause().getMessage());
+		assertThatThrownBy(() -> testInstance.set(object, new Address(new City("Toto"), null)))
+		        .isInstanceOf(RuntimeException.class)
+				.hasMessage("Error while applying [accessor for field o.g.r.m.Person.address] <- mutator for field o.g.r.m.Address.phones on instance of o.g.r.m.Person")
+                .hasCauseInstanceOf(NullPointerException.class)
+				.extracting(Throwable::getCause, InstanceOfAssertFactories.THROWABLE)
+                .hasMessage("Cannot invoke [accessor for field o.g.r.m.Person.address] on null instance");
 	}
-	
+
 	@Test
 	void set_nullValueOnPath_withInitializer_objectsAreInstanciated() {
 		DataSet dataSet = new DataSet();
@@ -160,9 +161,9 @@ class AccessorChainMutatorTest {
 		testInstance.setNullValueHandler(AccessorChain.INITIALIZE_VALUE);
 		Phone phone = new Phone("123");
 		testInstance.set(targetPerson, phone);
-		assertEquals(Arrays.asList(phone), targetPerson.getAddress().getPhones());
+		assertThat(targetPerson.getAddress().getPhones()).isEqualTo(Arrays.asList(phone));
 	}
-	
+
 	@Test
 	void set_nullValueOnPath_nullHandler() {
 		DataSet dataSet = new DataSet();
@@ -170,10 +171,11 @@ class AccessorChainMutatorTest {
 		Person person = new Person(new Address(null, null));
 		AccessorChainMutator<Person, Phone, String> testInstance = new AccessorChainMutator<>(accessors, dataSet.phoneNumberMethodMutator);
 		testInstance.setNullValueHandler(AccessorChain.RETURN_NULL);
-		NullPointerException nullPointerException = assertThrows(NullPointerException.class, () -> testInstance.set(person, "123"));
-		assertEquals("Call of address.phones.get(2) on " + person + " returned null, because address.phones returned null", nullPointerException.getMessage());
+		assertThatThrownBy(() -> testInstance.set(person, "123"))
+				.isInstanceOf(NullPointerException.class)
+				.hasMessage("Call of address.phones.get(2) on " + person + " returned null, because address.phones returned null");
 	}
-	
+
 	static Object[][] testPathDescription() {
 		DataSet dataSet = new DataSet();
 		return new Object[][] {
@@ -200,11 +202,11 @@ class AccessorChainMutatorTest {
 						"address.phones.get(2).getNumber().substring(..)" },
 		};
 	}
-	
+
 	@ParameterizedTest
 	@MethodSource("testPathDescription")
 	void testPathDescription(List<IAccessor> accessors, String expectedResult) {
 		AccessorPathBuilder testInstance = new AccessorPathBuilder();
-		assertEquals(expectedResult, testInstance.ccat(accessors, ".").toString());
+		assertThat(testInstance.ccat(accessors, ".").toString()).isEqualTo(expectedResult);
 	}
 }

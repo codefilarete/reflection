@@ -1,15 +1,14 @@
 package org.gama.reflection;
 
+import org.junit.jupiter.api.Test;
+
 import java.util.AbstractCollection;
 import java.util.AbstractSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Guillaume Mary
@@ -21,7 +20,7 @@ public class MutatorByMethodReferenceTest {
 		MutatorByMethodReference<StringBuilder, Integer> testInstance = new MutatorByMethodReference<>(StringBuilder::append);
 		StringBuilder target = new StringBuilder();
 		testInstance.set(target, 1);
-		assertEquals("1", target.toString());
+		assertThat(target.toString()).isEqualTo("1");
 	}
 
 	@Test
@@ -29,25 +28,25 @@ public class MutatorByMethodReferenceTest {
 		// usual case : 2 instances with same method reference should be equal
 		MutatorByMethodReference<DummySet, Object> testInstance1 = new MutatorByMethodReference<>(DummySet::contains);
 		MutatorByMethodReference<DummySet, Object> testInstance2 = new MutatorByMethodReference<>(DummySet::contains);
-		assertEquals(testInstance1, testInstance2);
+		assertThat(testInstance2).isEqualTo(testInstance1);
 		
 		// still equals to AbstractCollection::contains because DummySet::contains is not implemented and points to AbstractCollection::contains
 		MutatorByMethodReference<DummySet, Object> testInstance3 = new MutatorByMethodReference<>(AbstractCollection::contains);
-		assertEquals(testInstance1, testInstance3);
+		assertThat(testInstance3).isEqualTo(testInstance1);
 		// same test, but with a different generic parameter => instances should be equal
 		// (with a different hashCode implementation I had a strange behavior on which generic type influenced serilization !)
 		MutatorByMethodReference<AbstractSet, Object> testInstance4 = new MutatorByMethodReference<>(AbstractCollection::contains);
-		assertEquals(testInstance1, testInstance4);
+		assertThat(testInstance4).isEqualTo(testInstance1);
 
 		// A totally different method reference shouldn't be equal 
 		MutatorByMethodReference<StringBuilder, CharSequence> testInstance5 = new MutatorByMethodReference<>(StringBuilder::append);
-		assertNotEquals(testInstance1, testInstance5);
+		assertThat(testInstance5).isNotEqualTo(testInstance1);
 	}
 	
 	@Test
 	public void testToString() {
 		MutatorByMethodReference<Map, BiConsumer> testInstance = new MutatorByMethodReference<>(Map::forEach);
-		assertEquals("j.u.Map::forEach", testInstance.toString());
+		assertThat(testInstance.toString()).isEqualTo("j.u.Map::forEach");
 	}
 	
 	public static class DummySet<E> extends AbstractSet<E> {
@@ -66,15 +65,15 @@ public class MutatorByMethodReferenceTest {
 	@Test
 	void getPropertyType() {
 		MutatorByMethodReference<DummySet, Object> testInstance1 = new MutatorByMethodReference<>(DummySet::contains);
-		assertEquals(Object.class, testInstance1.getPropertyType());
+		assertThat(testInstance1.getPropertyType()).isEqualTo(Object.class);
 
 		MutatorByMethodReference<DummySet, Object> testInstance2 = new MutatorByMethodReference<>(AbstractCollection::contains);
-		assertEquals(Object.class, testInstance2.getPropertyType());
+		assertThat(testInstance2.getPropertyType()).isEqualTo(Object.class);
 
 		MutatorByMethodReference<AbstractSet, Object> testInstance3 = new MutatorByMethodReference<>(AbstractCollection::contains);
-		assertEquals(Object.class, testInstance3.getPropertyType());
+		assertThat(testInstance3.getPropertyType()).isEqualTo(Object.class);
 
 		MutatorByMethodReference<StringBuilder, CharSequence> testInstance4 = new MutatorByMethodReference<>(StringBuilder::append);
-		assertEquals(CharSequence.class, testInstance4.getPropertyType());
+		assertThat(testInstance4.getPropertyType()).isEqualTo(CharSequence.class);
 	}
 }

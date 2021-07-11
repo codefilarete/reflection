@@ -8,9 +8,9 @@ import org.gama.lang.Reflections;
 import org.gama.lang.Strings;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.gama.reflection.MethodReferences.getTargetMethodRawSignature;
 import static org.gama.reflection.MethodReferences.buildSerializedLambda;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Guillaume Mary
@@ -19,20 +19,20 @@ public class MethodReferencesTest {
 	
 	@Test
 	public void testGetTargetMethodRawSignature() throws ReflectiveOperationException {
-		assertEquals("java/lang/ObjecttoString()Ljava/lang/String;", getTargetMethodRawSignature(MethodReferences.buildSerializedLambda(Object::toString)));
-		assertEquals("java/lang/IntegershortValue()S", getTargetMethodRawSignature(MethodReferences.buildSerializedLambda(Integer::shortValue)));
-		assertEquals("java/text/CollatorsetStrength(I)V", getTargetMethodRawSignature(buildSerializedLambda(Collator::setStrength)));
+		assertThat(getTargetMethodRawSignature(MethodReferences.buildSerializedLambda(Object::toString))).isEqualTo("java/lang/ObjecttoString()Ljava/lang/String;");
+		assertThat(getTargetMethodRawSignature(MethodReferences.buildSerializedLambda(Integer::shortValue))).isEqualTo("java/lang/IntegershortValue()S");
+		assertThat(getTargetMethodRawSignature(buildSerializedLambda(Collator::setStrength))).isEqualTo("java/text/CollatorsetStrength(I)V");
 	}
 	
 	@Test
 	public void testBuildSerializedLambda_getter() throws ReflectiveOperationException {
 		SerializedLambda serializedLambda = MethodReferences.buildSerializedLambda(Object::toString);
 		Method method = Reflections.getMethod(Class.forName(serializedLambda.getImplClass().replace("/", ".")), serializedLambda.getImplMethodName());
-		assertEquals(Reflections.getMethod(Object.class, "toString"), method);
+		assertThat(method).isEqualTo(Reflections.getMethod(Object.class, "toString"));
 		
 		serializedLambda = MethodReferences.buildSerializedLambda(Integer::shortValue);
 		method = Reflections.getMethod(Class.forName(serializedLambda.getImplClass().replace("/", ".")), serializedLambda.getImplMethodName());
-		assertEquals(Reflections.getMethod(Integer.class, "shortValue"), method);
+		assertThat(method).isEqualTo(Reflections.getMethod(Integer.class, "shortValue"));
 	}
 	
 	@Test
@@ -49,7 +49,7 @@ public class MethodReferencesTest {
 		
 		Class<?> methodParameterType = Class.forName(methodParameterTypeName.replace("/", "."));
 		Method method = Reflections.getMethod(Class.forName(serializedLambda.getImplClass().replace("/", ".")), serializedLambda.getImplMethodName(), methodParameterType);
-		assertEquals(Reflections.getMethod(DummyClassWithSetter.class, "setX", Integer.class), method);
+		assertThat(method).isEqualTo(Reflections.getMethod(DummyClassWithSetter.class, "setX", Integer.class));
 	}
 	
 	public static class DummyClassWithSetter {

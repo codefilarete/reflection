@@ -20,9 +20,7 @@ import org.gama.lang.function.Hanger.Holder;
 import org.gama.lang.trace.ModifiableInt;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Guillaume Mary
@@ -38,12 +36,12 @@ class MethodReferenceDispatcherTest {
 				.redirect(CharSequence::subSequence, (i, j) -> "Hello " + i + j + " !")
 				.fallbackOn("Hello world !")
 				.build(CharSequence.class);
-		assertEquals("Hello 42666 !", testInstance.subSequence(42, 666));
+		assertThat(testInstance.subSequence(42, 666)).isEqualTo("Hello 42666 !");
 		// testing fallback (on chars() method)
 		StringBuilder appendedChars = new StringBuilder();
 		testInstance.chars().forEach(c -> appendedChars.append((char) c));
-		assertEquals("Hello world !", appendedChars.toString());
-		assertEquals("Dispatcher to Hello world !", testInstance.toString());
+		assertThat(appendedChars.toString()).isEqualTo("Hello world !");
+		assertThat(testInstance.toString()).isEqualTo("Dispatcher to Hello world !");
 	}
 	
 	@Test
@@ -60,13 +58,13 @@ class MethodReferenceDispatcherTest {
 				.fallbackOn("Hello world !")
 				.build(CharSequence.class);
 		CharSequence actual = testInstance.subSequence(42, 666);
-		assertEquals(708, modifiableInt.getValue());
-		assertSame(testInstance, actual);
+		assertThat(modifiableInt.getValue()).isEqualTo(708);
+		assertThat(actual).isSameAs(testInstance);
 		// testing fallback (on chars() method)
 		StringBuilder appendedChars = new StringBuilder();
 		testInstance.chars().forEach(c -> appendedChars.append((char) c));
-		assertEquals("Hello world !", appendedChars.toString());
-		assertEquals("Dispatcher to Hello world !", testInstance.toString());
+		assertThat(appendedChars.toString()).isEqualTo("Hello world !");
+		assertThat(testInstance.toString()).isEqualTo("Dispatcher to Hello world !");
 	}
 	
 	@Test
@@ -78,11 +76,11 @@ class MethodReferenceDispatcherTest {
 				.redirect((SerializableFunction<Stream, Optional>) Stream::findFirst, () -> Optional.of(42))
 				.fallbackOn(Stream.of(1, null, 2))
 				.build(Stream.class);
-		assertEquals(Optional.of(42), testInstance.findFirst());
+		assertThat(testInstance.findFirst()).isEqualTo(Optional.of(42));
 		
 		// other methods are not intercepted
 		Stream stream = testInstance.filter(Objects::nonNull);
-		assertEquals(Arrays.asList(1, 2), Iterables.copy(stream.iterator()));
+		assertThat(Iterables.copy(stream.iterator())).isEqualTo(Arrays.asList(1, 2));
 	}
 	
 	@Test
@@ -97,12 +95,12 @@ class MethodReferenceDispatcherTest {
 				.build(Stream.class);
 		
 		Stream actual = testInstance.distinct();
-		assertEquals(1, modifiableInt.getValue());
-		assertSame(testInstance, actual);
+		assertThat(modifiableInt.getValue()).isEqualTo(1);
+		assertThat(actual).isSameAs(testInstance);
 		
 		// other methods are not intercepted
 		Stream stream = testInstance.filter(Objects::nonNull);
-		assertEquals(Arrays.asList(1, 2), Iterables.copy(stream.iterator()));
+		assertThat(Iterables.copy(stream.iterator())).isEqualTo(Arrays.asList(1, 2));
 	}
 	
 	@Test
@@ -115,10 +113,10 @@ class MethodReferenceDispatcherTest {
 				.fallbackOn(Stream.of(1, null, 2))
 				.build(Stream.class);
 		Stream actual = testInstance.limit(42);
-		assertArrayEquals(Stream.of(42L).toArray(), actual.toArray());
+		assertThat(actual.toArray()).isEqualTo(Stream.of(42L).toArray());
 		// other methods are not intercepted
 		Stream stream = testInstance.filter(Objects::nonNull);
-		assertEquals(Arrays.asList(1, 2), Iterables.copy(stream.iterator()));
+		assertThat(Iterables.copy(stream.iterator())).isEqualTo(Arrays.asList(1, 2));
 	}
 	
 	@Test
@@ -132,11 +130,11 @@ class MethodReferenceDispatcherTest {
 				.fallbackOn(Stream.of(1, null, 2))
 				.build(Stream.class);
 		Stream actual = testInstance.limit(42);
-		assertEquals(42, modifiableInt.getValue());
-		assertSame(testInstance, actual);
+		assertThat(modifiableInt.getValue()).isEqualTo(42);
+		assertThat(actual).isSameAs(testInstance);
 		// other methods are not intercepted
 		Stream stream = testInstance.filter(Objects::nonNull);
-		assertEquals(Arrays.asList(1, 2), Iterables.copy(stream.iterator()));
+		assertThat(Iterables.copy(stream.iterator())).isEqualTo(Arrays.asList(1, 2));
 	}
 	
 	@Test
@@ -160,9 +158,9 @@ class MethodReferenceDispatcherTest {
 				})
 				.build(ExtendedRunnable.class);
 		testInstance.run();
-		assertEquals(1, modifiableInt.getValue());
+		assertThat(modifiableInt.getValue()).isEqualTo(1);
 		testInstance.doRun();
-		assertEquals(667, modifiableInt.getValue());
+		assertThat(modifiableInt.getValue()).isEqualTo(667);
 	}
 	
 	@Test
@@ -176,7 +174,7 @@ class MethodReferenceDispatcherTest {
 				.build(DummySetter.class);
 		
 		testInstance.setValue(42);
-		assertEquals(42, (int) valueHolder.get());
+		assertThat((int) valueHolder.get()).isEqualTo(42);
 		
 		// SerializableTriSonsummer : a setter
 		Map<Integer, String> valuesHolder = new HashMap<>();
@@ -185,7 +183,7 @@ class MethodReferenceDispatcherTest {
 				.build(DummySetter.class);
 		
 		testInstance.setValues(42, "666");
-		assertEquals(Maps.asHashMap(42, "666"), valuesHolder);
+		assertThat(valuesHolder).isEqualTo(Maps.asHashMap(42, "666"));
 	}
 	
 	@Test
@@ -198,7 +196,7 @@ class MethodReferenceDispatcherTest {
 				.redirectThrower(Connection::commit, () -> xx.set(42))
 				.build(Connection.class);
 		testInstance.commit();
-		assertEquals(42, (int) xx.get());
+		assertThat((int) xx.get()).isEqualTo(42);
 	}
 	
 	@Test
@@ -211,7 +209,7 @@ class MethodReferenceDispatcherTest {
 				.redirectThrower(PreparedStatement::setFetchSize, xx::set)
 				.build(PreparedStatement.class);
 		testInstance.setFetchSize(42);
-		assertEquals(42, (int) xx.get());
+		assertThat((int) xx.get()).isEqualTo(42);
 	}
 	
 	@Test
@@ -232,7 +230,7 @@ class MethodReferenceDispatcherTest {
 		testInstance.setString(0, "Hello");
 		testInstance.setLong(1, 42);
 		testInstance.setInt(2, 666);
-		assertEquals(Maps.asHashMap(0, (Object) "Hello").add(1, 42L).add(2, 666), valuesCaptor);
+		assertThat(valuesCaptor).isEqualTo(Maps.asHashMap(0, (Object) "Hello").add(1, 42L).add(2, 666));
 	}
 	
 	@Test
@@ -244,7 +242,7 @@ class MethodReferenceDispatcherTest {
 				.redirectThrower(PreparedStatement::executeBatch, () -> new int[] {42, 666 })
 				.fallbackOn("Coucou world !")
 				.build(PreparedStatement.class);
-		assertArrayEquals(new int[] { 42, 666 }, testInstance.executeBatch());
+		assertThat(testInstance.executeBatch()).isEqualTo(new int[]{42, 666});
 	}
 	
 	public interface ExtendedRunnable extends Runnable {

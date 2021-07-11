@@ -5,11 +5,11 @@ import org.gama.reflection.model.Person;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.gama.reflection.Accessors.accessorByField;
 import static org.gama.reflection.Accessors.accessorByMethod;
 import static org.gama.reflection.Accessors.mutatorByField;
 import static org.gama.reflection.Accessors.mutatorByMethod;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Guillaume Mary
@@ -74,6 +74,6 @@ class ValueAccessPointComparatorTest {
 		
 		ValueAccessPointSet testInstance = new ValueAccessPointSet();
 		testInstance.add(accessor2);
-		assertEquals(expectedEquality, testInstance.contains(accessor1));
+		assertThat(testInstance.contains(accessor1)).isEqualTo(expectedEquality);
 	}
 }

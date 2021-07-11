@@ -14,6 +14,7 @@
 		<mockito.version>2.22.0</mockito.version>
 		<slf4j-api.version>1.7.21</slf4j-api.version>
 		<jdk-serializable-functional.version>1.8.2</jdk-serializable-functional.version>
+		<assertj.version>3.20.2</assertj.version>
 	</properties>
 	
 	<dependencies>
@@ -45,6 +46,12 @@
 			<artifactId>tools</artifactId>
 			<type>test-jar</type>
 			<version>1.0-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>${assertj.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

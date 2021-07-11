@@ -9,8 +9,8 @@ import org.gama.reflection.model.City;
 import org.gama.reflection.model.Phone;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Guillaume Mary
@@ -21,8 +21,8 @@ public class PropertyAccessorTest {
 	public void testOf_fieldInput() {
 		Field numberField = Reflections.findField(Phone.class, "number");
 		PropertyAccessor<Phone, String> numberAccessor = Accessors.accessor(numberField);
-		assertEquals(new AccessorByField<>(numberField), numberAccessor.getAccessor());
-		assertEquals(new MutatorByField<>(numberField), numberAccessor.getMutator());
+		assertThat(numberAccessor.getAccessor()).isEqualTo(new AccessorByField<>(numberField));
+		assertThat(numberAccessor.getMutator()).isEqualTo(new MutatorByField<>(numberField));
 	}
 	
 	@Test
@@ -30,25 +30,24 @@ public class PropertyAccessorTest {
 		Field numberField = Reflections.findField(Phone.class, "number");
 		Method numberGetter = Reflections.findMethod(Phone.class, "getNumber");
 		PropertyAccessor<Phone, String> numberAccessor = Accessors.accessor(numberGetter);
-		assertEquals(new AccessorByMethod<>(numberGetter), numberAccessor.getAccessor());
+		assertThat(numberAccessor.getAccessor()).isEqualTo(new AccessorByMethod<>(numberGetter));
 		// As there's no setter for "number" field, the mutator is an field one, not a method one
-		assertEquals(new MutatorByField<>(numberField), numberAccessor.getMutator());
+		assertThat(numberAccessor.getMutator()).isEqualTo(new MutatorByField<>(numberField));
 		
 		
 		Method nameGetter = Reflections.findMethod(City.class, "getName");
 		Method nameSetter = Reflections.findMethod(City.class, "setName", String.class);
 		PropertyAccessor<City, String> nameAccessor = Accessors.accessor(nameGetter);
-		assertEquals(new AccessorByMethod<>(nameGetter), nameAccessor.getAccessor());
+		assertThat(nameAccessor.getAccessor()).isEqualTo(new AccessorByMethod<>(nameGetter));
 		// As a setter exists for "name" field, the mutator is a method one, not a field one
-		assertEquals(new MutatorByMethod<>(nameSetter), nameAccessor.getMutator());
+		assertThat(nameAccessor.getMutator()).isEqualTo(new MutatorByMethod<>(nameSetter));
 	}
 	
 	@Test
 	public void testOf_nonConventionalMethodInput_exceptionThrown() {
 		Method nameGetter = Reflections.findMethod(City.class, "name");
 		
-		assertThrows(MemberNotFoundException.class, () -> Accessors.accessor(nameGetter),
-				"Field wrapper j.l.String o.g.r.m.City.name() doesn't feet encapsulation naming convention");
+		assertThatExceptionOfType(MemberNotFoundException.class).as("Field wrapper j.l.String o.g.r.m.City.name() doesn't feet encapsulation naming convention").isThrownBy(() -> Accessors.accessor(nameGetter));
 	}
 	
 }

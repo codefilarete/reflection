@@ -2,8 +2,8 @@ package org.gama.reflection;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Guillaume Mary
@@ -16,11 +16,11 @@ public class ArrayAccessorTest {
 		String[] sample = { "a", "b", "c" };
 		
 		testInstance.setIndex(0);
-		assertEquals("a", testInstance.get(sample));
+		assertThat(testInstance.get(sample)).isEqualTo("a");
 		testInstance.setIndex(1);
-		assertEquals("b", testInstance.get(sample));
+		assertThat(testInstance.get(sample)).isEqualTo("b");
 		testInstance.setIndex(2);
-		assertEquals("c", testInstance.get(sample));
+		assertThat(testInstance.get(sample)).isEqualTo("c");
 	}
 	
 	@Test
@@ -29,6 +29,6 @@ public class ArrayAccessorTest {
 		String[] sample = { "a", "b", "c" };
 		
 		testInstance.setIndex(-1);
-		assertThrows(ArrayIndexOutOfBoundsException.class, () -> testInstance.get(sample));
+		assertThatExceptionOfType(ArrayIndexOutOfBoundsException.class).isThrownBy(() -> testInstance.get(sample));
 	}
 }

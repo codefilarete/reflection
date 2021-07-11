@@ -3,7 +3,7 @@ package org.gama.reflection;
 import org.gama.lang.Reflections;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Guillaume Mary
@@ -15,7 +15,7 @@ public class AccessorByFieldTest {
 		AccessorByField<Toto, Integer> testInstance = new AccessorByField<>(Reflections.findField(Toto.class, "a"));
 		Toto toto = new Toto();
 		toto.a = 42;
-		assertEquals(42, (int) testInstance.get(toto));
+		assertThat((int) testInstance.get(toto)).isEqualTo(42);
 	}
 	
 	private static class Toto {

@@ -3,10 +3,11 @@ package org.gama.reflection;
 import java.util.List;
 
 import org.gama.lang.collection.Arrays;
-import org.gama.lang.test.Assertions;
+import org.gama.lang.exception.Exceptions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Guillaume Mary
@@ -19,11 +20,11 @@ public class ListAccessorTest {
 		List<String> sample = Arrays.asList("a", "b", "c");
 		
 		testInstance.setIndex(0);
-		assertEquals("a", testInstance.get(sample));
+		assertThat(testInstance.get(sample)).isEqualTo("a");
 		testInstance.setIndex(1);
-		assertEquals("b", testInstance.get(sample));
+		assertThat(testInstance.get(sample)).isEqualTo("b");
 		testInstance.setIndex(2);
-		assertEquals("c", testInstance.get(sample));
+		assertThat(testInstance.get(sample)).isEqualTo("c");
 	}
 	
 	@Test
@@ -32,6 +33,8 @@ public class ListAccessorTest {
 		List<String> sample = Arrays.asList("a", "b", "c");
 		
 		testInstance.setIndex(-1);
-		Assertions.assertThrows(() -> testInstance.get(sample), Assertions.hasExceptionInCauses(ArrayIndexOutOfBoundsException.class));
+		assertThatThrownBy(() -> testInstance.get(sample))
+				.extracting(t -> Exceptions.findExceptionInCauses(t, ArrayIndexOutOfBoundsException.class))
+				.isNotNull();
 	}
 }

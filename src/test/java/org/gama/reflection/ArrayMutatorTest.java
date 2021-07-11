@@ -2,8 +2,8 @@ package org.gama.reflection;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @author Guillaume Mary
@@ -17,13 +17,13 @@ public class ArrayMutatorTest {
 		
 		testInstance.setIndex(0);
 		testInstance.set(sample, "x");
-		assertArrayEquals(sample, new String[]{"x", "b", "c"});
+		assertThat(new String[]{"x", "b", "c"}).isEqualTo(sample);
 		testInstance.setIndex(1);
 		testInstance.set(sample, "y");
-		assertArrayEquals(sample, new String[]{"x", "y", "c"});
+		assertThat(new String[]{"x", "y", "c"}).isEqualTo(sample);
 		testInstance.setIndex(2);
 		testInstance.set(sample, "z");
-		assertArrayEquals(sample, new String[]{"x", "y", "z"});
+		assertThat(new String[]{"x", "y", "z"}).isEqualTo(sample);
 	}
 	
 	@Test
@@ -32,6 +32,6 @@ public class ArrayMutatorTest {
 		String[] sample = { "a", "b", "c" };
 		
 		testInstance.setIndex(-1);
-		assertThrows(ArrayIndexOutOfBoundsException.class, () -> testInstance.set(sample, "x"));
+		assertThatExceptionOfType(ArrayIndexOutOfBoundsException.class).isThrownBy(() -> testInstance.set(sample, "x"));
 	}
 }

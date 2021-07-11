@@ -3,8 +3,9 @@ package org.gama.reflection;
 import org.gama.lang.Reflections;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.THROWABLE;
 
 /**
  * @author Guillaume Mary
@@ -14,7 +15,7 @@ public class MutatorByMethodTest {
 	@Test
 	public void testForProperty() {
 		MutatorByMethod testInstance = Accessors.mutatorByMethod(Toto.class, "a");
-		assertEquals(testInstance.getSetter(), Reflections.findMethod(Toto.class, "setA", int.class));
+		assertThat(Reflections.findMethod(Toto.class, "setA", int.class)).isEqualTo(testInstance.getSetter());
 	}
 	
 	@Test
@@ -22,35 +23,38 @@ public class MutatorByMethodTest {
 		MutatorByMethod<Toto, Integer> testInstance = new MutatorByMethod<>(Reflections.findMethod(Toto.class, "setA", int.class));
 		Toto toto = new Toto();
 		testInstance.set(toto, 42);
-		assertEquals(42, toto.a);
+		assertThat(toto.a).isEqualTo(42);
 	}
 	
 	@Test
 	public void testSet_withWrongArgument() {
 		MutatorByMethod<Toto, Object> testInstance = new MutatorByMethod<>(Reflections.findMethod(Toto.class, "setA", int.class));
 		Toto toto = new Toto();
-		RuntimeException thrownException = assertThrows(RuntimeException.class, () -> testInstance.set(toto, "42"));
-		assertEquals("Error while applying o.g.r.MutatorByMethodTest$Toto.setA(int) on instance of o.g.r.MutatorByMethodTest$Toto with value 42", thrownException.getMessage());
-		assertEquals("o.g.r.MutatorByMethodTest$Toto.setA(int) expects int as argument, but j.l.String was given", thrownException.getCause().getMessage());
+		assertThatThrownBy(() -> testInstance.set(toto, "42"))
+				.isInstanceOf(RuntimeException.class)
+				.hasMessage("Error while applying o.g.r.MutatorByMethodTest$Toto.setA(int) on instance of o.g.r.MutatorByMethodTest$Toto with value 42")
+				.extracting(Throwable::getCause, THROWABLE)
+				.hasMessage("o.g.r.MutatorByMethodTest$Toto.setA(int) expects int as argument, but j.l.String was given");
 	}
 	
 	@Test
 	public void testToMutator() {
 		MutatorByMethod<Toto, Integer> testInstance = new MutatorByMethod<>(Reflections.findMethod(Toto.class, "setA", int.class));
-		assertEquals(Reflections.getMethod(Toto.class, "getA"), testInstance.toAccessor().getGetter());
+		assertThat(testInstance.toAccessor().getGetter()).isEqualTo(Reflections.getMethod(Toto.class, "getA"));
 	}
 	
 	@Test
 	public void testToMutator_reverseSetterDoesntExist_throwsException() {
 		MutatorByMethod<Toto, Integer> testInstance = new MutatorByMethod<>(Reflections.findMethod(Toto.class, "setFakeProperty", int.class));
-		assertEquals("Can't find a mutator for o.g.r.MutatorByMethodTest$Toto.setFakeProperty(int)",
-				assertThrows(NonReversibleAccessor.class, testInstance::toAccessor).getMessage());
+		assertThatThrownBy(testInstance::toAccessor)
+				.isInstanceOf(NonReversibleAccessor.class)
+				.hasMessage("Can't find a mutator for o.g.r.MutatorByMethodTest$Toto.setFakeProperty(int)");
 	}
 	
 	@Test
 	public void testToString() {
 		MutatorByMethod<Toto, Integer> testInstance = new MutatorByMethod<>(Reflections.findMethod(Toto.class, "setA", int.class));
-		assertEquals("o.g.r.MutatorByMethodTest$Toto.setA(int)", testInstance.toString());
+		assertThat(testInstance.toString()).isEqualTo("o.g.r.MutatorByMethodTest$Toto.setA(int)");
 	}
 	
 	private static class Toto {

@@ -4,10 +4,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.annotations.VisibleForTesting;
 import org.gama.lang.Reflections;
 import org.gama.lang.StringAppender;
 import org.gama.lang.ThreadLocals;
+import org.gama.lang.VisibleForTesting;
 import org.gama.lang.collection.Iterables;
 import org.gama.lang.function.ThrowingRunnable;
 

@@ -3,8 +3,8 @@ package org.gama.reflection;
 import org.gama.lang.Reflections;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Guillaume Mary
@@ -14,7 +14,7 @@ public class AccessorByMethodTest {
 	@Test
 	public void testForProperty() {
 		AccessorByMethod testInstance = Accessors.accessorByMethod(Toto.class, "a");
-		assertEquals(testInstance.getGetter(), Reflections.findMethod(Toto.class, "getA"));
+		assertThat(Reflections.findMethod(Toto.class, "getA")).isEqualTo(testInstance.getGetter());
 	}
 	
 	@Test
@@ -22,26 +22,27 @@ public class AccessorByMethodTest {
 		AccessorByMethod<Toto, Integer> testInstance = new AccessorByMethod<>(Reflections.findMethod(Toto.class, "getA"));
 		Toto toto = new Toto();
 		toto.a = 42;
-		assertEquals((Object) 42, testInstance.get(toto));
+		assertThat(testInstance.get(toto)).isEqualTo((Object) 42);
 	}
 	
 	@Test
 	public void testToMutator() {
 		AccessorByMethod<Toto, Integer> testInstance = new AccessorByMethod<>(Reflections.findMethod(Toto.class, "getA"));
-		assertEquals(Reflections.getMethod(Toto.class, "setA", int.class), testInstance.toMutator().getSetter());
+		assertThat(testInstance.toMutator().getSetter()).isEqualTo(Reflections.getMethod(Toto.class, "setA", int.class));
 	}
 	
 	@Test
 	public void testToMutator_reverseSetterDoesntExist_throwsException() {
 		AccessorByMethod<Toto, Integer> testInstance = new AccessorByMethod<>(Reflections.findMethod(Toto.class, "getFakeProperty"));
-		assertEquals("Can't find a mutator for o.g.r.AccessorByMethodTest$Toto.getFakeProperty()",
-				assertThrows(NonReversibleAccessor.class, testInstance::toMutator).getMessage());
+		assertThatThrownBy(testInstance::toMutator)
+				.isInstanceOf(NonReversibleAccessor.class)
+				.hasMessage("Can't find a mutator for o.g.r.AccessorByMethodTest$Toto.getFakeProperty()");
 	}
 	
 	@Test
 	public void testToString() {
 		AccessorByMethod<Toto, Integer> testInstance = new AccessorByMethod<>(Reflections.findMethod(Toto.class, "getA"));
-		assertEquals("o.g.r.AccessorByMethodTest$Toto.getA()", testInstance.toString());
+		assertThat(testInstance.toString()).isEqualTo("o.g.r.AccessorByMethodTest$Toto.getA()");
 	}
 	
 	private static class Toto {

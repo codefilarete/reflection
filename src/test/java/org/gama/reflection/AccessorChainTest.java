@@ -1,9 +1,9 @@
 package org.gama.reflection;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.gama.lang.Reflections;
 import org.gama.lang.collection.Arrays;
 import org.gama.reflection.AccessorChain.ValueInitializerOnNullValue;
@@ -15,14 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import static org.gama.reflection.Accessors.accessorByMethodReference;
-import static org.gama.reflection.Accessors.propertyAccessor;
-import static org.gama.reflection.Accessors.mutatorByField;
-import static org.gama.reflection.Accessors.mutatorByMethod;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Guillaume Mary
@@ -85,7 +79,7 @@ class AccessorChainTest {
 	@MethodSource("get_data")
 	void get(List<IAccessor> accessors, Object object, Object expected) {
 		AccessorChain<Object, Object> accessorChain = new AccessorChain<>(accessors);
-		assertEquals(expected, accessorChain.get(object));
+		assertThat(accessorChain.get(object)).isEqualTo(expected);
 	}
 	
 	@Test
@@ -95,11 +89,14 @@ class AccessorChainTest {
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, Arrays.asList(new Phone("123"))));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
-		RuntimeException thrownException = assertThrows(RuntimeException.class, () -> testInstance.get(object));
-		assertEquals("Error while applying [accessor for field o.g.r.m.Person.address, accessor for field o.g.r.m.Address.phones," 
-				+ " accessor for field o.g.r.m.Phone.number] on instance of o.g.r.m.Person", thrownException.getMessage());
-		assertEquals("Error while applying accessor for field o.g.r.m.Phone.number on instance of j.u.ArrayList", thrownException.getCause().getMessage());
-		assertEquals("Field o.g.r.m.Phone.number doesn't exist in j.u.ArrayList", thrownException.getCause().getCause().getMessage());
+		assertThatThrownBy(() -> testInstance.get(object))
+				.isInstanceOf(RuntimeException.class)
+				.hasMessage("Error while applying [accessor for field o.g.r.m.Person.address, accessor for field o.g.r.m.Address.phones,"
+						+ " accessor for field o.g.r.m.Phone.number] on instance of o.g.r.m.Person")
+				.extracting(Throwable::getCause, InstanceOfAssertFactories.THROWABLE)
+				.hasMessage("Error while applying accessor for field o.g.r.m.Phone.number on instance of j.u.ArrayList")
+				.extracting(Throwable::getCause, InstanceOfAssertFactories.THROWABLE)
+				.hasMessage("Field o.g.r.m.Phone.number doesn't exist in j.u.ArrayList");
 	}
 	
 	@Test
@@ -108,12 +105,13 @@ class AccessorChainTest {
 		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, null));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
-		RuntimeException thrownException = assertThrows(RuntimeException.class, () -> testInstance.get(object));
-		assertEquals("Error while applying [accessor for field o.g.r.m.Person.address, accessor for field o.g.r.m.Address.phones," 
-				+ " accessor for field o.g.r.m.Phone.number] on instance of o.g.r.m.Person", thrownException.getMessage());
-		assertTrue(thrownException.getCause() instanceof NullPointerException);
-		assertEquals("Cannot invoke [accessor for field o.g.r.m.Person.address, accessor for field o.g.r.m.Address.phones," 
-				+ " accessor for field o.g.r.m.Phone.number] on null instance", thrownException.getCause().getMessage());
+		assertThatThrownBy(() -> testInstance.get(object))
+				.isInstanceOf(RuntimeException.class)
+				.hasMessage("Error while applying [accessor for field o.g.r.m.Person.address, accessor for field o.g.r.m.Address.phones,"
+						+ " accessor for field o.g.r.m.Phone.number] on instance of o.g.r.m.Person")
+				.extracting(Throwable::getCause, InstanceOfAssertFactories.THROWABLE)
+				.hasMessage("Cannot invoke [accessor for field o.g.r.m.Person.address, accessor for field o.g.r.m.Address.phones,"
+						+ " accessor for field o.g.r.m.Phone.number] on null instance");
 	}
 	
 	@Test
@@ -123,7 +121,7 @@ class AccessorChainTest {
 		Object object = new Person(new Address(null, null));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
 		testInstance.setNullValueHandler(AccessorChain.RETURN_NULL);
-		assertNull(testInstance.get(object));
+		assertThat(testInstance.get(object)).isNull();
 	}
 	
 	@Test
@@ -131,8 +129,8 @@ class AccessorChainTest {
 		DataSet dataSet = new DataSet();
 		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(list(dataSet.personAddressAccessor,
 				dataSet.addressCityAccessor, dataSet.cityNameAccessor), null);
-		assertNull(testInstance.get(new Person(null)));
-		assertNull(testInstance.get(new Person(new Address(null, null))));
+		assertThat(testInstance.get(new Person(null))).isNull();
+		assertThat(testInstance.get(new Person(new Address(null, null)))).isNull();
 	}
 	
 	@Test
@@ -142,7 +140,7 @@ class AccessorChainTest {
 				dataSet.addressCityAccessor, dataSet.cityNameAccessor), null);
 		Person pawn = new Person(null);
 		testInstance.toMutator().set(pawn, "toto");
-		assertEquals("toto", pawn.getAddress().getCity().getName());
+		assertThat(pawn.getAddress().getCity().getName()).isEqualTo("toto");
 	}
 	
 	@Test
@@ -159,8 +157,8 @@ class AccessorChainTest {
 		Person pawn = new Person(null);
 		Phone newPhone = new Phone();
 		testInstance.toMutator().set(pawn, newPhone);
-		assertEquals(MyList.class, pawn.getAddress().getPhones().getClass());
-		assertEquals(newPhone, pawn.getAddress().getPhones().get(0));
+		assertThat(pawn.getAddress().getPhones()).isInstanceOf(MyList.class);
+		assertThat(pawn.getAddress().getPhones().get(0)).isEqualTo(newPhone);
 	}
 	
 	private static class MyList<E> extends ArrayList<E> {
