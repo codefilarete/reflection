@@ -49,7 +49,7 @@ class AccessorChainTest {
 		}
 	}
 	
-	static List<IAccessor> list(IAccessor ... accessors) {
+	static List<Accessor> list(Accessor... accessors) {
 		return Arrays.asList(accessors);
 	}
 	
@@ -77,7 +77,7 @@ class AccessorChainTest {
 	
 	@ParameterizedTest
 	@MethodSource("get_data")
-	void get(List<IAccessor> accessors, Object object, Object expected) {
+	void get(List<Accessor> accessors, Object object, Object expected) {
 		AccessorChain<Object, Object> accessorChain = new AccessorChain<>(accessors);
 		assertThat(accessorChain.get(object)).isEqualTo(expected);
 	}
@@ -86,7 +86,7 @@ class AccessorChainTest {
 	void get_accessorIsAWrongOne_throwsIllegalArgumentException() {
 		// field "number" doesn't exist on Collection "phones" => get(..) should throw exception
 		DataSet dataSet = new DataSet();
-		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
+		List<Accessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, Arrays.asList(new Phone("123"))));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
 		assertThatThrownBy(() -> testInstance.get(object))
@@ -102,7 +102,7 @@ class AccessorChainTest {
 	@Test
 	void get_nullValueOnPath_defaultNullHandler_throwsNullPointerException() {
 		DataSet dataSet = new DataSet();
-		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
+		List<Accessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, null));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
 		assertThatThrownBy(() -> testInstance.get(object))
@@ -117,7 +117,7 @@ class AccessorChainTest {
 	@Test
 	void get_nullValueOnPath_nullHandler() {
 		DataSet dataSet = new DataSet();
-		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
+		List<Accessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, null));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
 		testInstance.setNullValueHandler(AccessorChain.RETURN_NULL);

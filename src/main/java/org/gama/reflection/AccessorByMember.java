@@ -5,7 +5,7 @@ import java.lang.reflect.Member;
 /**
  * @author Guillaume Mary
  */
-public interface AccessorByMember<C, T, M extends Member> extends IAccessor<C, T>{
+public interface AccessorByMember<C, T, M extends Member> extends Accessor<C, T> {
 	
 	M getGetter();
 	

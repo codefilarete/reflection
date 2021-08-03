@@ -60,13 +60,13 @@ public final class Accessors {
 		return new AccessorByMethodReference<>(getter);
 	}
 	
-	public static <C, T> IReversibleAccessor<C, T> accessorByMethodReference(SerializableFunction<C, T> getter, SerializableBiConsumer<C, T> setter) {
+	public static <C, T> ReversibleAccessor<C, T> accessorByMethodReference(SerializableFunction<C, T> getter, SerializableBiConsumer<C, T> setter) {
 		AccessorByMethodReference<C, T> fallback = new AccessorByMethodReference<>(getter);
 		return new MethodDispatcher()
 				// reverse methods are redirected to a redirecting lambda
-				.redirect(IReversibleAccessor.class, new IReversibleAccessor<C, T>() {
+				.redirect(ReversibleAccessor.class, new ReversibleAccessor<C, T>() {
 					@Override
-					public IMutator<C, T> toMutator() {
+					public Mutator<C, T> toMutator() {
 						return new MutatorByMethodReference<>(setter);
 					}
 					
@@ -77,7 +77,7 @@ public final class Accessors {
 				})
 				// fallback goes to default instance
 				.fallbackOn(fallback)
-				.build(IReversibleAccessor.class);
+				.build(ReversibleAccessor.class);
 	}
 	
 	public static <C, T> AccessorByField<C, T> accessorByField(Field field) {
@@ -166,18 +166,18 @@ public final class Accessors {
 	
 	public static <C, T> PropertyAccessor<C, T> propertyAccessor(Class<C> clazz, String propertyName) {
 		AccessorByMember<C, T, ?> propertyGetter = accessor(clazz, propertyName);
-		IMutator<C, T> propertySetter = mutator(clazz, propertyName, propertyGetter.getPropertyType());
+		Mutator<C, T> propertySetter = mutator(clazz, propertyName, propertyGetter.getPropertyType());
 		return new PropertyAccessor<>(propertyGetter, propertySetter);
 	}
 	
 	/**
-	 * Creates an {@link IAccessor} for the given property of the given class. Does it with conventional getter or a direct access to the field.
+	 * Creates an {@link Accessor} for the given property of the given class. Does it with conventional getter or a direct access to the field.
 	 * 
 	 * @param clazz the class owning the property
 	 * @param propertyName the name of the property
 	 * @param <C> the type of the class owning the property
 	 * @param <T> the type of the field (returned by the getter)
-	 * @return a new {@link IAccessor}
+	 * @return a new {@link Accessor}
 	 */
 	public static <C, T, M extends Member> AccessorByMember<C, T, M> accessor(Class<C> clazz, String propertyName) {
 		AccessorByMember<C, T, ?> propertyGetter = accessorByMethod(clazz, propertyName);
@@ -190,13 +190,13 @@ public final class Accessors {
 	}
 	
 	/**
-	 * Creates an {@link IAccessor} for the given property of the given class. Does it with conventional getter or a direct access to the field.
+	 * Creates an {@link Accessor} for the given property of the given class. Does it with conventional getter or a direct access to the field.
 	 * 
 	 * @param clazz the class owning the property
 	 * @param propertyName the name of the property
 	 * @param <C> the type of the class owning the property
 	 * @param <T> the type of the field (returned by the getter)
-	 * @return a new {@link IAccessor}
+	 * @return a new {@link Accessor}
 	 */
 	public static <C, T, M extends Member> AccessorByMember<C, T, M> accessor(Class<C> clazz, String propertyName, Class<T> propertyType) {
 		AccessorByMember<C, T, ?> propertyGetter = accessorByMethod(clazz, propertyName);
@@ -214,13 +214,13 @@ public final class Accessors {
 	}
 	
 	/**
-	 * Creates an {@link IMutator} for the given property of the given class. Does it with conventional setter or a direct access to the field.
+	 * Creates an {@link Mutator} for the given property of the given class. Does it with conventional setter or a direct access to the field.
 	 *
 	 * @param clazz the class owning the property
 	 * @param propertyName the name of the property
 	 * @param <C> the type of the class owning the property
 	 * @param <T> the type of the field (first parameter of the setter)
-	 * @return a new {@link IMutator}
+	 * @return a new {@link Mutator}
 	 */
 	public static <C, T, M extends Member> MutatorByMember<C, T, M> mutator(Class<C> clazz, String propertyName) {
 		MutatorByMember<C, T, ?> propertySetter = mutatorByMethod(clazz, propertyName);
@@ -233,13 +233,13 @@ public final class Accessors {
 	}
 	
 	/**
-	 * Creates an {@link IMutator} for the given property of the given class. Does it with conventional setter or a direct access to the field.
+	 * Creates an {@link Mutator} for the given property of the given class. Does it with conventional setter or a direct access to the field.
 	 *
 	 * @param clazz the class owning the property
 	 * @param propertyName the name of the property
 	 * @param <C> the type of the class owning the property
 	 * @param <T> the type of the field (first parameter of the setter)
-	 * @return a new {@link IMutator}
+	 * @return a new {@link Mutator}
 	 */
 	public static <C, T, M extends Member> MutatorByMember<C, T, M> mutator(Class<C> clazz, String propertyName, Class<T> propertyType) {
 		MutatorByMember<C, T, ?> propertySetter = mutatorByMethod(clazz, propertyName, propertyType);
@@ -289,10 +289,10 @@ public final class Accessors {
 					AccessorByMethod::new,
 					MutatorByMethod::new,
 					AccessorByMethod::new);
-			if (reflector instanceof IReversibleAccessor) {
-				return new PropertyAccessor<>((IReversibleAccessor<C, T>) reflector);
-			} else if (reflector instanceof IReversibleMutator) {
-				return new PropertyAccessor<>((IReversibleMutator<C, T>) reflector);
+			if (reflector instanceof ReversibleAccessor) {
+				return new PropertyAccessor<>((ReversibleAccessor<C, T>) reflector);
+			} else if (reflector instanceof ReversibleMutator) {
+				return new PropertyAccessor<>((ReversibleMutator<C, T>) reflector);
 			} else {
 				// unreachable because preceding ifs check all conditions
 				throw new IllegalArgumentException("Member cannot be determined as a getter or a setter : " + member);
@@ -306,10 +306,10 @@ public final class Accessors {
 	/**
 	 * Gives input type of a mutator. Implementation is based on well-known mutator classes and is not expected to be generic
 	 * 
-	 * @param mutator any {@link IMutator}
+	 * @param mutator any {@link Mutator}
 	 * @return input type of a mutator : input value of a setter and type of a field
 	 */
-	public static Class giveInputType(IMutator mutator) {
+	public static Class giveInputType(Mutator mutator) {
 		if (mutator instanceof MutatorByMember) {
 			Member member = ((MutatorByMember) mutator).getSetter();
 			if (member instanceof Method) {
@@ -335,10 +335,10 @@ public final class Accessors {
 	/**
 	 * Gives input type of a mutator. Implementation is based on well-known mutator classes and is not expected to be generic
 	 * 
-	 * @param accessor any {@link IAccessor}
+	 * @param accessor any {@link Accessor}
 	 * @return input type of a mutator : input value of a setter and type of a field
 	 */
-	public static Class giveReturnType(IAccessor accessor) {
+	public static Class giveReturnType(Accessor accessor) {
 		if (accessor instanceof AccessorByMember) {
 			Member member = ((AccessorByMember) accessor).getGetter();
 			if (member instanceof Method) {
@@ -354,7 +354,7 @@ public final class Accessors {
 		} else if (accessor instanceof PropertyAccessor) {
 			return giveReturnType(((PropertyAccessor) accessor).getAccessor());
 		} else if (accessor instanceof AccessorChain) {
-			return giveReturnType(Iterables.last((List<IAccessor>) ((AccessorChain) accessor).getAccessors()));
+			return giveReturnType(Iterables.last((List<Accessor>) ((AccessorChain) accessor).getAccessors()));
 		} else {
 			// for future new MutatorByMember that are neither a Field nor a Method ... should not happen 
 			throw new UnsupportedOperationException("Accessor type is not implemented : " + accessor);

@@ -5,7 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * @author Guillaume Mary
  */
-public abstract class AbstractMutator<C, T> extends AbstractReflector<C> implements IMutator<C, T> {
+public abstract class AbstractMutator<C, T> extends AbstractReflector<C> implements Mutator<C, T> {
 	
 	@Override
 	public void set(C c, T t) {

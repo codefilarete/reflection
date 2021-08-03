@@ -65,7 +65,7 @@ public class AccessorDefinition implements Comparable<AccessorDefinition> {
 			Method member = ((ValueAccessPointByMethod) o).getMethod();
 			memberName = Reflections.propertyName(member.getName());
 			declarator = member.getDeclaringClass();
-			if (o instanceof IAccessor) {
+			if (o instanceof Accessor) {
 				memberType = member.getReturnType();
 			} else {
 				memberType = member.getParameterTypes()[0];
@@ -74,7 +74,7 @@ public class AccessorDefinition implements Comparable<AccessorDefinition> {
 			memberName = Reflections.propertyName(((ValueAccessPointByMethodReference) o).getMethodName());
 			declarator = ((ValueAccessPointByMethodReference) o).getDeclaringClass();
 			Method method = METHOD_REFERENCE_CAPTURER.findMethod(((ValueAccessPointByMethodReference) o).getSerializedLambda());
-			if (o instanceof IAccessor) {
+			if (o instanceof Accessor) {
 				memberType = method.getReturnType();
 			} else {
 				memberType = method.getParameterTypes()[0];
@@ -93,16 +93,16 @@ public class AccessorDefinition implements Comparable<AccessorDefinition> {
 		StringAppender stringAppender = new StringAppender() {
 			@Override
 			public StringAppender cat(Object s) {
-				if (s instanceof IAccessor) {
-					return super.cat(giveDefinition((IAccessor) s).getName());
+				if (s instanceof Accessor) {
+					return super.cat(giveDefinition((Accessor) s).getName());
 				} else {
 					return super.cat(s);
 				}
 			}
 		};
 		stringAppender.ccat(o.getAccessors(), ".");
-		IAccessor firstAccessor = (IAccessor) Iterables.first(o.getAccessors());
-		IAccessor lastAccessor = (IAccessor) Iterables.last(o.getAccessors());
+		Accessor firstAccessor = (Accessor) Iterables.first(o.getAccessors());
+		Accessor lastAccessor = (Accessor) Iterables.last(o.getAccessors());
 		return new AccessorDefinition(
 				giveDefinition(firstAccessor).getDeclaringClass(),
 				stringAppender.toString(),
@@ -148,7 +148,7 @@ public class AccessorDefinition implements Comparable<AccessorDefinition> {
 			result = toString(((PropertyAccessor) o).getAccessor());
 		} else if (o instanceof AccessorChain) {
 			StringAppender chainPrint = new StringAppender();
-			((AccessorChain) o).getAccessors().forEach(accessor -> chainPrint.cat(toString((IAccessor) accessor)).cat(" > "));
+			((AccessorChain) o).getAccessors().forEach(accessor -> chainPrint.cat(toString((Accessor) accessor)).cat(" > "));
 			result = chainPrint.cutTail(3).toString();
 		} else {
 			throw new UnsupportedOperationException("Don't know how find out member definition for " + Reflections.toString(o.getClass()));

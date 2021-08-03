@@ -14,10 +14,10 @@ import org.gama.lang.StringAppender;
 import org.gama.lang.bean.InstanceMethodIterator;
 import org.gama.lang.collection.Iterables;
 import org.gama.lang.collection.KeepOrderSet;
+import org.gama.reflection.Accessor;
 import org.gama.reflection.AccessorByMethod;
 import org.gama.reflection.AccessorByMethodReference;
 import org.gama.reflection.AccessorDefinition;
-import org.gama.reflection.IAccessor;
 import org.gama.reflection.ValueAccessPointByMethodReference;
 import org.gama.reflection.ValueAccessPointSet;
 
@@ -56,8 +56,8 @@ public class ObjectPrinterBuilder<C> {
 	}
 	
 	/** @apiNote  */
-	private final KeepOrderSet<IAccessor<C, Object>> printableProperties = new KeepOrderSet<>();
-	/** @apiNote we use a {@link ValueAccessPointSet} because its supports well contains() method with {@link IAccessor} as argument */
+	private final KeepOrderSet<Accessor<C, Object>> printableProperties = new KeepOrderSet<>();
+	/** @apiNote we use a {@link ValueAccessPointSet} because its supports well contains() method with {@link Accessor} as argument */
 	private final ValueAccessPointSet excludedProperties = new ValueAccessPointSet();
 	
 	private final Map<Class, Function<Object, String>> overridenPrinters = new HashMap<>();
@@ -72,7 +72,7 @@ public class ObjectPrinterBuilder<C> {
 		return this.addProperty(new AccessorByMethodReference(getter));
 	}
 	
-	private ObjectPrinterBuilder<C> addProperty(IAccessor<C, Object> getter) {
+	private ObjectPrinterBuilder<C> addProperty(Accessor<C, Object> getter) {
 		this.printableProperties.add(getter);
 		return this;
 	}
@@ -107,8 +107,8 @@ public class ObjectPrinterBuilder<C> {
 	 * @return a configured printer for current type
 	 */
 	public ObjectPrinter<C> build() {
-		LinkedHashMap<String, IAccessor<C, Object>> printingFunctionByPropertyName = new LinkedHashMap<>();
-		for (IAccessor<C, Object> printableProperty : printableProperties) {
+		LinkedHashMap<String, Accessor<C, Object>> printingFunctionByPropertyName = new LinkedHashMap<>();
+		for (Accessor<C, Object> printableProperty : printableProperties) {
 			String methodName = AccessorDefinition.giveDefinition(printableProperty).getName();
 			if (!excludedProperties.contains(printableProperty)) {
 				printingFunctionByPropertyName.put(methodName, printableProperty);
@@ -124,13 +124,13 @@ public class ObjectPrinterBuilder<C> {
 	 */
 	public static class ObjectPrinter<C> {
 		
-		private final Map<String, IAccessor<C, Object>> printableProperties;
+		private final Map<String, Accessor<C, Object>> printableProperties;
 		private final Map<Class, Function<Object, String>> overridenPrinters;
 		
 		/**
 		 * @apiNote private because {@link ObjectPrinterBuilder} is expected to be used for configuration 
 		 */
-		private ObjectPrinter(LinkedHashMap<String, IAccessor<C, Object>> printableProperties, Map<Class, Function<Object, String>> overridenPrinters) {
+		private ObjectPrinter(LinkedHashMap<String, Accessor<C, Object>> printableProperties, Map<Class, Function<Object, String>> overridenPrinters) {
 			this.printableProperties = printableProperties;
 			this.overridenPrinters = overridenPrinters;
 		}

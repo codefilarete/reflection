@@ -20,14 +20,14 @@ import org.gama.lang.collection.Iterables;
 import static org.gama.reflection.Accessors.giveInputType;
 
 /**
- * Chain of {@link IAccessor}s that behaves as a {@link IAccessor}
+ * Chain of {@link Accessor}s that behaves as a {@link Accessor}
  * Behavior of null-encountered-values during {@link #get(Object)} is controlled through a {@link NullValueHandler}, by default {@link NullPointerException}
  * will be thrown, see {@link #setNullValueHandler(NullValueHandler)} to change it. This class proposes some other default behavior such as
  * {@link #RETURN_NULL} or {@link #INITIALIZE_VALUE}
  * 
  * @author Guillaume Mary
  */
-public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReversibleAccessor<C, T> {
+public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements ReversibleAccessor<C, T> {
 	
 	public static <IN, A, OUT> AccessorChain<IN, OUT> chain(SerializableFunction<IN, A> function1, SerializableFunction<A, OUT> function2) {
 		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2));
@@ -39,12 +39,12 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReve
 	 * - initializes values (instanciate bean) on path when its mutator is used
 	 * (voluntary dissimetric behavior)
 	 *
-	 * @param accessors list of {@link IAccessor} to be used by chain
+	 * @param accessors list of {@link Accessor} to be used by chain
 	 * @see #RETURN_NULL
-	 * @see ValueInitializerOnNullValue#giveValueType(IAccessor, Class)
+	 * @see ValueInitializerOnNullValue#giveValueType(Accessor, Class)
 	 * @see #forModel(List, BiFunction) 
 	 */
-	public static <IN, OUT> AccessorChain<IN, OUT> forModel(List<IAccessor> accessors) {
+	public static <IN, OUT> AccessorChain<IN, OUT> forModel(List<Accessor> accessors) {
 		return forModel(accessors, null);
 	}
 	
@@ -54,13 +54,13 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReve
 	 * - initializes values (instanciate bean) on path when its mutator is used
 	 * (voluntary dissimetric behavior)
 	 * 
-	 * @param accessors list of {@link IAccessor} to be used by chain
+	 * @param accessors list of {@link Accessor} to be used by chain
 	 * @param valueTypeDeterminer must be given if a bean type is badly determined by default mecanism
 	 * 		  (returning Object on generic for instance, or wrong Collection concrete type), null accepted (means default mecanism)
 	 * @see #RETURN_NULL
-	 * @see ValueInitializerOnNullValue#giveValueType(IAccessor, Class)
+	 * @see ValueInitializerOnNullValue#giveValueType(Accessor, Class)
 	 */
-	public static <IN, OUT> AccessorChain<IN, OUT> forModel(List<IAccessor> accessors, @Nullable BiFunction<IAccessor, Class, Class> valueTypeDeterminer) {
+	public static <IN, OUT> AccessorChain<IN, OUT> forModel(List<Accessor> accessors, @Nullable BiFunction<Accessor, Class, Class> valueTypeDeterminer) {
 		return new AccessorChain<IN, OUT>(accessors) {
 			
 			private final AccessorChainMutator<IN, Object, OUT> mutator = (AccessorChainMutator<IN, Object, OUT>) super.toMutator()
@@ -85,7 +85,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReve
 	/** Will instanciate needed value (and set it) if a link in an accessor chain returns null */
 	public static final NullValueHandler INITIALIZE_VALUE = new ValueInitializerOnNullValue();
 	
-	private final List<IAccessor> accessors;
+	private final List<Accessor> accessors;
 	
 	private NullValueHandler nullValueHandler = THROW_NULLPOINTEREXCEPTION;
 	
@@ -93,28 +93,28 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReve
 		this(new ArrayList<>(5));
 	}
 	
-	public AccessorChain(IAccessor ... accessors) {
+	public AccessorChain(Accessor... accessors) {
 		this(Arrays.asList(accessors));
 	}
 	
-	public AccessorChain(List<IAccessor> accessors) {
+	public AccessorChain(List<Accessor> accessors) {
 		this.accessors = accessors;
 	}
 	
-	public List<IAccessor> getAccessors() {
+	public List<Accessor> getAccessors() {
 		return accessors;
 	}
 	
-	public void add(IAccessor accessor) {
+	public void add(Accessor accessor) {
 		accessors.add(accessor);
 	}
 	
-	public void add(IAccessor ... accessors) {
+	public void add(Accessor... accessors) {
 		add(Arrays.asList(accessors));
 	}
 	
-	public void add(Iterable<IAccessor> accessors) {
-		this.accessors.addAll((Collection<IAccessor>) accessors);
+	public void add(Iterable<Accessor> accessors) {
+		this.accessors.addAll((Collection<Accessor>) accessors);
 	}
 	
 	public AccessorChain<C, T> setNullValueHandler(NullValueHandler nullValueHandler) {
@@ -126,7 +126,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReve
 	public T doGet(C c) {
 		Object target = c;
 		Object previousTarget;
-		for (IAccessor accessor : accessors) {
+		for (Accessor accessor : accessors) {
 			previousTarget = target;
 			target = accessor.get(target);
 			if (target == null) {
@@ -149,24 +149,24 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReve
 	 * @return the value that should replace null value, can be null too
 	 */
 	@Nullable
-	protected Object onNullValue(Object targetBean, IAccessor accessor) {
+	protected Object onNullValue(Object targetBean, Accessor accessor) {
 		return this.nullValueHandler.consume(targetBean, accessor);
 	}
 	
 	/**
-	 * Only supported when last accessor is reversible (aka implements {@link IReversibleAccessor}.
+	 * Only supported when last accessor is reversible (aka implements {@link ReversibleAccessor}.
 	 *
 	 * @return a new chain which path is the same as this
 	 * @throws UnsupportedOperationException if last accessor is not reversible
 	 */
 	@Override
 	public AccessorChainMutator<C, Object, T> toMutator() {
-		IAccessor lastAccessor = Iterables.last(getAccessors());
-		if (lastAccessor instanceof IReversibleAccessor) {
-			IReversibleMutator<Object, T> lastMutator = (IReversibleMutator<Object, T>) ((IReversibleAccessor) lastAccessor).toMutator();
+		Accessor lastAccessor = Iterables.last(getAccessors());
+		if (lastAccessor instanceof ReversibleAccessor) {
+			ReversibleMutator<Object, T> lastMutator = (ReversibleMutator<Object, T>) ((ReversibleAccessor) lastAccessor).toMutator();
 			return new AccessorChainMutator<>(Collections.cutTail(getAccessors()), lastMutator);
 		} else {
-			throw new UnsupportedOperationException("Last accessor cannot be reverted because it's not " + IReversibleAccessor.class.getName()
+			throw new UnsupportedOperationException("Last accessor cannot be reverted because it's not " + ReversibleAccessor.class.getName()
 					+ ": " + lastAccessor);
 		}
 	}
@@ -191,7 +191,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReve
 	 */
 	public interface NullValueHandler {
 		
-		Object consume(Object srcBean, IAccessor accessor);
+		Object consume(Object srcBean, Accessor accessor);
 		
 	}
 	
@@ -200,7 +200,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReve
 	 */
 	private static class NullPointerExceptionThrowerOnNullValue implements NullValueHandler {
 		@Override
-		public Object consume(Object srcBean, IAccessor accessor) {
+		public Object consume(Object srcBean, Accessor accessor) {
 			String accessorDescription = accessor.toString();
 			String exceptionMessage;
 			if (accessor instanceof AccessorByField) {
@@ -217,31 +217,31 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReve
 	 */
 	private static class NullReturnerOnNullValue implements NullValueHandler {
 		@Override
-		public Object consume(Object srcBean, IAccessor accessor) {
+		public Object consume(Object srcBean, Accessor accessor) {
 			return null;
 		}
 	}
 	
 	/**
 	 * Class that will initialize value by instanciating its class and set it onto the property.
-	 * Instanciated types can be controlled through {@link #giveValueType(IAccessor, Class)}.
+	 * Instanciated types can be controlled through {@link #giveValueType(Accessor, Class)}.
 	 */
 	public static class ValueInitializerOnNullValue implements NullValueHandler {
 		
-		private final BiFunction<IAccessor, Class, Class> valueTypeDeterminer;
+		private final BiFunction<Accessor, Class, Class> valueTypeDeterminer;
 		
 		public ValueInitializerOnNullValue() {
 			this(null);
 		}
 		
-		public ValueInitializerOnNullValue(@Nullable BiFunction<IAccessor, Class, Class> valueTypeDeterminer) {
+		public ValueInitializerOnNullValue(@Nullable BiFunction<Accessor, Class, Class> valueTypeDeterminer) {
 			this.valueTypeDeterminer = Objects.preventNull(valueTypeDeterminer, ValueInitializerOnNullValue::giveValueType);
 		}
 		
 		@Override
-		public Object consume(Object srcBean, IAccessor accessor) {
-			if (accessor instanceof IReversibleAccessor) {
-				IMutator mutator = ((IReversibleAccessor) accessor).toMutator();
+		public Object consume(Object srcBean, Accessor accessor) {
+			if (accessor instanceof ReversibleAccessor) {
+				Mutator mutator = ((ReversibleAccessor) accessor).toMutator();
 				Class inputType = giveInputType(mutator);
 				// NB: will throw an exception if type is not instanciable
 				Object value = Reflections.newInstance(valueTypeDeterminer.apply(accessor, inputType));
@@ -249,7 +249,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReve
 				return value;
 			} else {
 				throw new UnsupportedOperationException(
-						"accessor cannot be reverted because it's not " + Reflections.toString(IReversibleAccessor.class) + ": " + accessor);
+						"accessor cannot be reverted because it's not " + Reflections.toString(ReversibleAccessor.class) + ": " + accessor);
 			}
 		}
 		
@@ -259,7 +259,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements IReve
 		 * @param valueType expected compatible type, this of accessor
 		 * @return a concrete and instanciable type compatible with acccessor input type
 		 */
-		public static Class giveValueType(IAccessor accessor, Class valueType) {
+		public static Class giveValueType(Accessor accessor, Class valueType) {
 			if (List.class.equals(valueType)) {
 				return ArrayList.class;
 			} else if (Set.class.equals(valueType)) {

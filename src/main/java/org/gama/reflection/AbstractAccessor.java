@@ -5,7 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * @author Guillaume Mary
  */
-public abstract class AbstractAccessor<C, T> extends AbstractReflector<C> implements IAccessor<C, T> {
+public abstract class AbstractAccessor<C, T> extends AbstractReflector<C> implements Accessor<C, T> {
 	
 	@Override
 	public T get(C c) {

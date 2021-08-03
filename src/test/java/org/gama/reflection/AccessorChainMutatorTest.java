@@ -95,17 +95,17 @@ class AccessorChainMutatorTest {
 
 	@ParameterizedTest
 	@MethodSource("testGetMutatorData")
-	void testGetMutator(IReversibleAccessor accessor, IMutator expected) {
+	void testGetMutator(ReversibleAccessor accessor, Mutator expected) {
 		assertThat(accessor.toMutator()).isEqualTo(expected);
 	}
 
 	@ParameterizedTest
 	@MethodSource("testGetMutator_exception_data")
-	void testGetMutator_exception(IReversibleAccessor accessor) {
+	void testGetMutator_exception(ReversibleAccessor accessor) {
 		assertThatExceptionOfType(MemberNotFoundException.class).isThrownBy(accessor::toMutator);
 	}
 
-	static List<IAccessor> list(IAccessor ... accessors) {
+	static List<Accessor> list(Accessor... accessors) {
 		return Arrays.asList(accessors);
 	}
 
@@ -129,7 +129,7 @@ class AccessorChainMutatorTest {
 
 	@ParameterizedTest
 	@MethodSource("setData")
-	void set(List<IAccessor> accessors, Object object, Object expected) {
+	void set(List<Accessor> accessors, Object object, Object expected) {
 		AccessorChain<Object, Object> accessorChain = new AccessorChain<>(accessors);
 		AccessorChainMutator testInstance = accessorChain.toMutator();
 		testInstance.set(object, expected);
@@ -139,7 +139,7 @@ class AccessorChainMutatorTest {
 	@Test
 	void set_nullValueOnPath_throwsNullPointerException() {
 		DataSet dataSet = new DataSet();
-		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor);
+		List<Accessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor);
 		Object object = new Person(null);
 		AccessorChainMutator testInstance = new AccessorChain(accessors).toMutator();
 		assertThatThrownBy(() -> testInstance.set(object, new Address(new City("Toto"), null)))
@@ -153,8 +153,8 @@ class AccessorChainMutatorTest {
 	@Test
 	void set_nullValueOnPath_withInitializer_objectsAreInstanciated() {
 		DataSet dataSet = new DataSet();
-		IMutator<List<Phone>, Phone> phoneAdder = List::add;
-		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor);
+		Mutator<List<Phone>, Phone> phoneAdder = List::add;
+		List<Accessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor);
 		// We create a Person without address, it will be instanciated by AccessorChainMutator
 		Person targetPerson = new Person(null);
 		AccessorChainMutator<Person, List<Phone>, Phone> testInstance = new AccessorChainMutator<>(accessors, phoneAdder);
@@ -167,7 +167,7 @@ class AccessorChainMutatorTest {
 	@Test
 	void set_nullValueOnPath_nullHandler() {
 		DataSet dataSet = new DataSet();
-		List<IAccessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor);
+		List<Accessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor);
 		Person person = new Person(new Address(null, null));
 		AccessorChainMutator<Person, Phone, String> testInstance = new AccessorChainMutator<>(accessors, dataSet.phoneNumberMethodMutator);
 		testInstance.setNullValueHandler(AccessorChain.RETURN_NULL);
@@ -205,7 +205,7 @@ class AccessorChainMutatorTest {
 
 	@ParameterizedTest
 	@MethodSource("testPathDescription")
-	void testPathDescription(List<IAccessor> accessors, String expectedResult) {
+	void testPathDescription(List<Accessor> accessors, String expectedResult) {
 		AccessorPathBuilder testInstance = new AccessorPathBuilder();
 		assertThat(testInstance.ccat(accessors, ".").toString()).isEqualTo(expectedResult);
 	}

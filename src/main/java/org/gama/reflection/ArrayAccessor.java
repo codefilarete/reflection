@@ -6,7 +6,7 @@ import java.lang.reflect.Array;
  * @author Guillaume Mary
  */
 // NB: I didn't manage to create AbstractAccessor<C[], C> without having a "C cannot be cast to Object[]" from MetaModelAccessorBuilder
-public class ArrayAccessor<C> extends AbstractAccessor<C, C> implements IReversibleAccessor<C, C> {
+public class ArrayAccessor<C> extends AbstractAccessor<C, C> implements ReversibleAccessor<C, C> {
 	
 	private int index;
 	

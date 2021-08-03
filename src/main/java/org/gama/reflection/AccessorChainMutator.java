@@ -17,28 +17,28 @@ import org.gama.lang.function.ThrowingRunnable;
  * @param <T> value type to be set
  * @author Guillaume Mary
  */
-public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implements IReversibleMutator<C, T> {
+public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implements ReversibleMutator<C, T> {
 	
 	/**
 	 * Keeps track of the mutator that returned null during the {@link #get(Object)} phase, if any.
 	 * Will be used to give better exception message when {@link NullPointerException} will be thrown by {@link #set(Object, Object)}.
 	 * Using a ThreadLocal is quite an overkill design, but can't find a less intrusive & thread-safe way to do it. 
 	 */
-	private static final ThreadLocal<IAccessor> CURRENT_NULL_RETURNING_MUTATOR = new ThreadLocal<>();
+	private static final ThreadLocal<Accessor> CURRENT_NULL_RETURNING_MUTATOR = new ThreadLocal<>();
 	
-	private final IMutator<X, T> mutator;
+	private final Mutator<X, T> mutator;
 	
-	public AccessorChainMutator(List<IAccessor> accessors, IMutator<X, T> mutator) {
+	public AccessorChainMutator(List<Accessor> accessors, Mutator<X, T> mutator) {
 		super(accessors);
 		this.mutator = mutator;
 	}
 	
-	public AccessorChainMutator(AccessorChain<C, X> accessors, IMutator<X, T> mutator) {
+	public AccessorChainMutator(AccessorChain<C, X> accessors, Mutator<X, T> mutator) {
 		super(accessors.getAccessors());
 		this.mutator = mutator;
 	}
 	
-	public IMutator<X, T> getMutator() {
+	public Mutator<X, T> getMutator() {
 		return mutator;
 	}
 	
@@ -63,15 +63,15 @@ public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implement
 	 * @return super.onNullValue(targetBean, accessor)
 	 */
 	@Override
-	protected Object onNullValue(Object targetBean, IAccessor accessor) {
+	protected Object onNullValue(Object targetBean, Accessor accessor) {
 		CURRENT_NULL_RETURNING_MUTATOR.set(accessor);
 		return super.onNullValue(targetBean, accessor);
 	}
 	
 	private void throwNullPointerException(Object srcBean) {
 		String accessorDescription = new AccessorPathBuilder().ccat(getAccessors(), ".").toString();
-		IAccessor nullReturningMutator = CURRENT_NULL_RETURNING_MUTATOR.get();
-		List<IAccessor> pathToNullPointerException = Iterables.head(getAccessors(), nullReturningMutator);
+		Accessor nullReturningMutator = CURRENT_NULL_RETURNING_MUTATOR.get();
+		List<Accessor> pathToNullPointerException = Iterables.head(getAccessors(), nullReturningMutator);
 		pathToNullPointerException.add(nullReturningMutator);
 		String nullProviderDescription = new AccessorPathBuilder().ccat(pathToNullPointerException, ".").toString();
 		throw new NullPointerException("Call of " + accessorDescription + " on " + srcBean + " returned null, because "
@@ -79,20 +79,20 @@ public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implement
 	}
 	
 	/**
-	 * Only supported when last mutator is reversible (aka implements {@link IReversibleMutator}.
+	 * Only supported when last mutator is reversible (aka implements {@link ReversibleMutator}.
 	 * 
 	 * @return a new chain which path is the same as this
 	 * @throws UnsupportedOperationException if last mutator is not reversible
 	 */
 	@Override
 	public AccessorChain<C, T> toAccessor() {
-		if (mutator instanceof IReversibleMutator) {
-			ArrayList<IAccessor> newAccessors = new ArrayList<>(getAccessors());
-			newAccessors.add(((IReversibleMutator) mutator).toAccessor());
+		if (mutator instanceof ReversibleMutator) {
+			ArrayList<Accessor> newAccessors = new ArrayList<>(getAccessors());
+			newAccessors.add(((ReversibleMutator) mutator).toAccessor());
 			return new AccessorChain<>(newAccessors);
 		} else {
 			throw new UnsupportedOperationException(
-					"Last mutator cannot be reverted because it doesn't implement " + Reflections.toString(IReversibleAccessor.class) + ": " + mutator);
+					"Last mutator cannot be reverted because it doesn't implement " + Reflections.toString(ReversibleAccessor.class) + ": " + mutator);
 		}
 	}
 	

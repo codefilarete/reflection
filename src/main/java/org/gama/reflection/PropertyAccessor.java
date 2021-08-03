@@ -10,10 +10,10 @@ import org.gama.lang.function.Predicates;
  * @author Guillaume Mary
  * @see Accessors
  */
-public class PropertyAccessor<C, T> implements IReversibleAccessor<C, T>, IReversibleMutator<C, T> {
+public class PropertyAccessor<C, T> implements ReversibleAccessor<C, T>, ReversibleMutator<C, T> {
 	
 	/**
-	 * Static constructor, because its signature would conflict with the one with {@link IAccessor}, {@link IMutator}
+	 * Static constructor, because its signature would conflict with the one with {@link Accessor}, {@link Mutator}
 	 * @param accessor a method reference to a getter
 	 * @param mutator a method reference to a setter
 	 * @param <C> bean type
@@ -24,26 +24,26 @@ public class PropertyAccessor<C, T> implements IReversibleAccessor<C, T>, IRever
 		return new PropertyAccessor<>(new AccessorByMethodReference<>(accessor), new MutatorByMethodReference<>(mutator));
 	}
 	
-	private final IAccessor<C, T> accessor;
-	private final IMutator<C, T> mutator;
+	private final Accessor<C, T> accessor;
+	private final Mutator<C, T> mutator;
 	
-	public PropertyAccessor(IReversibleAccessor<C, T> accessor) {
+	public PropertyAccessor(ReversibleAccessor<C, T> accessor) {
 		this(accessor, accessor.toMutator());
 	}
 	
-	public PropertyAccessor(IReversibleMutator<C, T> mutator) {
+	public PropertyAccessor(ReversibleMutator<C, T> mutator) {
 		this(mutator.toAccessor(), mutator);
 	}
 	
-	public PropertyAccessor(IAccessor<C, T> accessor, IMutator<C, T> mutator) {
+	public PropertyAccessor(Accessor<C, T> accessor, Mutator<C, T> mutator) {
 		this.accessor = accessor;
 		this.mutator = mutator;
 	}
-	public IAccessor<C, T> getAccessor() {
+	public Accessor<C, T> getAccessor() {
 		return accessor;
 	}
 	
-	public IMutator<C, T> getMutator() {
+	public Mutator<C, T> getMutator() {
 		return mutator;
 	}
 	
@@ -71,7 +71,7 @@ public class PropertyAccessor<C, T> implements IReversibleAccessor<C, T>, IRever
 	 * @return {@link #getAccessor()}
 	 */
 	@Override
-	public IAccessor<C, T> toAccessor() {
+	public Accessor<C, T> toAccessor() {
 		return getAccessor();
 	}
 	
@@ -80,7 +80,7 @@ public class PropertyAccessor<C, T> implements IReversibleAccessor<C, T>, IRever
 	 * @return {@link #getMutator()}
 	 */
 	@Override
-	public IMutator<C, T> toMutator() {
+	public Mutator<C, T> toMutator() {
 		return getMutator();
 	}
 	
