@@ -126,7 +126,7 @@ public class MethodReferenceCapturer {
 	 * @param <O> the owning class of the constructor which is also the return/instance type
 	 * @return the found method
 	 */
-	public <O> Constructor findConstructor(SerializableSupplier<O> methodReference) {
+	public <O> Constructor<O> findConstructor(SerializableSupplier<O> methodReference) {
 		return findConstructor(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	
@@ -138,7 +138,7 @@ public class MethodReferenceCapturer {
 	 * @param <A1> the first argument type
 	 * @return the found method
 	 */
-	public <O, A1> Constructor findConstructor(SerializableFunction<A1, O> methodReference) {
+	public <O, A1> Constructor<O> findConstructor(SerializableFunction<A1, O> methodReference) {
 		return findConstructor(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	
@@ -151,7 +151,7 @@ public class MethodReferenceCapturer {
 	 * @param <A2> the first argument type
 	 * @return the found method
 	 */
-	public <A1, A2, O> Constructor findConstructor(SerializableBiFunction<A1, A2, O> methodReference) {
+	public <A1, A2, O> Constructor<O> findConstructor(SerializableBiFunction<A1, A2, O> methodReference) {
 		return findConstructor(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	
@@ -165,7 +165,7 @@ public class MethodReferenceCapturer {
 	 * @param <A3> the second argument type
 	 * @return the found method
 	 */
-	public <A1, A2, A3,O> Constructor findConstructor(SerializableTriFunction<A1, A2, A3, O> methodReference) {
+	public <A1, A2, A3,O> Constructor<O> findConstructor(SerializableTriFunction<A1, A2, A3, O> methodReference) {
 		return findConstructor(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	

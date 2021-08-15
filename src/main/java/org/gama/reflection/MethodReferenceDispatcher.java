@@ -206,6 +206,30 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 		return this;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 * Overriden to cast return type to current instance one, to allow better chaining 
+	 */
+	public <X> MethodReferenceDispatcher redirect(Class<X> interfazz, X extensionSurrogate) {
+		return (MethodReferenceDispatcher) super.redirect(interfazz, extensionSurrogate);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * Overriden to cast return type to current instance one, to allow better chaining 
+	 */
+	public <X> MethodReferenceDispatcher redirect(Class<X> interfazz, X extensionSurrogate, boolean returnProxy) {
+		return (MethodReferenceDispatcher) super.redirect(interfazz, extensionSurrogate, returnProxy);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * Overriden to cast return type to current instance one, to allow better chaining 
+	 */
+	public <X> MethodReferenceDispatcher redirect(Class<X> interfazz, X extensionSurrogate, Object returningMethodsTarget) {
+		return (MethodReferenceDispatcher) super.redirect(interfazz, extensionSurrogate, returningMethodsTarget);
+	}
+	
 	/* Shortcut methods  */
 	
 	private void addInterceptor(Method method, ArgsDigester argsDigester) {
