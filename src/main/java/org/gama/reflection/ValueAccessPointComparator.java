@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Comparator for {@link ValueAccessPoint} that makes them not different if their goal is to access same property whatever the way they use (by field,
+ * by method, by method reference ...)
+ * Based on {@link AccessorDefinition#compareTo(AccessorDefinition)}
+ * 
  * @author Guillaume Mary
  */
 public class ValueAccessPointComparator implements Comparator<ValueAccessPoint> {

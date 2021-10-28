@@ -42,7 +42,7 @@ public class AccessorDefinition implements Comparable<AccessorDefinition> {
 		} else if (o instanceof AbstractReflector) {
 			result = giveDefinition((AbstractReflector) o);
 		} else {
-			throw new UnsupportedOperationException("Don't know how find out member definition for " + (o == null ? "null" : Reflections.toString(o.getClass())));
+			throw new UnsupportedOperationException("Accessor type is unsupported to compute its definition : " + (o == null ? "null" : Reflections.toString(o.getClass())));
 		}
 		return result;
 	}
@@ -60,7 +60,7 @@ public class AccessorDefinition implements Comparable<AccessorDefinition> {
 			Field member = ((ValueAccessPointByField) o).getField();
 			memberName = member.getName();
 			declarator = member.getDeclaringClass();
-			memberType = ((Field) member).getType();
+			memberType = member.getType();
 		} else if (o instanceof ValueAccessPointByMethod) {
 			Method member = ((ValueAccessPointByMethod) o).getMethod();
 			memberName = Reflections.propertyName(member.getName());
@@ -110,24 +110,6 @@ public class AccessorDefinition implements Comparable<AccessorDefinition> {
 		);
 	}
 	
-	
-	private final Class declaringClass;
-	private final String name;
-	private final Class memberType;
-	
-	/**
-	 * Constructor with mandatory attributes
-	 * 
-	 * @param declaringClass the owning class of the member
-	 * @param name name of the member
-	 * @param memberType member type (input for setter, return type for getter, type for field)
-	 */
-	public AccessorDefinition(Class declaringClass, String name, Class memberType) {
-		this.declaringClass = declaringClass;
-		this.name = name;
-		this.memberType = memberType;
-	}
-	
 	/**
 	 * @param o any {@link ValueAccessPoint}
 	 * @return a short representation of the given {@link ValueAccessPoint} : owner + name (spearator depends on accessor kind)
@@ -174,6 +156,23 @@ public class AccessorDefinition implements Comparable<AccessorDefinition> {
 		StringAppender chainPrint = new StringAppender();
 		accessPoints.forEach(accessor -> chainPrint.cat(toString(accessor)).cat(" > "));
 		return chainPrint.cutTail(3).toString();
+	}
+	
+	private final Class declaringClass;
+	private final String name;
+	private final Class memberType;
+	
+	/**
+	 * Constructor with mandatory attributes
+	 * 
+	 * @param declaringClass the owning class of the member
+	 * @param name name of the member
+	 * @param memberType member type (input for setter, return type for getter, type for field)
+	 */
+	public AccessorDefinition(Class declaringClass, String name, Class memberType) {
+		this.declaringClass = declaringClass;
+		this.name = name;
+		this.memberType = memberType;
 	}
 	
 	public <T> Class<T> getDeclaringClass() {
