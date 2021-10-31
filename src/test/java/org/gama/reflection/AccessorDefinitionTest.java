@@ -51,7 +51,7 @@ class AccessorDefinitionTest {
 	void testGiveMemberDefinition_nullArgument() {
 		assertThatThrownBy(() -> giveDefinition(null))
 				.extracting(t -> Exceptions.findExceptionInCauses(t, UnsupportedOperationException.class), InstanceOfAssertFactories.THROWABLE)
-				.hasMessage("Don't know how find out member definition for null");
+				.hasMessage("Accessor type is unsupported to compute its definition : null");
 	}
 	
 	static Object[][] testToString() {
