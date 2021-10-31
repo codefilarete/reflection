@@ -1,18 +1,23 @@
 package org.gama.reflection;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 import org.gama.lang.Reflections;
 import org.gama.lang.Reflections.MemberNotFoundException;
-import org.gama.lang.StringAppender;
 import org.gama.lang.collection.Arrays;
 import org.gama.reflection.model.City;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.gama.reflection.Accessors.*;
+import static org.gama.reflection.Accessors.accessorByField;
+import static org.gama.reflection.Accessors.accessorByMethod;
+import static org.gama.reflection.Accessors.accessorByMethodReference;
+import static org.gama.reflection.Accessors.mutatorByField;
+import static org.gama.reflection.Accessors.mutatorByMethod;
+import static org.gama.reflection.Accessors.mutatorByMethodReference;
+import static org.gama.reflection.Accessors.propertyAccessor;
 
 /**
  * @author Guillaume Mary
@@ -49,14 +54,15 @@ class AccessorsTest {
 	
 	@Test
 	void mutator() throws NoSuchFieldException {
-		Field appender = StringAppender.class.getDeclaredField("appender");
-		assertThat(Accessors.mutator(StringAppender.class, "appender").getSetter()).isEqualTo(appender);
-		assertThat(Accessors.mutator(StringAppender.class, "appender", StringBuilder.class).getSetter()).isEqualTo(appender);
-		assertThat(Accessors.mutator(StringAppender.class, "appender", CharSequence.class).getSetter()).isEqualTo(appender);
+		Field propertyNoSetter = Toto.class.getDeclaredField("propertyNoSetter");
+		assertThat(Accessors.mutator(Toto.class, "propertyNoSetter").getSetter()).isEqualTo(propertyNoSetter);
+		// testing compatibility look up
+		assertThat(Accessors.mutator(Toto.class, "propertyNoSetter", StringBuilder.class).getSetter()).isEqualTo(propertyNoSetter);
+		assertThat(Accessors.mutator(Toto.class, "propertyNoSetter", CharSequence.class).getSetter()).isEqualTo(propertyNoSetter);
 		
-		assertThatThrownBy(() -> Accessors.mutator(StringAppender.class, "appender", String.class).getSetter())
+		assertThatThrownBy(() -> Accessors.mutator(Toto.class, "propertyNoSetter", String.class).getSetter())
 				.isInstanceOf(MemberNotFoundException.class)
-				.hasMessage("Member type doesn't match expected one for field o.g.l.StringAppender.appender:"
+				.hasMessage("Member type doesn't match expected one for field o.g.r.AccessorsTest$Toto.propertyNoSetter:"
 						+ " expected j.l.String but is j.l.StringBuilder");
 	}
 	
@@ -74,13 +80,14 @@ class AccessorsTest {
 	
 	@Test
 	void accessor() {
-		Method appender = Reflections.getMethod(StringAppender.class, "getAppender");
-		assertThat(Accessors.accessor(StringAppender.class, "appender", StringBuilder.class).getGetter()).isEqualTo(appender);
-		assertThat(Accessors.accessor(StringAppender.class, "appender", CharSequence.class).getGetter()).isEqualTo(appender);
+		Method getProperty = Reflections.getMethod(Toto.class, "getProperty");
+		// testing compatibility look up
+		assertThat(Accessors.accessor(Toto.class, "property", StringBuilder.class).getGetter()).isEqualTo(getProperty);
+		assertThat(Accessors.accessor(Toto.class, "property", CharSequence.class).getGetter()).isEqualTo(getProperty);
 
-		assertThatThrownBy(() -> Accessors.mutator(StringAppender.class, "appender", String.class).getSetter())
+		assertThatThrownBy(() -> Accessors.mutator(Toto.class, "property", String.class).getSetter())
 				.isInstanceOf(MemberNotFoundException.class)
-				.hasMessage("Member type doesn't match expected one for field o.g.l.StringAppender.appender:"
+				.hasMessage("Member type doesn't match expected one for field o.g.r.AccessorsTest$Toto.property:"
 						+ " expected j.l.String but is j.l.StringBuilder");
 	}
 	
@@ -93,12 +100,17 @@ class AccessorsTest {
 	@Test
 	void accessor_withMethodReferenceSetter() {
 		assertThat(Accessors.accessor(Toto::getProperty).getAccessor().getClass()).isEqualTo(AccessorByMethodReference.class);
-		assertThat(((ValueAccessPointByMethod) Accessors.accessor(Toto::getProperty).getMutator()).getMethod()).isEqualTo(Reflections.getMethod(Toto.class, "setProperty", Long.class));
+		assertThat(((ValueAccessPointByMethod) Accessors.accessor(Toto::getProperty).getMutator()).getMethod()).isEqualTo(Reflections.getMethod(Toto.class, "setProperty", StringBuilder.class));
 	}
 	
 	@Test
-	void mutatorByMethod_noSetter() throws NoSuchMethodException {
-		assertThat(mutatorByMethod(Toto.class, "property").getMethod()).isEqualTo(Toto.class.getMethod("setProperty", Long.class));
+	void mutatorByMethod_setterExists_wrapsJDKMethod() throws NoSuchMethodException {
+		assertThat(mutatorByMethod(Toto.class, "property").getMethod()).isEqualTo(Toto.class.getMethod("setProperty", StringBuilder.class));
+	}
+	
+	@Test
+	void mutatorByMethod_noSetter() {
+		assertThat(mutatorByMethod(Toto.class, "propertyNoSetter")).isNull();
 	}
 	
 	@Test
@@ -110,18 +122,24 @@ class AccessorsTest {
 	
 	protected static class Toto {
 		
-		private Long property;
+		private StringBuilder property;
+		
+		private StringBuilder propertyNoSetter;
 		
 		private long propertyForBoxing;
 		
 		private String propertyForTypeCompatibility;
 		
-		public Long getProperty() {
+		public StringBuilder getProperty() {
 			return property;
 		}
 		
-		public void setProperty(Long property) {
+		public void setProperty(StringBuilder property) {
 			this.property = property;
+		}
+		
+		public StringBuilder getPropertyNoSetter() {
+			return propertyNoSetter;
 		}
 		
 		public Long getNoMatchingField() {
