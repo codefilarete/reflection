@@ -63,7 +63,7 @@ public class ObjectPrinterBuilder<C> {
 	private final Map<Class, Function<Object, String>> overridenPrinters = new HashMap<>();
 	
 	/**
-	 * Adds a property to be printed throught its getter
+	 * Adds a property to be printed through its getter
 	 * 
 	 * @param getter the method reference that gives access to the property, can be one the parameterized class or one of its subtype
 	 * @return this

@@ -18,7 +18,7 @@ public class PropertyAccessor<C, T> implements ReversibleAccessor<C, T>, Reversi
 	 * @param mutator a method reference to a setter
 	 * @param <C> bean type
 	 * @param <T> property type
-	 * @return a {@link PropertyAccessor} that will access a property throught the given getter and getter
+	 * @return a {@link PropertyAccessor} that will access a property through the given getter and getter
 	 */
 	public static <C, T> PropertyAccessor<C, T> fromMethodReference(SerializableFunction<C, T> accessor, SerializableBiConsumer<C, T> mutator) {
 		return new PropertyAccessor<>(new AccessorByMethodReference<>(accessor), new MutatorByMethodReference<>(mutator));
