@@ -11,10 +11,10 @@ import org.danekja.java.util.function.serializable.SerializableBiFunction;
 import org.danekja.java.util.function.serializable.SerializableConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.danekja.java.util.function.serializable.SerializableSupplier;
-import org.gama.lang.Reflections;
-import org.gama.lang.exception.Exceptions;
-import org.gama.lang.function.SerializableTriConsumer;
-import org.gama.lang.function.SerializableTriFunction;
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.exception.Exceptions;
+import org.codefilarete.tool.function.SerializableTriConsumer;
+import org.codefilarete.tool.function.SerializableTriFunction;
 
 /**
  * Helper methods for method reference

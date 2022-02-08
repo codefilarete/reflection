@@ -3,7 +3,7 @@ package org.gama.reflection;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import org.gama.lang.Reflections;
+import org.codefilarete.tool.Reflections;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

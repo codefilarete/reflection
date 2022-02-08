@@ -3,8 +3,8 @@ package org.gama.reflection;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import org.gama.lang.Reflections;
-import org.gama.lang.Reflections.MemberNotFoundException;
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.Reflections.MemberNotFoundException;
 import org.gama.reflection.model.City;
 import org.gama.reflection.model.Phone;
 import org.junit.jupiter.api.Test;

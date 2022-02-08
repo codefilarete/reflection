@@ -4,7 +4,7 @@ import java.lang.invoke.SerializedLambda;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
-import org.gama.lang.Reflections;
+import org.codefilarete.tool.Reflections;
 
 /**
  * Mutator constructed with a method reference to a setter ({@link java.util.function.BiConsumer}).

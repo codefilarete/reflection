@@ -1,8 +1,8 @@
 package org.gama.reflection;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.gama.lang.collection.Arrays;
-import org.gama.lang.exception.Exceptions;
+import org.codefilarete.tool.collection.Arrays;
+import org.codefilarete.tool.exception.Exceptions;
 import org.gama.reflection.model.Address;
 import org.gama.reflection.model.City;
 import org.gama.reflection.model.Person;

@@ -5,12 +5,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 
-import org.gama.lang.Reflections;
-import org.gama.lang.StringAppender;
-import org.gama.lang.collection.Arrays;
-import org.gama.lang.collection.Iterables;
-import org.gama.lang.exception.Exceptions;
-import org.gama.lang.exception.NotImplementedException;
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.StringAppender;
+import org.codefilarete.tool.collection.Arrays;
+import org.codefilarete.tool.collection.Iterables;
+import org.codefilarete.tool.exception.Exceptions;
+import org.codefilarete.tool.exception.NotImplementedException;
 
 /**
  * A tool class to convert some exceptions from default JDK to a clearer one, well ... hope so !

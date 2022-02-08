@@ -8,10 +8,10 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 
-import org.gama.lang.Reflections;
-import org.gama.lang.StringAppender;
-import org.gama.lang.bean.ClassIterator;
-import org.gama.lang.collection.Iterables;
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.StringAppender;
+import org.codefilarete.tool.bean.ClassIterator;
+import org.codefilarete.tool.collection.Iterables;
 
 /**
  * A common representation of "class member", in a sense of property accessor. So it means Fields, Methods and MethodReferences.

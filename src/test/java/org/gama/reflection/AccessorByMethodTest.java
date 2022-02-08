@@ -1,6 +1,6 @@
 package org.gama.reflection;
 
-import org.gama.lang.Reflections;
+import org.codefilarete.tool.Reflections;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

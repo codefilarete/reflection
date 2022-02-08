@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.gama.lang.Reflections;
-import org.gama.lang.collection.Arrays;
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.collection.Arrays;
 import org.gama.reflection.AccessorChain.ValueInitializerOnNullValue;
 import org.gama.reflection.model.Address;
 import org.gama.reflection.model.City;

@@ -2,8 +2,8 @@ package org.gama.reflection;
 
 import java.util.List;
 
-import org.gama.lang.collection.Arrays;
-import org.gama.lang.exception.Exceptions;
+import org.codefilarete.tool.collection.Arrays;
+import org.codefilarete.tool.exception.Exceptions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

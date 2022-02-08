@@ -4,7 +4,7 @@ import java.lang.invoke.SerializedLambda;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
-import org.gama.lang.Reflections;
+import org.codefilarete.tool.Reflections;
 
 /**
  * Accessor constructed with a method reference to a getter ({@link java.util.function.Function}).

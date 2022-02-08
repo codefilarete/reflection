@@ -2,7 +2,7 @@ package org.gama.reflection;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
-import org.gama.lang.function.Predicates;
+import org.codefilarete.tool.function.Predicates;
 
 /**
  * A class for managing accesses (reading and writing) of a bean property.

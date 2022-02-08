@@ -7,8 +7,8 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import org.gama.lang.Reflections;
-import org.gama.lang.Reflections.MemberNotFoundException;
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.Reflections.MemberNotFoundException;
 
 /**
  * @author Guillaume Mary

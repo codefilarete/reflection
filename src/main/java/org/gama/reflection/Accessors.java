@@ -9,13 +9,13 @@ import java.util.List;
 
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
-import org.gama.lang.Reflections;
-import org.gama.lang.Reflections.MemberNotFoundException;
-import org.gama.lang.Strings;
-import org.gama.lang.collection.Iterables;
-import org.gama.lang.reflect.MethodDispatcher;
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.Reflections.MemberNotFoundException;
+import org.codefilarete.tool.Strings;
+import org.codefilarete.tool.collection.Iterables;
+import org.codefilarete.tool.reflect.MethodDispatcher;
 
-import static org.gama.lang.Reflections.propertyName;
+import static org.codefilarete.tool.Reflections.propertyName;
 
 /**
  * @author Guillaume Mary

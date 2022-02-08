@@ -1,9 +1,9 @@
 package org.gama.reflection;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.gama.lang.Reflections;
-import org.gama.lang.Reflections.MemberNotFoundException;
-import org.gama.lang.collection.Arrays;
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.Reflections.MemberNotFoundException;
+import org.codefilarete.tool.collection.Arrays;
 import org.gama.reflection.AccessorChainMutator.AccessorPathBuilder;
 import org.gama.reflection.model.Address;
 import org.gama.reflection.model.City;

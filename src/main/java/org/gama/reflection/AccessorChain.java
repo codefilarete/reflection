@@ -11,11 +11,11 @@ import java.util.Set;
 import java.util.function.BiFunction;
 
 import org.danekja.java.util.function.serializable.SerializableFunction;
-import org.gama.lang.Reflections;
-import org.gama.lang.bean.Objects;
-import org.gama.lang.collection.Arrays;
-import org.gama.lang.collection.Collections;
-import org.gama.lang.collection.Iterables;
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.bean.Objects;
+import org.codefilarete.tool.collection.Arrays;
+import org.codefilarete.tool.collection.Collections;
+import org.codefilarete.tool.collection.Iterables;
 
 import static org.gama.reflection.Accessors.giveInputType;
 

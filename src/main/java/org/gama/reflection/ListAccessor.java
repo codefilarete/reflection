@@ -3,7 +3,7 @@ package org.gama.reflection;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.gama.lang.Reflections;
+import org.codefilarete.tool.Reflections;
 
 /**
  * Dedicated class to {@link List#get(int)} accessor

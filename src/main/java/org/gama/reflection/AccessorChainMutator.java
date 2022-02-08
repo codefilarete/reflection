@@ -4,12 +4,12 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.gama.lang.Reflections;
-import org.gama.lang.StringAppender;
-import org.gama.lang.ThreadLocals;
-import org.gama.lang.VisibleForTesting;
-import org.gama.lang.collection.Iterables;
-import org.gama.lang.function.ThrowingRunnable;
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.StringAppender;
+import org.codefilarete.tool.ThreadLocals;
+import org.codefilarete.tool.VisibleForTesting;
+import org.codefilarete.tool.collection.Iterables;
+import org.codefilarete.tool.function.ThrowingRunnable;
 
 /**
  * @param <C> source bean type

@@ -13,19 +13,19 @@ import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableBiFunction;
 import org.danekja.java.util.function.serializable.SerializableConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
-import org.gama.lang.function.SerializableThrowingBiConsumer;
-import org.gama.lang.function.SerializableThrowingConsumer;
-import org.gama.lang.function.SerializableThrowingFunction;
-import org.gama.lang.function.SerializableThrowingTriConsumer;
-import org.gama.lang.function.SerializableTriConsumer;
-import org.gama.lang.function.SerializableTriFunction;
-import org.gama.lang.function.ThrowingBiConsumer;
-import org.gama.lang.function.ThrowingConsumer;
-import org.gama.lang.function.TriFunction;
-import org.gama.lang.reflect.MethodDispatcher;
+import org.codefilarete.tool.function.SerializableThrowingBiConsumer;
+import org.codefilarete.tool.function.SerializableThrowingConsumer;
+import org.codefilarete.tool.function.SerializableThrowingFunction;
+import org.codefilarete.tool.function.SerializableThrowingTriConsumer;
+import org.codefilarete.tool.function.SerializableTriConsumer;
+import org.codefilarete.tool.function.SerializableTriFunction;
+import org.codefilarete.tool.function.ThrowingBiConsumer;
+import org.codefilarete.tool.function.ThrowingConsumer;
+import org.codefilarete.tool.function.TriFunction;
+import org.codefilarete.tool.reflect.MethodDispatcher;
 
-import static org.gama.lang.Reflections.PRIMITIVE_DEFAULT_VALUES;
-import static org.gama.lang.Reflections.newProxy;
+import static org.codefilarete.tool.Reflections.PRIMITIVE_DEFAULT_VALUES;
+import static org.codefilarete.tool.Reflections.newProxy;
 import static org.gama.reflection.MethodReferences.buildSerializedLambda;
 
 /**

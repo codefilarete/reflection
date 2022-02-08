@@ -2,7 +2,7 @@ package org.gama.reflection;
 
 import java.lang.reflect.Field;
 
-import org.gama.lang.Reflections;
+import org.codefilarete.tool.Reflections;
 
 /**
  * @author mary

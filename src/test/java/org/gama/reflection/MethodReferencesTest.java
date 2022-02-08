@@ -4,8 +4,8 @@ import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Method;
 import java.text.Collator;
 
-import org.gama.lang.Reflections;
-import org.gama.lang.Strings;
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.Strings;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

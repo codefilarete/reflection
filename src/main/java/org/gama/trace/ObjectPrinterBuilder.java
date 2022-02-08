@@ -8,12 +8,12 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import org.danekja.java.util.function.serializable.SerializableFunction;
-import org.gama.lang.Experimental;
-import org.gama.lang.Reflections;
-import org.gama.lang.StringAppender;
-import org.gama.lang.bean.InstanceMethodIterator;
-import org.gama.lang.collection.Iterables;
-import org.gama.lang.collection.KeepOrderSet;
+import org.codefilarete.tool.Experimental;
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.StringAppender;
+import org.codefilarete.tool.bean.InstanceMethodIterator;
+import org.codefilarete.tool.collection.Iterables;
+import org.codefilarete.tool.collection.KeepOrderSet;
 import org.gama.reflection.Accessor;
 import org.gama.reflection.AccessorByMethod;
 import org.gama.reflection.AccessorByMethodReference;

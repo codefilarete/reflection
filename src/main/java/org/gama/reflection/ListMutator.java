@@ -3,7 +3,7 @@ package org.gama.reflection;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import org.gama.lang.Reflections;
+import org.codefilarete.tool.Reflections;
 
 /**
  * @author Guillaume Mary
