@@ -15,13 +15,14 @@
 		<slf4j-api.version>1.7.21</slf4j-api.version>
 		<jdk-serializable-functional.version>1.8.2</jdk-serializable-functional.version>
 		<assertj.version>3.20.2</assertj.version>
+		<tools.version>1.0-SNAPSHOT</tools.version>
 	</properties>
 	
 	<dependencies>
 		<dependency>
 			<groupId>org.codefilarete</groupId>
-			<artifactId>tool</artifactId>
-			<version>${project.version}</version>
+			<artifactId>tools</artifactId>
+			<version>${tools.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -43,9 +44,9 @@
 		</dependency>
 		<dependency>
 			<groupId>org.codefilarete</groupId>
-			<artifactId>tool</artifactId>
+			<artifactId>tools</artifactId>
 			<type>test-jar</type>
-			<version>1.0-SNAPSHOT</version>
+			<version>${tools.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -76,5 +77,12 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+	<distributionManagement>
+		<snapshotRepository>
+			<id>snapshots</id>
+			<url>https://codefilarete.jfrog.io/artifactory/default-maven-virtual/</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 </project>
