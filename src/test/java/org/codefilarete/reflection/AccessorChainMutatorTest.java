@@ -1,21 +1,23 @@
 package org.codefilarete.reflection;
 
+import java.util.List;
+
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.codefilarete.reflection.AccessorChainMutator.AccessorPathBuilder;
-import org.codefilarete.tool.Reflections;
-import org.codefilarete.tool.Reflections.MemberNotFoundException;
-import org.codefilarete.tool.collection.Arrays;
 import org.codefilarete.reflection.model.Address;
 import org.codefilarete.reflection.model.City;
 import org.codefilarete.reflection.model.Person;
 import org.codefilarete.reflection.model.Phone;
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.Reflections.MemberNotFoundException;
+import org.codefilarete.tool.collection.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Guillaume Mary
@@ -144,10 +146,10 @@ class AccessorChainMutatorTest {
 		AccessorChainMutator testInstance = new AccessorChain(accessors).toMutator();
 		assertThatThrownBy(() -> testInstance.set(object, new Address(new City("Toto"), null)))
 		        .isInstanceOf(RuntimeException.class)
-				.hasMessage("Error while applying [accessor for field o.g.r.m.Person.address] <- mutator for field o.g.r.m.Address.phones on instance of o.g.r.m.Person")
+				.hasMessage("Error while applying [accessor for field o.c.r.m.Person.address] <- mutator for field o.c.r.m.Address.phones on instance of o.c.r.m.Person")
                 .hasCauseInstanceOf(NullPointerException.class)
 				.extracting(Throwable::getCause, InstanceOfAssertFactories.THROWABLE)
-                .hasMessage("Cannot invoke [accessor for field o.g.r.m.Person.address] on null instance");
+                .hasMessage("Cannot invoke [accessor for field o.c.r.m.Person.address] on null instance");
 	}
 
 	@Test

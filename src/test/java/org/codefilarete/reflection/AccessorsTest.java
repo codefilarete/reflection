@@ -62,7 +62,7 @@ class AccessorsTest {
 		
 		assertThatThrownBy(() -> Accessors.mutator(Toto.class, "propertyNoSetter", String.class).getSetter())
 				.isInstanceOf(MemberNotFoundException.class)
-				.hasMessage("Member type doesn't match expected one for field o.g.r.AccessorsTest$Toto.propertyNoSetter:"
+				.hasMessage("Member type doesn't match expected one for field o.c.r.AccessorsTest$Toto.propertyNoSetter:"
 						+ " expected j.l.String but is j.l.StringBuilder");
 	}
 	
@@ -87,7 +87,7 @@ class AccessorsTest {
 
 		assertThatThrownBy(() -> Accessors.mutator(Toto.class, "property", String.class).getSetter())
 				.isInstanceOf(MemberNotFoundException.class)
-				.hasMessage("Member type doesn't match expected one for field o.g.r.AccessorsTest$Toto.property:"
+				.hasMessage("Member type doesn't match expected one for field o.c.r.AccessorsTest$Toto.property:"
 						+ " expected j.l.String but is j.l.StringBuilder");
 	}
 	
@@ -117,7 +117,7 @@ class AccessorsTest {
 	void mutatorByMethod_noMatchingField() {
 		assertThatThrownBy(() -> Accessors.mutatorByMethod(Toto.class, "noMatchingField"))
 				.isInstanceOf(MemberNotFoundException.class)
-				.hasMessage("Method setNoMatchingField() on o.g.r.AccessorsTest$Toto was not found");
+				.hasMessage("Method setNoMatchingField() on o.c.r.AccessorsTest$Toto was not found");
 	}
 	
 	protected static class Toto {

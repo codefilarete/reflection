@@ -91,12 +91,12 @@ class AccessorChainTest {
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
 		assertThatThrownBy(() -> testInstance.get(object))
 				.isInstanceOf(RuntimeException.class)
-				.hasMessage("Error while applying [accessor for field o.g.r.m.Person.address, accessor for field o.g.r.m.Address.phones,"
-						+ " accessor for field o.g.r.m.Phone.number] on instance of o.g.r.m.Person")
+				.hasMessage("Error while applying [accessor for field o.c.r.m.Person.address, accessor for field o.c.r.m.Address.phones,"
+						+ " accessor for field o.c.r.m.Phone.number] on instance of o.c.r.m.Person")
 				.extracting(Throwable::getCause, InstanceOfAssertFactories.THROWABLE)
-				.hasMessage("Error while applying accessor for field o.g.r.m.Phone.number on instance of j.u.ArrayList")
+				.hasMessage("Error while applying accessor for field o.c.r.m.Phone.number on instance of j.u.ArrayList")
 				.extracting(Throwable::getCause, InstanceOfAssertFactories.THROWABLE)
-				.hasMessage("Field o.g.r.m.Phone.number doesn't exist in j.u.ArrayList");
+				.hasMessage("Field o.c.r.m.Phone.number doesn't exist in j.u.ArrayList");
 	}
 	
 	@Test
@@ -107,11 +107,11 @@ class AccessorChainTest {
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
 		assertThatThrownBy(() -> testInstance.get(object))
 				.isInstanceOf(RuntimeException.class)
-				.hasMessage("Error while applying [accessor for field o.g.r.m.Person.address, accessor for field o.g.r.m.Address.phones,"
-						+ " accessor for field o.g.r.m.Phone.number] on instance of o.g.r.m.Person")
+				.hasMessage("Error while applying [accessor for field o.c.r.m.Person.address, accessor for field o.c.r.m.Address.phones,"
+						+ " accessor for field o.c.r.m.Phone.number] on instance of o.c.r.m.Person")
 				.extracting(Throwable::getCause, InstanceOfAssertFactories.THROWABLE)
-				.hasMessage("Cannot invoke [accessor for field o.g.r.m.Person.address, accessor for field o.g.r.m.Address.phones,"
-						+ " accessor for field o.g.r.m.Phone.number] on null instance");
+				.hasMessage("Cannot invoke [accessor for field o.c.r.m.Person.address, accessor for field o.c.r.m.Address.phones,"
+						+ " accessor for field o.c.r.m.Phone.number] on null instance");
 	}
 	
 	@Test

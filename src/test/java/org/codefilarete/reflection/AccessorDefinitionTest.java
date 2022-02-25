@@ -56,13 +56,13 @@ class AccessorDefinitionTest {
 	
 	static Object[][] testToString() {
 		return new Object[][] {
-				{ Accessors.accessorByField(Person.class, "name"), "o.g.r.m.Person.name" },
-				{ new AccessorByMethod<>(Person.class, "getName"), "o.g.r.m.Person.getName()" },
+				{ Accessors.accessorByField(Person.class, "name"), "o.c.r.m.Person.name" },
+				{ new AccessorByMethod<>(Person.class, "getName"), "o.c.r.m.Person.getName()" },
 				{ new AccessorByMethodReference<>(Person::getName), "Person::getName" },
 				
 				// mutator
-				{ Accessors.mutatorByField(Person.class, "name"), "o.g.r.m.Person.name" },
-				{ new MutatorByMethod<>(Person.class, "setName", String.class), "o.g.r.m.Person.setName(j.l.String)" },
+				{ Accessors.mutatorByField(Person.class, "name"), "o.c.r.m.Person.name" },
+				{ new MutatorByMethod<>(Person.class, "setName", String.class), "o.c.r.m.Person.setName(j.l.String)" },
 				{ new MutatorByMethodReference<>(Person::setName), "Person::setName" },
 				
 				{ new AccessorChain<>(Arrays.asList(new AccessorByMethodReference<>(Person::getAddress), new AccessorByMethodReference<>(Address::getCity))),
@@ -70,7 +70,7 @@ class AccessorDefinitionTest {
 				
 				{ new PropertyAccessor<>(new AccessorByMethodReference<>(Person::getName), new MutatorByMethodReference<>(Person::setName)), "Person::getName" },
 				{ new PropertyAccessor<>(new AccessorByMethod<>(Person.class, "getName"), new MutatorByMethod<>(Person.class, "setName", String.class)),
-						"o.g.r.m.Person.getName()" },
+						"o.c.r.m.Person.getName()" },
 				{ null, "null" }
 		};
 	}
@@ -89,7 +89,7 @@ class AccessorDefinitionTest {
 		assertThat(AccessorDefinition.toString(Arrays.asList(
 				new AccessorByMethodReference<>(Person::getAddress),
 				new AccessorByMethodReference<>(Address::getCity),
-				Accessors.accessorByField(Person.class, "name")))).isEqualTo("Person::getAddress > Address::getCity > o.g.r.m.Person.name");
+				Accessors.accessorByField(Person.class, "name")))).isEqualTo("Person::getAddress > Address::getCity > o.c.r.m.Person.name");
 	}
 	
 }

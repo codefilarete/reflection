@@ -47,7 +47,7 @@ public class PropertyAccessorTest {
 	public void testOf_nonConventionalMethodInput_exceptionThrown() {
 		Method nameGetter = Reflections.findMethod(City.class, "name");
 		
-		assertThatExceptionOfType(MemberNotFoundException.class).as("Field wrapper j.l.String o.g.r.m.City.name() doesn't feet encapsulation naming convention").isThrownBy(() -> Accessors.accessor(nameGetter));
+		assertThatExceptionOfType(MemberNotFoundException.class).as("Field wrapper j.l.String o.c.r.m.City.name() doesn't feet encapsulation naming convention").isThrownBy(() -> Accessors.accessor(nameGetter));
 	}
 	
 }
