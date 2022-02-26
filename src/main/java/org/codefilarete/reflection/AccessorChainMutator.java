@@ -24,6 +24,7 @@ public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implement
 	 * Will be used to give better exception message when {@link NullPointerException} will be thrown by {@link #set(Object, Object)}.
 	 * Using a ThreadLocal is quite an overkill design, but can't find a less intrusive & thread-safe way to do it. 
 	 */
+	@SuppressWarnings("java:S5164" /* remove() will be invoked by AutoRemoveThreadLocal while using ThreadLocals.doWithThreadLocal(..) */)
 	private static final ThreadLocal<Accessor> CURRENT_NULL_RETURNING_MUTATOR = new ThreadLocal<>();
 	
 	private final Mutator<X, T> mutator;
