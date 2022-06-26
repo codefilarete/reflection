@@ -39,7 +39,7 @@
 		<slf4j-api.version>1.7.21</slf4j-api.version>
 		<jdk-serializable-functional.version>1.8.2</jdk-serializable-functional.version>
 		<assertj.version>3.20.2</assertj.version>
-		<tools.version>1.0.1</tools.version>
+		<tools.version>1.0.2-SNAPSHOT</tools.version>
 	</properties>
 	
 	<dependencies>
