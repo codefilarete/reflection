@@ -50,7 +50,7 @@ public class PropertyAccessor<C, T> implements ReversibleAccessor<C, T>, Reversi
 	/**
 	 * Shortcut for {@link #getAccessor()}.get(c)
 	 * @param c the source instance
-	 * @return the result of the invokation of the accessor onto c argument
+	 * @return the result of the invocation of the accessor onto c argument
 	 */
 	@Override
 	public T get(C c) {

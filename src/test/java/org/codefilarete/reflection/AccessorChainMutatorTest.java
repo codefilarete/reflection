@@ -153,11 +153,11 @@ class AccessorChainMutatorTest {
 	}
 
 	@Test
-	void set_nullValueOnPath_withInitializer_objectsAreInstanciated() {
+	void set_nullValueOnPath_withInitializer_objectsAreinstantiated() {
 		DataSet dataSet = new DataSet();
 		Mutator<List<Phone>, Phone> phoneAdder = List::add;
 		List<Accessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor);
-		// We create a Person without address, it will be instanciated by AccessorChainMutator
+		// We create a Person without address, it will be instantiated by AccessorChainMutator
 		Person targetPerson = new Person(null);
 		AccessorChainMutator<Person, List<Phone>, Phone> testInstance = new AccessorChainMutator<>(accessors, phoneAdder);
 		testInstance.setNullValueHandler(AccessorChain.INITIALIZE_VALUE);

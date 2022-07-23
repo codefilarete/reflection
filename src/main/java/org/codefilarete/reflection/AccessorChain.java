@@ -34,7 +34,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	/**
 	 * Creates a chain that :
 	 * - returns null when any accessor on path returns null
-	 * - initializes values (instanciate bean) on path when its mutator is used
+	 * - initializes values (instantiate bean) on path when its mutator is used
 	 * (voluntary dissimetric behavior)
 	 *
 	 * @param accessors list of {@link Accessor} to be used by chain
@@ -49,7 +49,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	/**
 	 * Creates a chain that :
 	 * - returns null when any accessor on path returns null
-	 * - initializes values (instanciate bean) on path when its mutator is used
+	 * - initializes values (instantiate bean) on path when its mutator is used
 	 * (voluntary dissimetric behavior)
 	 * 
 	 * @param accessors list of {@link Accessor} to be used by chain
@@ -80,7 +80,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	/** Will return null if a link in an accessor chain returns null */
 	public static final NullValueHandler RETURN_NULL = new NullReturnerOnNullValue();
 	
-	/** Will instanciate needed value (and set it) if a link in an accessor chain returns null */
+	/** Will instantiate needed value (and set it) if a link in an accessor chain returns null */
 	public static final NullValueHandler INITIALIZE_VALUE = new ValueInitializerOnNullValue();
 	
 	private final List<Accessor> accessors;
@@ -221,8 +221,8 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	}
 	
 	/**
-	 * Class that will initialize value by instanciating its class and set it onto the property.
-	 * Instanciated types can be controlled through {@link #giveValueType(Accessor, Class)}.
+	 * Class that will initialize value by instantiating its class and set it onto the property.
+	 * instantiated types can be controlled through {@link #giveValueType(Accessor, Class)}.
 	 */
 	public static class ValueInitializerOnNullValue implements NullValueHandler {
 		
@@ -252,7 +252,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 		}
 		
 		/**
-		 * Expected to give concrete class to be instanciated.
+		 * Expected to give concrete class to be instantiated.
 		 * @param accessor the current accessor that returned null, given for a fine grained adjustment of returned type
 		 * @param valueType expected compatible type, this of accessor
 		 * @return a concrete and instanciable type compatible with acccessor input type

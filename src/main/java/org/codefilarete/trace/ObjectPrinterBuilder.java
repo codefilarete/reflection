@@ -78,7 +78,7 @@ public class ObjectPrinterBuilder<C> {
 	}
 	
 	/**
-	 * Excludes a property from being printed, usefull in combination of {@link #printerFor(Class)}
+	 * Excludes a property from being printed, useful in combination of {@link #printerFor(Class)}
 	 *
 	 * @param getter the method reference that gives access to the property
 	 * @return this

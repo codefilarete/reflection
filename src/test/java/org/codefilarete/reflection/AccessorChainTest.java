@@ -134,7 +134,7 @@ class AccessorChainTest {
 	}
 	
 	@Test
-	void forModel_setWithSomeNullOnPath_instanciateBeansOnPath() {
+	void forModel_setWithSomeNullOnPath_instantiateBeansOnPath() {
 		DataSet dataSet = new DataSet();
 		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(list(dataSet.personAddressAccessor,
 				dataSet.addressCityAccessor, dataSet.cityNameAccessor), null);

@@ -40,7 +40,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	private static final MethodReferenceCapturer METHOD_REFERENCE_CAPTURER = new MethodReferenceCapturer();
 	
 	/**
-	 * Redirects a {@link Function} invokation (on the proxy built by {@link MethodReferenceDispatcher#build(Class)}) onto the given {@link Callable}
+	 * Redirects a {@link Function} invocation (on the proxy built by {@link MethodReferenceDispatcher#build(Class)}) onto the given {@link Callable}
 	 * 
 	 * @param methodToCapture the no-args {@link Function} to be intercepted
 	 * @param codeToInvoke the code to be called instead of the {@link Function} 
@@ -54,7 +54,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	}
 	
 	/**
-	 * Made for particular use case of Fluent API writing : result of Function invokation will be the proxy itself (X) so one can chain it with some
+	 * Made for particular use case of Fluent API writing : result of Function invocation will be the proxy itself (X) so one can chain it with some
 	 * other proxy methods, {@link BiConsumer} is used to apply some code on this {@link TriFunction} call.
 	 * Quite the same as {@link #redirect(SerializableTriFunction, BiFunction)} but avoids to implement a null-returning {@link TriFunction}
 	 *
@@ -70,7 +70,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	}
 	
 	/**
-	 * Redirects a {@link BiFunction} invokation (on the proxy built by {@link MethodReferenceDispatcher#build(Class)}) onto the given {@link Function}
+	 * Redirects a {@link BiFunction} invocation (on the proxy built by {@link MethodReferenceDispatcher#build(Class)}) onto the given {@link Function}
 	 *
 	 * @param methodToCapture the 2-args {@link BiFunction} to be intercepted
 	 * @param codeToInvoke the code to be called instead of the {@link BiFunction} 
@@ -84,7 +84,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	}
 	
 	/**
-	 * Made for particular use case of Fluent API writing : result of Function invokation will be the proxy itself (X) so one can chain it with some
+	 * Made for particular use case of Fluent API writing : result of Function invocation will be the proxy itself (X) so one can chain it with some
 	 * other proxy methods, {@link BiConsumer} is used to apply some code on this {@link TriFunction} call.
 	 * Quite the same as {@link #redirect(SerializableTriFunction, BiFunction)} but avoids to implement a null-returning {@link TriFunction}
 	 *
@@ -101,7 +101,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	}
 	
 	/**
-	 * Redirects a {@link TriFunction} invokation (on the proxy built by {@link MethodReferenceDispatcher#build(Class)}) onto the given {@link Function}
+	 * Redirects a {@link TriFunction} invocation (on the proxy built by {@link MethodReferenceDispatcher#build(Class)}) onto the given {@link Function}
 	 *
 	 * @param methodToCapture the 3-args {@link TriFunction} to be intercepted
 	 * @param codeToInvoke the code to be called instead of the {@link TriFunction}
@@ -115,7 +115,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	}
 	
 	/**
-	 * Made for particular use case of Fluent API writing : result of Function invokation will be the proxy itself (X) so one can chain it with some
+	 * Made for particular use case of Fluent API writing : result of Function invocation will be the proxy itself (X) so one can chain it with some
 	 * other proxy methods, {@link BiConsumer} is used to apply some code on this {@link TriFunction} call.
 	 * Quite the same as {@link #redirect(SerializableTriFunction, BiFunction)} but avoids to implement a null-returning {@link TriFunction}
 	 * 
@@ -150,12 +150,12 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	}
 	
 	/**
-	 * Same as {@link #redirect(SerializableFunction, Supplier)}, but dedicated to intercepted methods that has a {@code throws} clause.
-	 * Naming it "redirect" would lead to some casting of the argument because compiler doesn't dictinct method references that has a throws clause
-	 * from those that don't have one, so, to prevent boilerplate casting, method must be named differenlty : {@code redirectThrower}.
+	 * Same as {@link #redirect(SerializableFunction, Supplier)}, but dedicated to intercepted methods that have a {@code throws} clause.
+	 * Naming it "redirect" would lead to some casting of the argument because compiler doesn't distinct method references that has a throws clause
+	 * from those that don't have one, so, to prevent boilerplate casting, method must be named differently : {@code redirectThrower}.
 	 *
 	 * @param methodToCapture the no-args method to be intercepted
-	 * @param codeToInvoke the code to be called instead of the the method 
+	 * @param codeToInvoke the code to be called instead of the method
 	 * @param <X> declaring class of the intercepted method
 	 * @param <R> result type of the method
 	 * @param <E> exception type that may be thrown by captured method
@@ -172,12 +172,12 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	}
 	
 	/**
-	 * Same as {@link #redirect(SerializableBiConsumer, Consumer)}, but dedicated to intercepted methods that has a {@code throws} clause.
-	 * Naming it "redirect" would lead to some casting of the argument because compiler doesn't dictinct method references that has a throws clause
-	 * from those that don't have one, so, to prevent boilerplate casting, method must be named differenlty : {@code redirectThrower}.
+	 * Same as {@link #redirect(SerializableBiConsumer, Consumer)}, but dedicated to intercepted methods that have a {@code throws} clause.
+	 * Naming it "redirect" would lead to some casting of the argument because compiler doesn't distinct method references that has a throws clause
+	 * from those that don't have one, so, to prevent boilerplate casting, method must be named differently : {@code redirectThrower}.
 	 *
 	 * @param methodToCapture the no-args method to be intercepted
-	 * @param codeToInvoke the code to be called instead of the the method 
+	 * @param codeToInvoke the code to be called instead of the method
 	 * @param <X> declaring class of the intercepted method
 	 * @param <A> input type of the method
 	 * @param <E> exception type that may be thrown by captured method
@@ -189,12 +189,12 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	}
 	
 	/**
-	 * Same as {@link #redirect(SerializableTriConsumer, BiConsumer)}, but dedicated to intercepted methods that has a {@code throws} clause.
-	 * Naming it "redirect" would lead to some casting of the argument because compiler doesn't dictinct method references that has a throws clause
-	 * from those that don't have one, so, to prevent boilerplate casting, method must be named differenlty : {@code redirectThrower}.
+	 * Same as {@link #redirect(SerializableTriConsumer, BiConsumer)}, but dedicated to intercepted methods that have a {@code throws} clause.
+	 * Naming it "redirect" would lead to some casting of the argument because compiler doesn't distinct method references that has a throws clause
+	 * from those that don't have one, so, to prevent boilerplate casting, method must be named differently : {@code redirectThrower}.
 	 *
 	 * @param methodToCapture the no-args method to be intercepted
-	 * @param codeToInvoke the code to be called instead of the the method 
+	 * @param codeToInvoke the code to be called instead of the method
 	 * @param <X> declaring class of the intercepted method
 	 * @param <A> first input type of the method
 	 * @param <B> second input type of the method
@@ -208,7 +208,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	
 	/**
 	 * {@inheritDoc}
-	 * Overriden to cast return type to current instance one, to allow better chaining 
+	 * Overridden to cast return type to current instance one, to allow better chaining
 	 */
 	public <X> MethodReferenceDispatcher redirect(Class<X> interfazz, X extensionSurrogate) {
 		return (MethodReferenceDispatcher) super.redirect(interfazz, extensionSurrogate);
@@ -216,7 +216,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	
 	/**
 	 * {@inheritDoc}
-	 * Overriden to cast return type to current instance one, to allow better chaining 
+	 * Overridden to cast return type to current instance one, to allow better chaining
 	 */
 	public <X> MethodReferenceDispatcher redirect(Class<X> interfazz, X extensionSurrogate, boolean returnProxy) {
 		return (MethodReferenceDispatcher) super.redirect(interfazz, extensionSurrogate, returnProxy);
@@ -224,7 +224,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	
 	/**
 	 * {@inheritDoc}
-	 * Overriden to cast return type to current instance one, to allow better chaining 
+	 * Overridden to cast return type to current instance one, to allow better chaining
 	 */
 	public <X> MethodReferenceDispatcher redirect(Class<X> interfazz, X extensionSurrogate, Object returningMethodsTarget) {
 		return (MethodReferenceDispatcher) super.redirect(interfazz, extensionSurrogate, returningMethodsTarget);
