@@ -94,6 +94,8 @@ public class ExceptionConverter {
 		// (cf https://docs.oracle.com/javase/tutorial/reflect/member/fieldTrouble.html) but we can't distinguish cases
 		if (Reflections.findField(target.getClass(), getter.getName()) == null) {
 			return new IllegalArgumentException("Field " + Reflections.toString(getter) + " doesn't exist in " + Reflections.toString(target.getClass()));
+		} else if (!target.getClass().isAssignableFrom(getter.getDeclaringClass())) {
+			return new IllegalArgumentException("Field " + Reflections.toString(getter) + " cannot be applied on instance of type " + Reflections.toString(target.getClass()));
 		} else if (!getter.getType().isInstance(arg)) {
 			return new IllegalArgumentException("Field " + Reflections.toString(getter)
 					+ " of type " + Reflections.toString(getter.getType()) + " is not compatible with " + (arg == null ? "null" : Reflections.toString(arg.getClass())));
