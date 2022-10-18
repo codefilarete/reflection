@@ -29,7 +29,7 @@ public class AccessorDefinition implements Comparable<AccessorDefinition> {
 	 * Gives a {@link AccessorDefinition} that are similar if they access the same property, whatever type they are : doesn't make difference
 	 * between a {@link MutatorByField}, {@link AccessorByMethod} or {@link AccessorByMethodReference} if the goal is to access the same field.
 	 * 
-	 * @param o any {@link ValueAccessPoint}, null autorized but will throw an {@link UnsupportedOperationException}
+	 * @param o any {@link ValueAccessPoint}, null authorized but will throw an {@link UnsupportedOperationException}
 	 * @return a common representation of given input
 	 * @throws UnsupportedOperationException when member can't be found because given {@link ValueAccessPoint} is not a known concrete type
 	 */
@@ -49,7 +49,7 @@ public class AccessorDefinition implements Comparable<AccessorDefinition> {
 	
 	/**
 	 * Dedicated to accessor / mutator by field, method and method reference
-	 * @param o one to accessor / mutator by field, method and method reference
+	 * @param o any accessor / mutator by field, method and method reference
 	 * @return a {@link AccessorDefinition} describing input
 	 */
 	private static AccessorDefinition giveDefinition(AbstractReflector o) {
