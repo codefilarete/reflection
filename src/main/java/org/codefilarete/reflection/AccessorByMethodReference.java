@@ -36,8 +36,7 @@ public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> impl
 		serializedLambda = MethodReferences.buildSerializedLambda(methodReference);
 		// our description is made of SerializedLambda's one
 		methodName = serializedLambda.getImplMethodName();
-		String implementationClass = serializedLambda.getImplClass().replace('/', '.');
-		this.declaringClass = Reflections.forName(implementationClass);
+		this.declaringClass = MethodReferences.giveImplementingClass(serializedLambda);
 		this.propertyType = MethodReferenceCapturer.giveArgumentTypes(serializedLambda).getReturnType();
 		this.methodReferenceSignature = Reflections.toString(declaringClass)
 				.concat("::")

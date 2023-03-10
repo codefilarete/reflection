@@ -10,7 +10,6 @@ import org.codefilarete.tool.Strings;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.codefilarete.reflection.MethodReferences.buildSerializedLambda;
 
 /**
  * @author Guillaume Mary
@@ -18,14 +17,14 @@ import static org.codefilarete.reflection.MethodReferences.buildSerializedLambda
 public class MethodReferencesTest {
 	
 	@Test
-	public void testGetTargetMethodRawSignature() throws ReflectiveOperationException {
+	void getTargetMethodRawSignature() {
 		Assertions.assertThat(MethodReferences.getTargetMethodRawSignature(MethodReferences.buildSerializedLambda(Object::toString))).isEqualTo("java/lang/ObjecttoString()Ljava/lang/String;");
 		Assertions.assertThat(MethodReferences.getTargetMethodRawSignature(MethodReferences.buildSerializedLambda(Integer::shortValue))).isEqualTo("java/lang/IntegershortValue()S");
 		Assertions.assertThat(MethodReferences.getTargetMethodRawSignature(MethodReferences.buildSerializedLambda(Collator::setStrength))).isEqualTo("java/text/CollatorsetStrength(I)V");
 	}
 	
 	@Test
-	public void testBuildSerializedLambda_getter() throws ReflectiveOperationException {
+	void buildSerializedLambda_getter() throws ReflectiveOperationException {
 		SerializedLambda serializedLambda = MethodReferences.buildSerializedLambda(Object::toString);
 		Method method = Reflections.getMethod(Class.forName(serializedLambda.getImplClass().replace("/", ".")), serializedLambda.getImplMethodName());
 		assertThat(method).isEqualTo(Reflections.getMethod(Object.class, "toString"));
@@ -36,7 +35,7 @@ public class MethodReferencesTest {
 	}
 	
 	@Test
-	public void testBuildSerializedLambda_setter() throws ReflectiveOperationException {
+	void buildSerializedLambda_setter() throws ReflectiveOperationException {
 		SerializedLambda serializedLambda = MethodReferences.buildSerializedLambda(DummyClassWithSetter::setX);
 		// extracting method type argument from serialized lambda method type
 		String instantiatedMethodType = serializedLambda.getInstantiatedMethodType();
@@ -52,9 +51,51 @@ public class MethodReferencesTest {
 		assertThat(method).isEqualTo(Reflections.getMethod(DummyClassWithSetter.class, "setX", Integer.class));
 	}
 	
+	@Test
+	void giveImplementingClass() {
+		SerializedLambda serializedLambda = MethodReferences.buildSerializedLambda(DummyClassWithSetter::setX);
+		assertThat(MethodReferences.giveImplementingClass(serializedLambda)).isEqualTo(DummyClassWithSetter.class);
+		
+		serializedLambda = MethodReferences.buildSerializedLambda(InheritingDummyClassWithSetter::setX);
+		assertThat(MethodReferences.giveImplementingClass(serializedLambda)).isEqualTo(DummyClassWithSetter.class);
+		
+		serializedLambda = MethodReferences.buildSerializedLambda(Integer::equals);
+		assertThat(MethodReferences.giveImplementingClass(serializedLambda)).isEqualTo(Integer.class);
+		
+		serializedLambda = MethodReferences.buildSerializedLambda(Object::equals);
+		assertThat(MethodReferences.giveImplementingClass(serializedLambda)).isEqualTo(Object.class);
+		
+		// test with interface
+		serializedLambda = MethodReferences.buildSerializedLambda(CharSequence::length);
+		assertThat(MethodReferences.giveImplementingClass(serializedLambda)).isEqualTo(CharSequence.class);
+	}
+	
+	@Test
+	void giveInstantiatedClass() {
+		SerializedLambda serializedLambda = MethodReferences.buildSerializedLambda(DummyClassWithSetter::setX);
+		assertThat(MethodReferences.giveInstantiatedClass(serializedLambda)).isEqualTo(DummyClassWithSetter.class);
+		
+		serializedLambda = MethodReferences.buildSerializedLambda(InheritingDummyClassWithSetter::setX);
+		assertThat(MethodReferences.giveInstantiatedClass(serializedLambda)).isEqualTo(InheritingDummyClassWithSetter.class);
+		
+		serializedLambda = MethodReferences.buildSerializedLambda(Integer::equals);
+		assertThat(MethodReferences.giveInstantiatedClass(serializedLambda)).isEqualTo(Integer.class);
+		
+		serializedLambda = MethodReferences.buildSerializedLambda(Object::equals);
+		assertThat(MethodReferences.giveInstantiatedClass(serializedLambda)).isEqualTo(Object.class);
+		
+		// test with interface
+		serializedLambda = MethodReferences.buildSerializedLambda(String::length);
+		assertThat(MethodReferences.giveInstantiatedClass(serializedLambda)).isEqualTo(String.class);
+	}
+	
 	public static class DummyClassWithSetter {
 		public void setX(Integer x) {
 			
 		}
+	}
+	
+	public static class InheritingDummyClassWithSetter extends DummyClassWithSetter {
+	
 	}
 }

@@ -7,16 +7,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Guillaume Mary
  */
-public class AccessorByMethodReferenceTest {
+class AccessorByMethodReferenceTest {
 	
 	@Test
-	public void testGet() {
+	void get() {
 		AccessorByMethodReference<Integer, String> testInstance = new AccessorByMethodReference<>(Number::toString);
 		assertThat(testInstance.get(1)).isEqualTo("1");
 	}
 	
 	@Test
-	public void testEquals() {
+	void equals() {
 		// usual case : 2 instances with same method reference should be equal
 		AccessorByMethodReference<Integer, String> testInstance1 = new AccessorByMethodReference<>(Number::toString);
 		AccessorByMethodReference<Integer, String> testInstance2 = new AccessorByMethodReference<>(Number::toString);
@@ -34,7 +34,7 @@ public class AccessorByMethodReferenceTest {
 	}
 	
 	@Test
-	public void testToString() {
+	void testToString() {
 		AccessorByMethodReference<String, char[]> testInstance = new AccessorByMethodReference<>(String::toCharArray);
 		assertThat(testInstance.toString()).isEqualTo("j.l.String::toCharArray");
 	}

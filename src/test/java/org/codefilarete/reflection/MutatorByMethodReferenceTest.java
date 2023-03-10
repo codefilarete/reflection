@@ -1,22 +1,22 @@
 package org.codefilarete.reflection;
 
-import org.junit.jupiter.api.Test;
-
 import java.util.AbstractCollection;
 import java.util.AbstractSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import org.junit.jupiter.api.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Guillaume Mary
  */
-public class MutatorByMethodReferenceTest {
+class MutatorByMethodReferenceTest {
 	
 	@Test
-	public void testSet() {
+	void set() {
 		MutatorByMethodReference<StringBuilder, Integer> testInstance = new MutatorByMethodReference<>(StringBuilder::append);
 		StringBuilder target = new StringBuilder();
 		testInstance.set(target, 1);
@@ -24,7 +24,7 @@ public class MutatorByMethodReferenceTest {
 	}
 
 	@Test
-	public void testEquals() {
+	void equals() {
 		// usual case : 2 instances with same method reference should be equal
 		MutatorByMethodReference<DummySet, Object> testInstance1 = new MutatorByMethodReference<>(DummySet::contains);
 		MutatorByMethodReference<DummySet, Object> testInstance2 = new MutatorByMethodReference<>(DummySet::contains);
@@ -34,7 +34,7 @@ public class MutatorByMethodReferenceTest {
 		MutatorByMethodReference<DummySet, Object> testInstance3 = new MutatorByMethodReference<>(AbstractCollection::contains);
 		assertThat(testInstance3).isEqualTo(testInstance1);
 		// same test, but with a different generic parameter => instances should be equal
-		// (with a different hashCode implementation I had a strange behavior on which generic type influenced serilization !)
+		// (with a different hashCode implementation I had a strange behavior on which generic type influenced serialization !)
 		MutatorByMethodReference<AbstractSet, Object> testInstance4 = new MutatorByMethodReference<>(AbstractCollection::contains);
 		assertThat(testInstance4).isEqualTo(testInstance1);
 
@@ -44,12 +44,12 @@ public class MutatorByMethodReferenceTest {
 	}
 	
 	@Test
-	public void testToString() {
+	void testToString() {
 		MutatorByMethodReference<Map, BiConsumer> testInstance = new MutatorByMethodReference<>(Map::forEach);
 		assertThat(testInstance.toString()).isEqualTo("j.u.Map::forEach");
 	}
 	
-	public static class DummySet<E> extends AbstractSet<E> {
+	static class DummySet<E> extends AbstractSet<E> {
 		
 		@Override
 		public Iterator<E> iterator() {

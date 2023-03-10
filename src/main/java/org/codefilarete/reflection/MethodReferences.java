@@ -4,17 +4,19 @@ import java.io.Serializable;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.function.Function;
 
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.Strings;
+import org.codefilarete.tool.exception.Exceptions;
+import org.codefilarete.tool.function.SerializableTriConsumer;
+import org.codefilarete.tool.function.SerializableTriFunction;
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableBiFunction;
 import org.danekja.java.util.function.serializable.SerializableConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.danekja.java.util.function.serializable.SerializableSupplier;
-import org.codefilarete.tool.Reflections;
-import org.codefilarete.tool.exception.Exceptions;
-import org.codefilarete.tool.function.SerializableTriConsumer;
-import org.codefilarete.tool.function.SerializableTriFunction;
 
 /**
  * Helper methods for method reference
@@ -76,7 +78,7 @@ public class MethodReferences {
 	}
 	
 	/**
-	 * Gives a raw version of the method targetted by the given {@link SerializedLambda}
+	 * Gives a raw version of the method targeted by the given {@link SerializedLambda}
 	 * THIS METHOD WILL ONLY WORK WITH A METHOD REFERENCE, NOT WITH AN ANONYMOUS LAMBDA FUNCTION.
 	 * @param serializedLambda a method reference
 	 * @return a concatenation of method class, method name, method arguments, method return type
@@ -196,5 +198,42 @@ public class MethodReferences {
 			throw Exceptions.asRuntimeException(e);
 		}
 		return (SerializedLambda) serializedForm;
+	}
+	
+	/**
+	 * Gives the class that implements the method referenced by the given lambda.
+	 * Example : if String::length is given, then CharSequence.class is returned because CharSequence defines length()
+	 *
+	 * @param serializedLambda a lambda representing a method reference, not any anonymous lambda
+	 * @return the class that implements method referenced by the given lambda
+	 * @see #giveInstantiatedClass(SerializedLambda)
+	 */
+	public static Class giveImplementingClass(SerializedLambda serializedLambda) {
+		String implementationClass = serializedLambda.getImplClass().replace('/', '.');
+		return Reflections.forName(implementationClass);
+	}
+	
+	/**
+	 * Gives the class that is directly referenced by the given method reference lambda.
+	 * Example : if String::length is given, then String.class is returned, not CharSequence.class whereas
+	 * CharSequence defines length()
+	 *
+	 * @param serializedLambda a lambda representing a method reference, not any anonymous lambda
+	 * @return the class that is directly referenced by the given method reference lambda.
+	 * @see #giveImplementingClass(SerializedLambda)
+	 */
+	public static Class giveInstantiatedClass(SerializedLambda serializedLambda) {
+		// We don't use getImplClass() because it less accurate when lambda is a method reference pointing to a method
+		// subclass while method is defined in an upper class : getImplClass points to class defining method (the parent one)
+		// while getInstantiatedMethodType gives user-pointed method
+		String instantiatedMethodType = serializedLambda.getInstantiatedMethodType();
+		// it has the following structure:
+		// parenthesis implementing_class arguments_types parenthesis return_type
+		int closingParenthesisIndex = instantiatedMethodType.indexOf(')');
+		String implementingClassAndArgumentsTypes = instantiatedMethodType.substring(1, closingParenthesisIndex);
+		
+		// NB : we need ";" to be kept because it's in String representing type : see Class.getName()
+		List<String> types = Strings.split(implementingClassAndArgumentsTypes, ';', true);
+		return Reflections.forName(types.get(0).replace("/", "."));
 	}
 }

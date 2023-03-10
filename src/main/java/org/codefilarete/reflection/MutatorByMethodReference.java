@@ -15,7 +15,7 @@ import org.codefilarete.tool.Reflections;
  * @see Accessors#mutatorByMethodReference(SerializableBiConsumer)
  * @see Accessors#accessorByMethodReference(SerializableFunction, SerializableBiConsumer)
  */
-@SuppressWarnings("squid:S2160")	// because super.equals() is based on getDescription() it doesn't need to be overriden in this class 
+@SuppressWarnings("squid:S2160")	// because super.equals() is based on getDescription() it doesn't need to be overridden in this class
 public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> implements ValueAccessPointByMethodReference {
 	
 	private final SerializableBiConsumer<C, T> methodReference;
@@ -35,8 +35,7 @@ public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> implem
 		serializedLambda = MethodReferences.buildSerializedLambda(methodReference);
 		// our description is made of SerializedLambda's one
 		methodName = serializedLambda.getImplMethodName();
-		String implementationClass = serializedLambda.getImplClass().replace('/', '.');
-		this.declaringClass = Reflections.forName(implementationClass);
+		this.declaringClass = MethodReferences.giveImplementingClass(serializedLambda);
 		this.propertyType = MethodReferenceCapturer.giveArgumentTypes(serializedLambda).getArgumentTypes()[0];
 		this.methodReferenceSignature = Reflections.toString(declaringClass)
 				.concat("::")
