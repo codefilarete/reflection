@@ -14,9 +14,9 @@ import org.codefilarete.tool.bean.ClassIterator;
 import org.codefilarete.tool.collection.Iterables;
 
 /**
- * A common representation of "class member", in a sense of property accessor. So it means Fields, Methods and MethodReferences.
+ * A common representation of "class member", in the meaning of property accessor. So it means Fields, Methods and MethodReferences.
  * Main goal is to make a majority of {@link ValueAccessPoint} comparable between each other even if they are not of same type :
- * a {@link MutatorByField} would have the same {@link AccessorDefinition} as an {@link AccessorByMethod} for the same property.
+ * a {@link MutatorByField} would have the same {@link AccessorDefinition} than an {@link AccessorByMethod} for the same property.
  * 
  * @author Guillaume Mary
  * @see #giveDefinition(ValueAccessPoint)
@@ -26,25 +26,44 @@ public class AccessorDefinition implements Comparable<AccessorDefinition> {
 	private static final MethodReferenceCapturer METHOD_REFERENCE_CAPTURER = new MethodReferenceCapturer();
 	
 	/**
-	 * Gives a {@link AccessorDefinition} that are similar if they access the same property, whatever type they are : doesn't make difference
-	 * between a {@link MutatorByField}, {@link AccessorByMethod} or {@link AccessorByMethodReference} if the goal is to access the same field.
+	 * Gives an {@link AccessorDefinition} defining given {@link ValueAccessPoint}.
 	 * 
-	 * @param o any {@link ValueAccessPoint}, null authorized but will throw an {@link UnsupportedOperationException}
+	 * @param accessPoint any {@link ValueAccessPoint}
 	 * @return a common representation of given input
 	 * @throws UnsupportedOperationException when member can't be found because given {@link ValueAccessPoint} is not a known concrete type
 	 */
-	public static AccessorDefinition giveDefinition(@Nullable ValueAccessPoint o) {
+	public static AccessorDefinition giveDefinition(ValueAccessPoint accessPoint) {
 		AccessorDefinition result;
-		if (o instanceof AccessorChain) {
-			result = giveDefinition((AccessorChain) o);
-		} else if (o instanceof PropertyAccessor) {
-			result = giveDefinition(((PropertyAccessor) o).getAccessor());
-		} else if (o instanceof AbstractReflector) {
-			result = giveDefinition((AbstractReflector) o);
+		if (accessPoint instanceof AccessorChain) {
+			result = giveDefinition((AccessorChain) accessPoint);
+		} else if (accessPoint instanceof PropertyAccessor) {
+			result = giveDefinition(((PropertyAccessor) accessPoint).getAccessor());
+		} else if (accessPoint instanceof AbstractReflector) {
+			result = giveDefinition((AbstractReflector) accessPoint);
 		} else {
-			throw new UnsupportedOperationException("Accessor type is unsupported to compute its definition : " + (o == null ? "null" : Reflections.toString(o.getClass())));
+			throw new UnsupportedOperationException("Accessor type is unsupported to compute its definition : " + (accessPoint == null ? "null" : Reflections.toString(accessPoint.getClass())));
 		}
 		return result;
+	}
+	
+	/**
+	 * Gives an {@link AccessorDefinition} defining given {@link Method}.
+	 *
+	 * @param method any {@link Method}
+	 * @return a common representation of given input
+	 */
+	public static AccessorDefinition giveDefinition(Method method) {
+		return new AccessorDefinition(method.getDeclaringClass(), Reflections.propertyName(method), method.getReturnType());
+	}
+	
+	/**
+	 * Gives an {@link AccessorDefinition} defining given {@link Field}.
+	 *
+	 * @param field any {@link Field}
+	 * @return a common representation of given input
+	 */
+	public static AccessorDefinition giveDefinition(Field field) {
+		return new AccessorDefinition(field.getDeclaringClass(), field.getName(), field.getType());
 	}
 	
 	/**

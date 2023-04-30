@@ -13,15 +13,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.codefilarete.reflection.AccessorDefinition.giveDefinition;
-import static org.codefilarete.reflection.Accessors.accessorByField;
-import static org.codefilarete.reflection.Accessors.mutatorByField;
 
 /**
  * @author Guillaume Mary
  */
 class AccessorDefinitionTest {
 	
-	static Object[][] testGiveMemberDefinition() {
+	static Object[][] giveMemberDefinition() {
 		return new Object[][] {
 				// accessor
 				{ Accessors.accessorByField(Person.class, "name"), Person.class, "name", String.class },
@@ -39,8 +37,8 @@ class AccessorDefinitionTest {
 	}
 	
 	@ParameterizedTest
-	@MethodSource("testGiveMemberDefinition")
-	void testGiveMemberDefinition(ValueAccessPoint o, Class expectedDeclaringClass, String expectedName, Class expectedMemberType) {
+	@MethodSource("giveMemberDefinition")
+	void giveMemberDefinition(ValueAccessPoint o, Class expectedDeclaringClass, String expectedName, Class expectedMemberType) {
 		AccessorDefinition accessorDefinition = giveDefinition(o);
 		assertThat(accessorDefinition.getDeclaringClass()).isEqualTo(expectedDeclaringClass);
 		assertThat(accessorDefinition.getName()).isEqualTo(expectedName);
@@ -48,8 +46,24 @@ class AccessorDefinitionTest {
 	}
 	
 	@Test
-	void testGiveMemberDefinition_nullArgument() {
-		assertThatThrownBy(() -> giveDefinition(null))
+	void giveMemberDefinition_method() throws NoSuchMethodException {
+		AccessorDefinition accessorDefinition = giveDefinition(String.class.getMethod("getBytes"));
+		assertThat(accessorDefinition.getDeclaringClass()).isEqualTo(String.class);
+		assertThat(accessorDefinition.getName()).isEqualTo("bytes");
+		assertThat(accessorDefinition.getMemberType()).isEqualTo(byte[].class);
+	}
+	
+	@Test
+	void giveMemberDefinition_field() throws NoSuchFieldException {
+		AccessorDefinition accessorDefinition = giveDefinition(String.class.getDeclaredField("value"));
+		assertThat(accessorDefinition.getDeclaringClass()).isEqualTo(String.class);
+		assertThat(accessorDefinition.getName()).isEqualTo("value");
+		assertThat(accessorDefinition.getMemberType()).isEqualTo(char[].class);
+	}
+	
+	@Test
+	void giveMemberDefinition_nullArgument() {
+		assertThatThrownBy(() -> giveDefinition((ValueAccessPoint) null))
 				.extracting(t -> Exceptions.findExceptionInCauses(t, UnsupportedOperationException.class), InstanceOfAssertFactories.THROWABLE)
 				.hasMessage("Accessor type is unsupported to compute its definition : null");
 	}

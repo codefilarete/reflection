@@ -27,7 +27,7 @@ import org.codefilarete.reflection.ValueAccessPointSet;
  * 
  * @author Guillaume Mary
  */
-@Experimental(todo = { "implement recursivity and overall prevent from stackoverflow", "test !" })
+@Experimental(todo = { "implement recursion and overall prevent from stackoverflow", "test !" })
 public class ObjectPrinterBuilder<C> {
 	
 	/**
