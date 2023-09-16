@@ -3,7 +3,7 @@ package org.codefilarete.reflection.model;
 /**
  * @author Guillaume Mary
  */
-public class Person {
+public class Person implements IPerson {
 	
 	private Address address;
 	

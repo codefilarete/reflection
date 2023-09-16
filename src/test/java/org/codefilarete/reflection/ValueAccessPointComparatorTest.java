@@ -1,15 +1,12 @@
 package org.codefilarete.reflection;
 
 import org.codefilarete.reflection.model.City;
+import org.codefilarete.reflection.model.IPerson;
 import org.codefilarete.reflection.model.Person;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.codefilarete.reflection.Accessors.accessorByField;
-import static org.codefilarete.reflection.Accessors.accessorByMethod;
-import static org.codefilarete.reflection.Accessors.mutatorByField;
-import static org.codefilarete.reflection.Accessors.mutatorByMethod;
 
 /**
  * @author Guillaume Mary
@@ -64,6 +61,8 @@ class ValueAccessPointComparatorTest {
 				{ Accessors.accessorByMethod(Person.class, "lastName"), new MutatorByMethodReference<>(Person::setLastName), true},
 				{ Accessors.mutatorByMethod(Person.class, "lastName"), new MutatorByMethodReference<>(Person::setLastName), true},
 				{ Accessors.accessorByMethod(Person.class, "lastName"), propertyAccessor, true},
+				
+				{ new AccessorByMethodReference<>(IPerson::getName), new AccessorByMethodReference<>(IPerson::getName), true},
 			
 		};
 	}

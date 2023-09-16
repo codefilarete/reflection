@@ -1,16 +1,13 @@
 package org.codefilarete.reflection;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.List;
 
 import org.codefilarete.tool.Reflections;
 import org.codefilarete.tool.StringAppender;
-import org.codefilarete.tool.bean.ClassIterator;
 import org.codefilarete.tool.collection.Iterables;
 
 /**
@@ -21,7 +18,7 @@ import org.codefilarete.tool.collection.Iterables;
  * @author Guillaume Mary
  * @see #giveDefinition(ValueAccessPoint)
  */
-public class AccessorDefinition implements Comparable<AccessorDefinition> {
+public class AccessorDefinition {
 	
 	private static final MethodReferenceCapturer METHOD_REFERENCE_CAPTURER = new MethodReferenceCapturer();
 	
@@ -203,17 +200,22 @@ public class AccessorDefinition implements Comparable<AccessorDefinition> {
 	}
 	
 	/**
-	 * Implementation to complies with presence of {@link #compareTo(AccessorDefinition)}
+	 * Implementation based on strict equality of {@link #getDeclaringClass()}, {@link #getName()} and {@link #getMemberType()}
 	 * 
 	 * @param obj another object
-	 * @return true if {@link #compareTo(AccessorDefinition)} returns 0
+	 * @return true if {@link #getDeclaringClass()}, {@link #getName()} and {@link #getMemberType()} of current instance
+	 * and given one are equal
 	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		} else if (obj instanceof AccessorDefinition) {
-			return compareTo((AccessorDefinition) obj) == 0;
+			AccessorDefinition other = (AccessorDefinition) obj;
+			
+			return other.getDeclaringClass().equals(this.getDeclaringClass())
+					&& other.getName().equals(this.getName())
+					&& other.getMemberType().equals(this.getMemberType());
 		} else {
 			return false;
 		}
@@ -225,19 +227,6 @@ public class AccessorDefinition implements Comparable<AccessorDefinition> {
 		result = 31 * result + name.hashCode();
 		result = 31 * result + memberType.hashCode();
 		return result;
-	}
-	
-	@Override
-	public int compareTo(@Nonnull AccessorDefinition o) {
-		if (name.equals(o.name)) {
-			ClassIterator classIterator1 = new ClassIterator(declaringClass);
-			ClassIterator classIterator2 = new ClassIterator(o.declaringClass);
-			List<Class> copy1 = Iterables.copy(classIterator1);
-			List<Class> copy2 = Iterables.copy(classIterator2);
-			return Iterables.intersect(copy1, copy2).isEmpty() ? (o.declaringClass.getName().compareTo(declaringClass.getName())) : 0;
-		} else {
-			return o.name.compareTo(name);
-		}
 	}
 	
 	public Class getMemberType() {
