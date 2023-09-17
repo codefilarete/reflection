@@ -9,13 +9,13 @@ import java.util.TreeMap;
  *
  * @author Guillaume Mary
  */
-public class ValueAccessPointMap<V> extends TreeMap<ValueAccessPoint, V> {
+public class ValueAccessPointMap<K, V> extends TreeMap<ValueAccessPoint<K>, V> {
 	
 	public ValueAccessPointMap() {
 		super(new ValueAccessPointComparator());
 	}
 	
-	public ValueAccessPointMap(Map<? extends ValueAccessPoint, ? extends V> map) {
+	public ValueAccessPointMap(Map<? extends ValueAccessPoint<K>, ? extends V> map) {
 		this();
 		putAll(map);
 	}

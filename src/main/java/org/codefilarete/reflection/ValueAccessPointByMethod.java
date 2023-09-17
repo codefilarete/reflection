@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
  * 
  * @author Guillaume Mary
  */
-public interface ValueAccessPointByMethod extends ValueAccessPoint {
+public interface ValueAccessPointByMethod<C> extends ValueAccessPoint<C> {
 	
 	Method getMethod();
 }

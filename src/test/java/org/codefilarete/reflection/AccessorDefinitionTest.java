@@ -38,7 +38,7 @@ class AccessorDefinitionTest {
 	
 	@ParameterizedTest
 	@MethodSource("giveMemberDefinition")
-	void giveMemberDefinition(ValueAccessPoint o, Class expectedDeclaringClass, String expectedName, Class expectedMemberType) {
+	void giveMemberDefinition(ValueAccessPoint<?> o, Class expectedDeclaringClass, String expectedName, Class expectedMemberType) {
 		AccessorDefinition accessorDefinition = giveDefinition(o);
 		assertThat(accessorDefinition.getDeclaringClass()).isEqualTo(expectedDeclaringClass);
 		assertThat(accessorDefinition.getName()).isEqualTo(expectedName);
@@ -63,7 +63,7 @@ class AccessorDefinitionTest {
 	
 	@Test
 	void giveMemberDefinition_nullArgument() {
-		assertThatThrownBy(() -> giveDefinition((ValueAccessPoint) null))
+		assertThatThrownBy(() -> giveDefinition((ValueAccessPoint<?>) null))
 				.extracting(t -> Exceptions.findExceptionInCauses(t, UnsupportedOperationException.class), InstanceOfAssertFactories.THROWABLE)
 				.hasMessage("Accessor type is unsupported to compute its definition : null");
 	}
@@ -91,7 +91,7 @@ class AccessorDefinitionTest {
 	
 	@ParameterizedTest
 	@MethodSource("testToString")
-	void toString(ValueAccessPoint valueAccessPoint, String expectedResult) {
+	void toString(ValueAccessPoint<?> valueAccessPoint, String expectedResult) {
 		assertThat(AccessorDefinition.toString(valueAccessPoint)).isEqualTo(expectedResult);
 	}
 	

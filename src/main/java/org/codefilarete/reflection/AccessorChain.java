@@ -42,7 +42,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @see ValueInitializerOnNullValue#giveValueType(Accessor, Class)
 	 * @see #forModel(List, BiFunction) 
 	 */
-	public static <IN, OUT> AccessorChain<IN, OUT> forModel(List<Accessor> accessors) {
+	public static <IN, OUT> AccessorChain<IN, OUT> forModel(List<? extends Accessor<?, ?>> accessors) {
 		return forModel(accessors, null);
 	}
 	
@@ -53,12 +53,12 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * (voluntary dissimetric behavior)
 	 * 
 	 * @param accessors list of {@link Accessor} to be used by chain
-	 * @param valueTypeDeterminer must be given if a bean type is badly determined by default mecanism
-	 * 		  (returning Object on generic for instance, or wrong Collection concrete type), null accepted (means default mecanism)
+	 * @param valueTypeDeterminer must be given if a bean type is badly determined by default mechanism
+	 * 		  (returning Object on generic for instance, or wrong Collection concrete type), null accepted (means default mechanism)
 	 * @see #RETURN_NULL
 	 * @see ValueInitializerOnNullValue#giveValueType(Accessor, Class)
 	 */
-	public static <IN, OUT> AccessorChain<IN, OUT> forModel(List<Accessor> accessors, @Nullable BiFunction<Accessor, Class, Class> valueTypeDeterminer) {
+	public static <IN, OUT> AccessorChain<IN, OUT> forModel(List<? extends Accessor<?, ?>> accessors, @Nullable BiFunction<Accessor, Class, Class> valueTypeDeterminer) {
 		return new AccessorChain<IN, OUT>(accessors) {
 			
 			private final AccessorChainMutator<IN, Object, OUT> mutator = (AccessorChainMutator<IN, Object, OUT>) super.toMutator()
@@ -83,7 +83,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	/** Will instantiate needed value (and set it) if a link in an accessor chain returns null */
 	public static final NullValueHandler INITIALIZE_VALUE = new ValueInitializerOnNullValue();
 	
-	private final List<Accessor> accessors;
+	private final List<Accessor<?, ?>> accessors;
 	
 	private NullValueHandler nullValueHandler = THROW_NULLPOINTEREXCEPTION;
 	
@@ -91,28 +91,32 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 		this(new ArrayList<>(5));
 	}
 	
-	public AccessorChain(Accessor... accessors) {
+	public AccessorChain(Accessor<?, ?>... accessors) {
 		this(Arrays.asList(accessors));
 	}
 	
-	public AccessorChain(List<Accessor> accessors) {
-		this.accessors = accessors;
+	public AccessorChain(List<? extends Accessor<?, ?>> accessors) {
+		this.accessors = (List<Accessor<?, ?>>) accessors;
 	}
 	
-	public List<Accessor> getAccessors() {
+	public List<Accessor<?, ?>> getAccessors() {
 		return accessors;
 	}
 	
-	public void add(Accessor accessor) {
+	public void add(Accessor<?, ?> accessor) {
 		accessors.add(accessor);
 	}
 	
-	public void add(Accessor... accessors) {
+	public void add(Accessor<?, ?>... accessors) {
 		add(Arrays.asList(accessors));
 	}
 	
-	public void add(Iterable<Accessor> accessors) {
-		this.accessors.addAll((Collection<Accessor>) accessors);
+	public void add(Iterable<? extends Accessor<?, ?>> accessors) {
+		if (accessors instanceof Collection) {
+			this.accessors.addAll((Collection<? extends Accessor<?, ?>>) accessors);
+		} else {
+			accessors.forEach(this::add);
+		}
 	}
 	
 	public AccessorChain<C, T> setNullValueHandler(NullValueHandler nullValueHandler) {

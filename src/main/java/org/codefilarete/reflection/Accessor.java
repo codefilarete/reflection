@@ -9,7 +9,7 @@ package org.codefilarete.reflection;
  * @author Guillaume Mary
  */
 @FunctionalInterface
-public interface Accessor<C, T> extends ValueAccessPoint {
+public interface Accessor<C, T> extends ValueAccessPoint<C> {
 	
 	T get(C c);
 }

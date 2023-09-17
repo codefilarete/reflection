@@ -58,7 +58,7 @@ public class ObjectPrinterBuilder<C> {
 	/** @apiNote  */
 	private final KeepOrderSet<Accessor<C, Object>> printableProperties = new KeepOrderSet<>();
 	/** @apiNote we use a {@link ValueAccessPointSet} because its supports well contains() method with {@link Accessor} as argument */
-	private final ValueAccessPointSet excludedProperties = new ValueAccessPointSet();
+	private final ValueAccessPointSet<C> excludedProperties = new ValueAccessPointSet<>();
 	
 	private final Map<Class, Function<Object, String>> overridenPrinters = new HashMap<>();
 	
@@ -146,7 +146,7 @@ public class ObjectPrinterBuilder<C> {
 				// we prevent subclass property accessor of being invoked on parent class
 				boolean getterCompliesWithInstance;
 				if (getter instanceof ValueAccessPointByMethodReference) {
-					getterCompliesWithInstance = ((ValueAccessPointByMethodReference) getter).getDeclaringClass().isInstance(object);
+					getterCompliesWithInstance = ((ValueAccessPointByMethodReference<C>) getter).getDeclaringClass().isInstance(object);
 				} else {
 					// necessarly AccessorByMethod, see printerFor(Class)
 					getterCompliesWithInstance = ((AccessorByMethod) getter).getGetter().getDeclaringClass().isInstance(object);

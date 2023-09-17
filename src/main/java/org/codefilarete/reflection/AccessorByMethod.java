@@ -14,7 +14,7 @@ import org.codefilarete.tool.Reflections.MemberNotFoundException;
  * @author Guillaume Mary
  */
 public class AccessorByMethod<C, T> extends AbstractAccessor<C, T>
-		implements AccessorByMember<C, T, Method>, ReversibleAccessor<C, T>, ValueAccessPointByMethod {
+		implements AccessorByMember<C, T, Method>, ReversibleAccessor<C, T>, ValueAccessPointByMethod<C> {
 	
 	private final Method getter;
 	

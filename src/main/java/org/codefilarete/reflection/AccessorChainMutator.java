@@ -29,7 +29,7 @@ public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implement
 	
 	private final Mutator<X, T> mutator;
 	
-	public AccessorChainMutator(List<Accessor> accessors, Mutator<X, T> mutator) {
+	public AccessorChainMutator(List<? extends Accessor<?, ?>> accessors, Mutator<X, T> mutator) {
 		super(accessors);
 		this.mutator = mutator;
 	}
@@ -72,7 +72,7 @@ public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implement
 	private void throwNullPointerException(Object srcBean) {
 		String accessorDescription = new AccessorPathBuilder().ccat(getAccessors(), ".").toString();
 		Accessor nullReturningMutator = CURRENT_NULL_RETURNING_MUTATOR.get();
-		List<Accessor> pathToNullPointerException = Iterables.head(getAccessors(), nullReturningMutator);
+		List<Accessor<?, ?>> pathToNullPointerException = Iterables.head(getAccessors(), nullReturningMutator);
 		pathToNullPointerException.add(nullReturningMutator);
 		String nullProviderDescription = new AccessorPathBuilder().ccat(pathToNullPointerException, ".").toString();
 		throw new NullPointerException("Call of " + accessorDescription + " on " + srcBean + " returned null, because "
@@ -88,7 +88,7 @@ public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implement
 	@Override
 	public AccessorChain<C, T> toAccessor() {
 		if (mutator instanceof ReversibleMutator) {
-			ArrayList<Accessor> newAccessors = new ArrayList<>(getAccessors());
+			List<Accessor<?, ?>> newAccessors = new ArrayList<>(getAccessors());
 			newAccessors.add(((ReversibleMutator) mutator).toAccessor());
 			return new AccessorChain<>(newAccessors);
 		} else {

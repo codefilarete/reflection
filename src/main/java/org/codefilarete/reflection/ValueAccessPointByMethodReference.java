@@ -7,11 +7,11 @@ import java.lang.invoke.SerializedLambda;
  * 
  * @author Guillaume Mary
  */
-public interface ValueAccessPointByMethodReference extends ValueAccessPoint {
+public interface ValueAccessPointByMethodReference<C> extends ValueAccessPoint<C> {
 	
 	String getMethodName();
 	
-	Class getDeclaringClass();
+	Class<C> getDeclaringClass();
 	
 	SerializedLambda getSerializedLambda();
 	

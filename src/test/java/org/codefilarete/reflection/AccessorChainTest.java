@@ -49,35 +49,35 @@ class AccessorChainTest {
 		}
 	}
 	
-	static List<Accessor> list(Accessor... accessors) {
+	static List<Accessor<?, ?>> toList(Accessor<?, ?>... accessors) {
 		return Arrays.asList(accessors);
 	}
 	
 	static Object[][] get_data() {
 		DataSet dataSet = new DataSet();
 		return new Object[][] {
-				{ list(dataSet.cityNameAccessor),
+				{ toList(dataSet.cityNameAccessor),
 						new City("Toto"), "Toto" },
-				{ list(dataSet.addressCityAccessor, dataSet.cityNameAccessor),
+				{ toList(dataSet.addressCityAccessor, dataSet.cityNameAccessor),
 						new Address(new City("Toto"), null), "Toto" },
-				{ list(dataSet.personAddressAccessor, dataSet.addressCityAccessor, dataSet.cityNameAccessor),
+				{ toList(dataSet.personAddressAccessor, dataSet.addressCityAccessor, dataSet.cityNameAccessor),
 						new Person(new Address(new City("Toto"), null)), "Toto" },
-				{ list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor, dataSet.phoneNumberAccessor),
+				{ toList(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor, dataSet.phoneNumberAccessor),
 						new Person(new Address(null, Arrays.asList(new Phone("123"), new Phone("456"), new Phone("789")))), "789" },
-				{ list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor, dataSet.phoneNumberMethodAccessor),
+				{ toList(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor, dataSet.phoneNumberMethodAccessor),
 						new Person(new Address(null, Arrays.asList(new Phone("123"), new Phone("456"), new Phone("789")))), "789" },
-				{ list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor, dataSet.phoneNumberMethodAccessor, dataSet.charAtAccessor.setParameters(2)),
+				{ toList(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor, dataSet.phoneNumberMethodAccessor, dataSet.charAtAccessor.setParameters(2)),
 						new Person(new Address(null, Arrays.asList(new Phone("123"), new Phone("456"), new Phone("789")))), '9' },
-				{ list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor, dataSet.phoneNumberMethodAccessor, dataSet.toCharArrayAccessor, dataSet.charArrayAccessor),
+				{ toList(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneListAccessor, dataSet.phoneNumberMethodAccessor, dataSet.toCharArrayAccessor, dataSet.charArrayAccessor),
 						new Person(new Address(null, Arrays.asList(new Phone("123"), new Phone("456"), new Phone("789")))), '9' },
-				{ list(dataSet.toCharArrayAccessor, dataSet.charArrayAccessor),
+				{ toList(dataSet.toCharArrayAccessor, dataSet.charArrayAccessor),
 						"123", '3' },
 		};
 	}
 	
 	@ParameterizedTest
 	@MethodSource("get_data")
-	void get(List<Accessor> accessors, Object object, Object expected) {
+	void get(List<? extends Accessor<?, ?>> accessors, Object object, Object expected) {
 		AccessorChain<Object, Object> accessorChain = new AccessorChain<>(accessors);
 		assertThat(accessorChain.get(object)).isEqualTo(expected);
 	}
@@ -86,7 +86,7 @@ class AccessorChainTest {
 	void get_accessorIsAWrongOne_throwsIllegalArgumentException() {
 		// field "number" doesn't exist on Collection "phones" => get(..) should throw exception
 		DataSet dataSet = new DataSet();
-		List<Accessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
+		List<Accessor<?, ?>> accessors = toList(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, Arrays.asList(new Phone("123"))));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
 		assertThatThrownBy(() -> testInstance.get(object))
@@ -102,7 +102,7 @@ class AccessorChainTest {
 	@Test
 	void get_nullValueOnPath_defaultNullHandler_throwsNullPointerException() {
 		DataSet dataSet = new DataSet();
-		List<Accessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
+		List<Accessor<?, ?>> accessors = toList(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, null));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
 		assertThatThrownBy(() -> testInstance.get(object))
@@ -117,7 +117,7 @@ class AccessorChainTest {
 	@Test
 	void get_nullValueOnPath_nullHandler() {
 		DataSet dataSet = new DataSet();
-		List<Accessor> accessors = list(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
+		List<Accessor<?, ?>> accessors = toList(dataSet.personAddressAccessor, dataSet.addressPhonesAccessor, dataSet.phoneNumberAccessor);
 		Object object = new Person(new Address(null, null));
 		AccessorChain<Object, Object > testInstance = new AccessorChain<>(accessors);
 		testInstance.setNullValueHandler(AccessorChain.RETURN_NULL);
@@ -127,7 +127,7 @@ class AccessorChainTest {
 	@Test
 	void forModel_getWithSomeNullOnPath_returnsNull() {
 		DataSet dataSet = new DataSet();
-		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(list(dataSet.personAddressAccessor,
+		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(toList(dataSet.personAddressAccessor,
 				dataSet.addressCityAccessor, dataSet.cityNameAccessor), null);
 		assertThat(testInstance.get(new Person(null))).isNull();
 		assertThat(testInstance.get(new Person(new Address(null, null)))).isNull();
@@ -136,7 +136,7 @@ class AccessorChainTest {
 	@Test
 	void forModel_setWithSomeNullOnPath_instantiateBeansOnPath() {
 		DataSet dataSet = new DataSet();
-		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(list(dataSet.personAddressAccessor,
+		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(toList(dataSet.personAddressAccessor,
 				dataSet.addressCityAccessor, dataSet.cityNameAccessor), null);
 		Person pawn = new Person(null);
 		testInstance.toMutator().set(pawn, "toto");
@@ -146,7 +146,7 @@ class AccessorChainTest {
 	@Test
 	void forModel_setUsesValueTypeDeterminer() {
 		DataSet dataSet = new DataSet();
-		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(list(dataSet.personAddressAccessor,
+		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(toList(dataSet.personAddressAccessor,
 				dataSet.addressPhonesAccessor, new ListAccessor<>(0)), (accessor, valueType) -> {
 			if (accessor == dataSet.addressPhonesAccessor) {
 				return MyList.class;	// we return a special List that prevent IndexOutOfBoundsException

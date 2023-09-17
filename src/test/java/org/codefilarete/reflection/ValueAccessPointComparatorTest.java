@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ValueAccessPointComparatorTest {
 	
-	static Object[][] testValueAccessPointComparator() {
+	static Object[][] compare() {
 		MutatorByMethodReference<Person, String> ctMutatorByMethodReference = new MutatorByMethodReference<>(Person::setLastName);
 		AccessorByMethodReference<Person, String> ctAccessorByMethodReference = new AccessorByMethodReference<>(Person::getLastName);
 		PropertyAccessor<Person, String> propertyAccessor = new PropertyAccessor<>(ctAccessorByMethodReference, ctMutatorByMethodReference);
@@ -68,10 +68,10 @@ class ValueAccessPointComparatorTest {
 	}
 	
 	@ParameterizedTest
-	@MethodSource("testValueAccessPointComparator")
-	void testValueAccessPointComparator(ValueAccessPoint accessor1, ValueAccessPoint accessor2, boolean expectedEquality) {
+	@MethodSource("compare")
+	<X> void compare(ValueAccessPoint<X> accessor1, ValueAccessPoint<X> accessor2, boolean expectedEquality) {
 		
-		ValueAccessPointSet testInstance = new ValueAccessPointSet();
+		ValueAccessPointSet<X> testInstance = new ValueAccessPointSet<>();
 		testInstance.add(accessor2);
 		assertThat(testInstance.contains(accessor1)).isEqualTo(expectedEquality);
 	}

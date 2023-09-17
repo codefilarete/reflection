@@ -75,7 +75,7 @@ class AccessorsTest {
 	@Test
 	void mutator_withMethodReferenceSetter() {
 		assertThat(Accessors.mutator(Toto::setProperty).getMutator().getClass()).isEqualTo(MutatorByMethodReference.class);
-		assertThat(((ValueAccessPointByMethod) Accessors.mutator(Toto::setProperty).getAccessor()).getMethod()).isEqualTo(Reflections.getMethod(Toto.class, "getProperty"));
+		assertThat(((ValueAccessPointByMethod<Toto>) Accessors.mutator(Toto::setProperty).getAccessor()).getMethod()).isEqualTo(Reflections.getMethod(Toto.class, "getProperty"));
 	}
 	
 	@Test
@@ -100,7 +100,7 @@ class AccessorsTest {
 	@Test
 	void accessor_withMethodReferenceSetter() {
 		assertThat(Accessors.accessor(Toto::getProperty).getAccessor().getClass()).isEqualTo(AccessorByMethodReference.class);
-		assertThat(((ValueAccessPointByMethod) Accessors.accessor(Toto::getProperty).getMutator()).getMethod()).isEqualTo(Reflections.getMethod(Toto.class, "setProperty", StringBuilder.class));
+		assertThat(((ValueAccessPointByMethod<Toto>) Accessors.accessor(Toto::getProperty).getMutator()).getMethod()).isEqualTo(Reflections.getMethod(Toto.class, "setProperty", StringBuilder.class));
 	}
 	
 	@Test

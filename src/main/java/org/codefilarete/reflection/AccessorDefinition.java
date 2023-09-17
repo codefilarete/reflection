@@ -29,7 +29,7 @@ public class AccessorDefinition {
 	 * @return a common representation of given input
 	 * @throws UnsupportedOperationException when member can't be found because given {@link ValueAccessPoint} is not a known concrete type
 	 */
-	public static AccessorDefinition giveDefinition(ValueAccessPoint accessPoint) {
+	public static AccessorDefinition giveDefinition(ValueAccessPoint<?> accessPoint) {
 		AccessorDefinition result;
 		if (accessPoint instanceof AccessorChain) {
 			result = giveDefinition((AccessorChain) accessPoint);
@@ -78,7 +78,7 @@ public class AccessorDefinition {
 			declarator = member.getDeclaringClass();
 			memberType = member.getType();
 		} else if (o instanceof ValueAccessPointByMethod) {
-			Method member = ((ValueAccessPointByMethod) o).getMethod();
+			Method member = ((ValueAccessPointByMethod<?>) o).getMethod();
 			memberName = Reflections.propertyName(member.getName());
 			declarator = member.getDeclaringClass();
 			if (o instanceof Accessor) {
@@ -87,9 +87,9 @@ public class AccessorDefinition {
 				memberType = member.getParameterTypes()[0];
 			}
 		} else if (o instanceof ValueAccessPointByMethodReference) {
-			memberName = Reflections.propertyName(((ValueAccessPointByMethodReference) o).getMethodName());
-			declarator = ((ValueAccessPointByMethodReference) o).getDeclaringClass();
-			Method method = METHOD_REFERENCE_CAPTURER.findMethod(((ValueAccessPointByMethodReference) o).getSerializedLambda());
+			memberName = Reflections.propertyName(((ValueAccessPointByMethodReference<?>) o).getMethodName());
+			declarator = ((ValueAccessPointByMethodReference<?>) o).getDeclaringClass();
+			Method method = METHOD_REFERENCE_CAPTURER.findMethod(((ValueAccessPointByMethodReference<?>) o).getSerializedLambda());
 			if (o instanceof Accessor) {
 				memberType = method.getReturnType();
 			} else {
@@ -105,7 +105,7 @@ public class AccessorDefinition {
 	 * @param o an {@link AccessorChain}
 	 * @return a {@link AccessorDefinition} describing input
 	 */
-	private static AccessorDefinition giveDefinition(AccessorChain o) {
+	private static AccessorDefinition giveDefinition(AccessorChain<?, ?> o) {
 		StringAppender stringAppender = new StringAppender() {
 			@Override
 			public StringAppender cat(Object s) {
@@ -117,8 +117,8 @@ public class AccessorDefinition {
 			}
 		};
 		stringAppender.ccat(o.getAccessors(), ".");
-		Accessor firstAccessor = (Accessor) Iterables.first(o.getAccessors());
-		Accessor lastAccessor = (Accessor) Iterables.last(o.getAccessors());
+		Accessor firstAccessor = Iterables.first(o.getAccessors());
+		Accessor lastAccessor = Iterables.last(o.getAccessors());
 		return new AccessorDefinition(
 				giveDefinition(firstAccessor).getDeclaringClass(),
 				stringAppender.toString(),
@@ -130,7 +130,7 @@ public class AccessorDefinition {
 	 * @param o any {@link ValueAccessPoint}
 	 * @return a short representation of the given {@link ValueAccessPoint} : owner + name (spearator depends on accessor kind)
 	 */
-	public static String toString(@Nullable ValueAccessPoint o) {
+	public static String toString(@Nullable ValueAccessPoint<?> o) {
 		String result;
 		if (o == null) {
 			result = "null";
@@ -168,7 +168,7 @@ public class AccessorDefinition {
 	 * @param accessPoints several {@link ValueAccessPoint}s
 	 * @return the concatenation of each call to {@link #toString(ValueAccessPoint)} for every element of the collection, separated by ">"
 	 */
-	public static String toString(Collection<ValueAccessPoint> accessPoints) {
+	public static String toString(Collection<ValueAccessPoint<?>> accessPoints) {
 		StringAppender chainPrint = new StringAppender();
 		accessPoints.forEach(accessor -> chainPrint.cat(toString(accessor)).cat(" > "));
 		return chainPrint.cutTail(3).toString();

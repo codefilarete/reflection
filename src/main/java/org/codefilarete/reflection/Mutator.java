@@ -9,7 +9,7 @@ package org.codefilarete.reflection;
  * @author Guillaume Mary
  */
 @FunctionalInterface
-public interface Mutator<C, T> extends ValueAccessPoint {
+public interface Mutator<C, T> extends ValueAccessPoint<C> {
 	
 	void set(C c, T t);
 }
