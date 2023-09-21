@@ -13,13 +13,13 @@ import static org.assertj.core.api.InstanceOfAssertFactories.THROWABLE;
 public class MutatorByMethodTest {
 	
 	@Test
-	public void testForProperty() {
+	public void getSetter() {
 		MutatorByMethod testInstance = Accessors.mutatorByMethod(Toto.class, "a");
 		assertThat(Reflections.findMethod(Toto.class, "setA", int.class)).isEqualTo(testInstance.getSetter());
 	}
 	
 	@Test
-	public void testSet() {
+	public void set() {
 		MutatorByMethod<Toto, Integer> testInstance = new MutatorByMethod<>(Reflections.findMethod(Toto.class, "setA", int.class));
 		Toto toto = new Toto();
 		testInstance.set(toto, 42);
@@ -27,7 +27,7 @@ public class MutatorByMethodTest {
 	}
 	
 	@Test
-	public void testSet_withWrongArgument() {
+	public void set_withWrongArgument() {
 		MutatorByMethod<Toto, Object> testInstance = new MutatorByMethod<>(Reflections.findMethod(Toto.class, "setA", int.class));
 		Toto toto = new Toto();
 		assertThatThrownBy(() -> testInstance.set(toto, "42"))
@@ -38,13 +38,14 @@ public class MutatorByMethodTest {
 	}
 	
 	@Test
-	public void testToMutator() {
+	public void toMutator() {
 		MutatorByMethod<Toto, Integer> testInstance = new MutatorByMethod<>(Reflections.findMethod(Toto.class, "setA", int.class));
-		assertThat(testInstance.toAccessor().getGetter()).isEqualTo(Reflections.getMethod(Toto.class, "getA"));
+		assertThat(testInstance.toAccessor()).isInstanceOf(AccessorByMethod.class);
+		assertThat(((AccessorByMethod) testInstance.toAccessor()).getGetter()).isEqualTo(Reflections.getMethod(Toto.class, "getA"));
 	}
 	
 	@Test
-	public void testToMutator_reverseSetterDoesntExist_throwsException() {
+	public void toMutator_reverseSetterDoesntExist_throwsException() {
 		MutatorByMethod<Toto, Integer> testInstance = new MutatorByMethod<>(Reflections.findMethod(Toto.class, "setFakeProperty", int.class));
 		assertThatThrownBy(testInstance::toAccessor)
 				.isInstanceOf(NonReversibleAccessor.class)

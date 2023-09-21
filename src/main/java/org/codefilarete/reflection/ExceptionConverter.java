@@ -26,7 +26,7 @@ public class ExceptionConverter {
 			nullPointerException.initCause(t);	// initial NPE is added for more trace
 			return nullPointerException;
 		} else if (t instanceof InvocationTargetException || t instanceof IllegalAccessException) {
-			return Exceptions.asRuntimeException(t.getCause());
+			return Exceptions.asRuntimeException(t);
 		} else if (t instanceof IllegalArgumentException) {
 			if ("wrong number of arguments".equals(t.getMessage())) {
 				return convertWrongNumberOfArguments(reflector, args);

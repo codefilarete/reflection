@@ -5,21 +5,37 @@ import java.lang.reflect.Field;
 import org.codefilarete.tool.Reflections;
 
 /**
+ * Property reader through its {@link Field}
+ *
  * @author Guillaume Mary
  */
 public class AccessorByField<C, T> extends AbstractAccessor<C, T>
 		implements AccessorByMember<C, T, Field>, ReversibleAccessor<C, T>, ValueAccessPointByField {
 	
 	private final Field field;
+	private final Mutator<C, T> mutator;
 	
 	public AccessorByField(Field field) {
-		this.field = field;
 		Reflections.ensureAccessible(field);
+		this.field = field;
+		// since MutatorByField instantiation has no cost we do it now to avoid lazy initialization which is always tricky
+		this.mutator = new MutatorByField<>(field, this);
+	}
+	
+	/**
+	 * Internal (package private) constructor that doesn't ensure field accessibility.
+	 * Made to avoid lazy initialization in {@link MutatorByField}.
+	 *
+	 * @param field the field to write to
+	 */
+	AccessorByField(Field field, Mutator<C, T> mutator) {
+		this.field = field;
+		this.mutator = mutator;
 	}
 	
 	@Override
 	public Field getGetter() {
-		return field;
+		return this.field;
 	}
 	
 	@Override
@@ -43,8 +59,8 @@ public class AccessorByField<C, T> extends AbstractAccessor<C, T>
 	}
 	
 	@Override
-	public MutatorByField<C, T> toMutator() {
-		return new MutatorByField<>(getGetter());
+	public Mutator<C, T> toMutator() {
+		return this.mutator;
 	}
 	
 	@Override

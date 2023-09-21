@@ -1,11 +1,12 @@
 package org.codefilarete.reflection;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.function.Supplier;
 
 import org.codefilarete.tool.Reflections;
 import org.codefilarete.tool.Reflections.MemberNotFoundException;
+import org.codefilarete.tool.function.ThreadSafeLazyInitializer;
 
 /**
  * @author mary
@@ -14,11 +15,22 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T>
 		implements MutatorByMember<C, T, Method>, ReversibleMutator<C, T>, ValueAccessPointByMethod<C> {
 	
 	private final Method setter;
+	private final Supplier<Accessor<C, T>> accessor;
 	
 	public MutatorByMethod(Method setter) {
-		super();
-		this.setter = setter;
 		Reflections.ensureAccessible(setter);
+		this.setter = setter;
+		this.accessor = new ThreadSafeLazyInitializer<Accessor<C, T>>() {
+			@Override
+			protected Accessor<C, T> createInstance() {
+				return findCompatibleAccessor();
+			}
+		};
+	}
+	
+	MutatorByMethod(Method setter, Accessor<C, T> accessor) {
+		this.setter = setter;
+		this.accessor = () -> accessor;
 	}
 	
 	/**
@@ -67,10 +79,15 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T>
 	 * @throws NonReversibleAccessor if neither getter nor field could be found
 	 */
 	@Override
-	public AccessorByMember<C, T, ? extends Member> toAccessor() {
+	public Accessor<C, T> toAccessor() {
+		return this.accessor.get();
+
+	}
+	
+	private Accessor<C, T> findCompatibleAccessor() {
 		Class<?> declaringClass = getSetter().getDeclaringClass();
 		String propertyName = Reflections.propertyName(getSetter());
-		AccessorByMethod<C, T> accessorByMethod = Accessors.accessorByMethod(declaringClass, propertyName);
+		AccessorByMethod<C, T> accessorByMethod = Accessors.accessorByMethod(declaringClass, propertyName,(Class<T>) getSetter().getParameterTypes()[0], this);
 		if (accessorByMethod == null) {
 			try {
 				return Accessors.accessorByField((Class<C>) declaringClass, propertyName);
@@ -81,7 +98,6 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T>
 			return accessorByMethod;
 		}
 	}
-	
 	
 	@Override
 	public boolean equals(Object other) {

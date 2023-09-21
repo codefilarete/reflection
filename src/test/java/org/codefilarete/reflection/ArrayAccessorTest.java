@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 public class ArrayAccessorTest {
 	
 	@Test
-	public void testGet() {
+	public void get() {
 		ArrayAccessor<String> testInstance = new ArrayAccessor<>();
 		String[] sample = { "a", "b", "c" };
 		
@@ -24,7 +24,7 @@ public class ArrayAccessorTest {
 	}
 	
 	@Test
-	public void testGet_ArrayIndexOutOfBoundsException() {
+	public void get_ArrayIndexOutOfBoundsException() {
 		ArrayAccessor<String> testInstance = new ArrayAccessor<>();
 		String[] sample = { "a", "b", "c" };
 		

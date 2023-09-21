@@ -12,12 +12,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.codefilarete.reflection.Accessors.accessorByField;
-import static org.codefilarete.reflection.Accessors.accessorByMethod;
-import static org.codefilarete.reflection.Accessors.accessorByMethodReference;
-import static org.codefilarete.reflection.Accessors.mutatorByField;
-import static org.codefilarete.reflection.Accessors.mutatorByMethod;
-import static org.codefilarete.reflection.Accessors.propertyAccessor;
 
 /**
  * @author Guillaume Mary

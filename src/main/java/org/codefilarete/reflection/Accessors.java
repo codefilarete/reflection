@@ -44,16 +44,37 @@ public final class Accessors {
 	 * @return null if getter method is not found
 	 */
 	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Class clazz, String propertyName) {
-		String capitalizedProperty = Strings.capitalize(propertyName);
-		Method getter = Reflections.findMethod(clazz, "get" + capitalizedProperty);
-		if (getter == null) {
-			// try for boolean
-			Field field = Reflections.findField(clazz, propertyName);
-			if (field != null && (boolean.class.isAssignableFrom(field.getType()) || Boolean.class.isAssignableFrom(field.getType()))) {
-				getter = Reflections.findMethod(clazz, "is" + capitalizedProperty);
-			} // nothing found : neither get nor is => return null
-		}
+		Field field = Reflections.findField(clazz, propertyName);
+		Method getter = findGetter(clazz, propertyName, field.getType());
 		return getter == null ? null : new AccessorByMethod<>(getter);
+	}
+	
+	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Class clazz, String propertyName, Class<T> inputType) {
+		Method getter = findGetter(clazz, propertyName, inputType);
+		return getter == null ? null : new AccessorByMethod<>(getter);
+	}
+	
+	@Nullable
+	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Class clazz, String propertyName, Class<T> inputType, Mutator<C, T> mutator) {
+		Method getter = findGetter(clazz, propertyName, inputType);
+		if (getter == null) {
+			return null;
+		} else {
+			Reflections.ensureAccessible(getter);
+			return new AccessorByMethod<>(getter, new Object[getter.getParameterTypes().length], mutator);
+		}
+	}
+	
+	@Nullable
+	private static <T> Method findGetter(Class clazz, String propertyName, Class<T> inputType) {
+		String capitalizedProperty = Strings.capitalize(propertyName);
+		String methodPrefix;
+		if (boolean.class.isAssignableFrom(inputType) || Boolean.class.isAssignableFrom(inputType)) {
+			methodPrefix = "is";
+		} else {
+			methodPrefix = "get";
+		}
+		return Reflections.findMethod(clazz, methodPrefix + capitalizedProperty);
 	}
 	
 	public static <C, T> AccessorByMethodReference<C, T> accessorByMethodReference(SerializableFunction<C, T> getter) {
@@ -142,6 +163,18 @@ public final class Accessors {
 		return setter == null ? null : new MutatorByMethod<>(setter);
 	}
 	
+	@Nullable
+	public static <C, T> MutatorByMethod<C, T> mutatorByMethod(Class<C> clazz, String propertyName, Class<T> inputType, Accessor<C, T> accessor) {
+		String capitalizedProperty = Strings.capitalize(propertyName);
+		Method setter = Reflections.findMethod(clazz, "set" + capitalizedProperty, inputType);
+		if (setter == null) {
+			return null;
+		} else {
+			Reflections.ensureAccessible(setter);
+			return new MutatorByMethod<>(setter, accessor);
+		}
+	}
+	
 	public static <C, T> MutatorByMethodReference<C, T> mutatorByMethodReference(SerializableBiConsumer<C, T> setter) {
 		return new MutatorByMethodReference<>(setter);
 	}
@@ -153,6 +186,12 @@ public final class Accessors {
 	public static <C, T> MutatorByField<C, T> mutatorByField(Class clazz, String propertyName) {
 		Field propertyField = Reflections.getField(clazz, propertyName);
 		return mutatorByField(propertyField);
+	}
+	
+	public static <C, T> MutatorByField<C, T> mutatorByField(Class clazz, String propertyName, Accessor<C, T> accessor) {
+		Field propertyField = Reflections.getField(clazz, propertyName);
+		Reflections.ensureAccessible(propertyField);
+		return new MutatorByField<>(propertyField, accessor);
 	}
 	
 	public static Field wrappedField(AccessorByMethod accessorByMethod) {

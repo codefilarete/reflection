@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 public class ArrayMutatorTest {
 	
 	@Test
-	public void testSet() {
+	public void set() {
 		ArrayMutator<String> testInstance = new ArrayMutator<>();
 		String[] sample = { "a", "b", "c" };
 		
@@ -27,7 +27,7 @@ public class ArrayMutatorTest {
 	}
 	
 	@Test
-	public void testSet_ArrayIndexOutOfBoundsException() {
+	public void set_ArrayIndexOutOfBoundsException() {
 		ArrayMutator<String> testInstance = new ArrayMutator<>();
 		String[] sample = { "a", "b", "c" };
 		

@@ -9,12 +9,20 @@ import java.lang.reflect.Array;
 public class ArrayMutator<C> extends AbstractMutator<C, C> implements ReversibleMutator<C, C> {
 	
 	private int index;
+	private final ArrayAccessor<C> accessor;
 	
 	public ArrayMutator() {
+		this.accessor = new ArrayAccessor<>(0, this);
 	}
 	
 	public ArrayMutator(int index) {
 		this.index = index;
+		this.accessor = new ArrayAccessor<>(index, this);
+	}
+	
+	public ArrayMutator(int index, ArrayAccessor<C> accessor) {
+		this.index = index;
+		this.accessor = accessor;
 	}
 	
 	public int getIndex() {
@@ -53,6 +61,6 @@ public class ArrayMutator<C> extends AbstractMutator<C, C> implements Reversible
 	
 	@Override
 	public ArrayAccessor<C> toAccessor() {
-		return new ArrayAccessor<>(getIndex());
+		return this.accessor;
 	}
 }

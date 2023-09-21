@@ -6,9 +6,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 import org.codefilarete.tool.Reflections;
 import org.codefilarete.tool.Reflections.MemberNotFoundException;
+import org.codefilarete.tool.function.ThreadSafeLazyInitializer;
+
+import static org.codefilarete.tool.Reflections.propertyName;
 
 /**
  * @author Guillaume Mary
@@ -20,14 +24,28 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T>
 	
 	private final Object[] methodParameters;
 	
+	private final Supplier<Mutator<C, T>> mutator;
+	
 	public AccessorByMethod(Method getter) {
 		this(getter, new Object[getter.getParameterTypes().length]);
 	}
 	
 	public AccessorByMethod(Method getter, Object ... arguments) {
-		this.getter = getter;
 		Reflections.ensureAccessible(getter);
+		this.getter = getter;
 		this.methodParameters = arguments;
+		this.mutator = new ThreadSafeLazyInitializer<Mutator<C, T>>() {
+			@Override
+			protected Mutator<C, T> createInstance() {
+				return findCompatibleMutator();
+			}
+		};
+	}
+	
+	AccessorByMethod(Method getter, Object[] methodParameters, Mutator<C, T> mutator) {
+		this.getter = getter;
+		this.methodParameters = methodParameters;
+		this.mutator = () -> mutator;
 	}
 	
 	/**
@@ -144,15 +162,20 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T>
 	 * @throws NonReversibleAccessor if neither setter nor field could be found
 	 */
 	@Override
-	public MutatorByMember<C, T, ? extends Member> toMutator() {
-		Class<?> declaringClass = getGetter().getDeclaringClass();
-		String propertyName = Reflections.propertyName(getGetter());
-		MutatorByMethod<C, T> mutatorByMethod = Accessors.mutatorByMethod((Class<C>) declaringClass, propertyName, (Class<T>) getGetter().getReturnType());
+	public Mutator<C, T> toMutator() {
+		// Note : this will ask for findCompatibleMutator() if not initialized
+		return this.mutator.get();
+	}
+	
+	private MutatorByMember<C, T, ? extends Member> findCompatibleMutator() {
+		Class<?> declaringClass = getter.getDeclaringClass();
+		String propertyName = propertyName(getter);
+		MutatorByMethod<C, T> mutatorByMethod = Accessors.mutatorByMethod((Class<C>) declaringClass, propertyName, (Class<T>) getter.getReturnType(), this);
 		if (mutatorByMethod == null) {
 			try {
-				return Accessors.mutatorByField(declaringClass, propertyName);
+				return Accessors.mutatorByField(declaringClass, propertyName, this);
 			} catch (MemberNotFoundException e) {
-				throw new NonReversibleAccessor("Can't find a mutator for " + Reflections.toString(getGetter()), e);
+				throw new NonReversibleAccessor("Can't find a mutator for " + Reflections.toString(getter), e);
 			}
 		} else {
 			return mutatorByMethod;
