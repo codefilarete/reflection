@@ -27,6 +27,10 @@ import org.codefilarete.tool.collection.Iterables;
  */
 public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements ReversibleAccessor<C, T> {
 	
+	public static <IN, OUT> AccessorChain<IN, OUT> chain(SerializableFunction<IN, OUT> function1) {
+		return new AccessorChain<>(new AccessorByMethodReference<>(function1));
+	}
+	
 	public static <IN, A, OUT> AccessorChain<IN, OUT> chain(SerializableFunction<IN, A> function1, SerializableFunction<A, OUT> function2) {
 		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2));
 	}
@@ -58,6 +62,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @see #RETURN_NULL
 	 * @see ValueInitializerOnNullValue#giveValueType(Accessor, Class)
 	 */
+	// TODO rename it as chainNullSafe
 	public static <IN, OUT> AccessorChain<IN, OUT> forModel(List<? extends Accessor<?, ?>> accessors, @Nullable BiFunction<Accessor, Class, Class> valueTypeDeterminer) {
 		return new AccessorChain<IN, OUT>(accessors) {
 			
