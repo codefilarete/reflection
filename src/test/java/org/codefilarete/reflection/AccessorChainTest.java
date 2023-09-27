@@ -127,7 +127,7 @@ class AccessorChainTest {
 	@Test
 	void forModel_getWithSomeNullOnPath_returnsNull() {
 		DataSet dataSet = new DataSet();
-		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(toList(dataSet.personAddressAccessor,
+		AccessorChain<Object, Object> testInstance = AccessorChain.chainNullSafe(toList(dataSet.personAddressAccessor,
 				dataSet.addressCityAccessor, dataSet.cityNameAccessor), null);
 		assertThat(testInstance.get(new Person(null))).isNull();
 		assertThat(testInstance.get(new Person(new Address(null, null)))).isNull();
@@ -136,7 +136,7 @@ class AccessorChainTest {
 	@Test
 	void forModel_setWithSomeNullOnPath_instantiateBeansOnPath() {
 		DataSet dataSet = new DataSet();
-		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(toList(dataSet.personAddressAccessor,
+		AccessorChain<Object, Object> testInstance = AccessorChain.chainNullSafe(toList(dataSet.personAddressAccessor,
 				dataSet.addressCityAccessor, dataSet.cityNameAccessor), null);
 		Person pawn = new Person(null);
 		testInstance.toMutator().set(pawn, "toto");
@@ -146,7 +146,7 @@ class AccessorChainTest {
 	@Test
 	void forModel_setUsesValueTypeDeterminer() {
 		DataSet dataSet = new DataSet();
-		AccessorChain<Object, Object> testInstance = AccessorChain.forModel(toList(dataSet.personAddressAccessor,
+		AccessorChain<Object, Object> testInstance = AccessorChain.chainNullSafe(toList(dataSet.personAddressAccessor,
 				dataSet.addressPhonesAccessor, new ListAccessor<>(0)), (accessor, valueType) -> {
 			if (accessor == dataSet.addressPhonesAccessor) {
 				return MyList.class;	// we return a special List that prevent IndexOutOfBoundsException

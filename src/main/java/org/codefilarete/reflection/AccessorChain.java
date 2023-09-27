@@ -44,10 +44,11 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @param accessors list of {@link Accessor} to be used by chain
 	 * @see #RETURN_NULL
 	 * @see ValueInitializerOnNullValue#giveValueType(Accessor, Class)
-	 * @see #forModel(List, BiFunction) 
+	 * @see #chainNullSafe(List, BiFunction)
 	 */
-	public static <IN, OUT> AccessorChain<IN, OUT> forModel(List<? extends Accessor<?, ?>> accessors) {
-		return forModel(accessors, null);
+	// TODO rename it as chainNullSafe
+	public static <IN, OUT> AccessorChain<IN, OUT> chainNullSafe(List<? extends Accessor<?, ?>> accessors) {
+		return chainNullSafe(accessors, null);
 	}
 	
 	/**
@@ -63,7 +64,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @see ValueInitializerOnNullValue#giveValueType(Accessor, Class)
 	 */
 	// TODO rename it as chainNullSafe
-	public static <IN, OUT> AccessorChain<IN, OUT> forModel(List<? extends Accessor<?, ?>> accessors, @Nullable BiFunction<Accessor, Class, Class> valueTypeDeterminer) {
+	public static <IN, OUT> AccessorChain<IN, OUT> chainNullSafe(List<? extends Accessor<?, ?>> accessors, @Nullable BiFunction<Accessor, Class, Class> valueTypeDeterminer) {
 		return new AccessorChain<IN, OUT>(accessors) {
 			
 			private final AccessorChainMutator<IN, Object, OUT> mutator = (AccessorChainMutator<IN, Object, OUT>) super.toMutator()
