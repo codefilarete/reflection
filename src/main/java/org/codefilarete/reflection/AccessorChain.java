@@ -46,7 +46,6 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @see ValueInitializerOnNullValue#giveValueType(Accessor, Class)
 	 * @see #chainNullSafe(List, BiFunction)
 	 */
-	// TODO rename it as chainNullSafe
 	public static <IN, OUT> AccessorChain<IN, OUT> chainNullSafe(List<? extends Accessor<?, ?>> accessors) {
 		return chainNullSafe(accessors, null);
 	}
@@ -63,7 +62,6 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @see #RETURN_NULL
 	 * @see ValueInitializerOnNullValue#giveValueType(Accessor, Class)
 	 */
-	// TODO rename it as chainNullSafe
 	public static <IN, OUT> AccessorChain<IN, OUT> chainNullSafe(List<? extends Accessor<?, ?>> accessors, @Nullable BiFunction<Accessor, Class, Class> valueTypeDeterminer) {
 		return new AccessorChain<IN, OUT>(accessors) {
 			
