@@ -170,7 +170,9 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 		Accessor lastAccessor = Iterables.last(getAccessors());
 		if (lastAccessor instanceof ReversibleAccessor) {
 			ReversibleMutator<Object, T> lastMutator = (ReversibleMutator<Object, T>) ((ReversibleAccessor) lastAccessor).toMutator();
-			return new AccessorChainMutator<>(Collections.cutTail(getAccessors()), lastMutator);
+			AccessorChainMutator<C, Object, T> result = new AccessorChainMutator<>(Collections.cutTail(getAccessors()), lastMutator);
+			result.setNullValueHandler(this.nullValueHandler);
+			return result;
 		} else {
 			throw new UnsupportedOperationException("Last accessor cannot be reverted because it's not " + ReversibleAccessor.class.getName()
 					+ ": " + lastAccessor);

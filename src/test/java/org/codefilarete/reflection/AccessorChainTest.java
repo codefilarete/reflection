@@ -125,7 +125,7 @@ class AccessorChainTest {
 	}
 	
 	@Test
-	void forModel_getWithSomeNullOnPath_returnsNull() {
+	void chainNullSafe_getWithSomeNullOnPath_returnsNull() {
 		DataSet dataSet = new DataSet();
 		AccessorChain<Object, Object> testInstance = AccessorChain.chainNullSafe(toList(dataSet.personAddressAccessor,
 				dataSet.addressCityAccessor, dataSet.cityNameAccessor), null);
@@ -134,7 +134,7 @@ class AccessorChainTest {
 	}
 	
 	@Test
-	void forModel_setWithSomeNullOnPath_instantiateBeansOnPath() {
+	void chainNullSafe_setWithSomeNullOnPath_instantiateBeansOnPath() {
 		DataSet dataSet = new DataSet();
 		AccessorChain<Object, Object> testInstance = AccessorChain.chainNullSafe(toList(dataSet.personAddressAccessor,
 				dataSet.addressCityAccessor, dataSet.cityNameAccessor), null);
@@ -144,7 +144,7 @@ class AccessorChainTest {
 	}
 	
 	@Test
-	void forModel_setUsesValueTypeDeterminer() {
+	void chainNullSafe_setUsesValueTypeDeterminer() {
 		DataSet dataSet = new DataSet();
 		AccessorChain<Object, Object> testInstance = AccessorChain.chainNullSafe(toList(dataSet.personAddressAccessor,
 				dataSet.addressPhonesAccessor, new ListAccessor<>(0)), (accessor, valueType) -> {
@@ -159,6 +159,21 @@ class AccessorChainTest {
 		testInstance.toMutator().set(pawn, newPhone);
 		assertThat(pawn.getAddress().getPhones()).isInstanceOf(MyList.class);
 		assertThat(pawn.getAddress().getPhones().get(0)).isEqualTo(newPhone);
+	}
+	
+	@Test
+	void toMutator_keepsNullValueHandler() {
+		DataSet dataSet = new DataSet();
+		AccessorChain<Object, Object> testInstance = new AccessorChain(dataSet.personAddressAccessor, dataSet.addressCityAccessor);
+		// by default NullValueHandler is one that throws an exception, by setting an initializer one, we'll see if
+		// property path is initialized when calling toMutator().set(..)
+		testInstance.setNullValueHandler(AccessorChain.INITIALIZE_VALUE);
+		// Path of AccessorChain test instance is Person -> Address -> City, we don't set Address to enforce an potential
+		// NPE exception while setting City onto a Person, which should not happen since we set INITIALIZE_VALUE
+		Person pawn = new Person(null);
+		City newCity = new City();
+		testInstance.toMutator().set(pawn, newCity);
+		assertThat(pawn.getAddress().getCity()).isSameAs(newCity);
 	}
 	
 	private static class MyList<E> extends ArrayList<E> {
