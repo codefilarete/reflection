@@ -37,6 +37,8 @@ public class AccessorDefinition {
 			result = giveDefinition(((PropertyAccessor) accessPoint).getAccessor());
 		} else if (accessPoint instanceof AbstractReflector) {
 			result = giveDefinition((AbstractReflector) accessPoint);
+		} else if (accessPoint instanceof AccessorDefinitionDefiner) {
+			result = ((AccessorDefinitionDefiner) accessPoint).asAccessorDefinition();
 		} else {
 			throw new UnsupportedOperationException("Accessor type is unsupported to compute its definition : " + (accessPoint == null ? "null" : Reflections.toString(accessPoint.getClass())));
 		}
