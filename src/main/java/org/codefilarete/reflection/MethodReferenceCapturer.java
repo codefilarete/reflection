@@ -72,7 +72,7 @@ public class MethodReferenceCapturer {
 	/**
 	 * Looks for the equivalent {@link Method} of a getter with two arguments
 	 *
-	 * @param methodReference a method reference refering to a 2-args getter
+	 * @param methodReference a method reference referring to a 2-args getter
 	 * @param <I> the owning class of the method
 	 * @param <A1> the first argument type
 	 * @param <A2> the second argument type
@@ -86,7 +86,7 @@ public class MethodReferenceCapturer {
 	/**
 	 * Looks for the equivalent {@link Method} of a no-arg no-return function
 	 *
-	 * @param methodReference a method reference refering to a no-arg no-return function
+	 * @param methodReference a method reference referring to a no-arg no-return function
 	 * @param <I> the owning class of the method
 	 * @return the found method
 	 */
@@ -97,7 +97,7 @@ public class MethodReferenceCapturer {
 	/**
 	 * Looks for the equivalent {@link Method} of a setter
 	 * 
-	 * @param methodReference a method reference refering to a setter
+	 * @param methodReference a method reference referring to a setter
 	 * @param <I> the owning class of the method
 	 * @param <A1> the input type of the setter
 	 * @return the found method
@@ -109,7 +109,7 @@ public class MethodReferenceCapturer {
 	/**
 	 * Looks for the equivalent {@link Method} of a setter with two arguments
 	 *
-	 * @param methodReference a method reference refering to a 2-args setter
+	 * @param methodReference a method reference referring to a 2-args setter
 	 * @param <I> the owning class of the method
 	 * @param <A1> the first argument type
 	 * @param <A2> the first argument type
@@ -122,7 +122,7 @@ public class MethodReferenceCapturer {
 	/**
 	 * Looks for the equivalent {@link Constructor} of constructor reference
 	 *
-	 * @param methodReference a method reference refering to a no-arg constructor
+	 * @param methodReference a method reference referring to a no-arg constructor
 	 * @param <O> the owning class of the constructor which is also the return/instance type
 	 * @return the found method
 	 */
@@ -133,7 +133,7 @@ public class MethodReferenceCapturer {
 	/**
 	 * Looks for the equivalent {@link Constructor} of 1-arg constructor reference
 	 *
-	 * @param methodReference a method reference refering to a 1-arg constructor
+	 * @param methodReference a method reference referring to a 1-arg constructor
 	 * @param <O> the owning class of the constructor which is also the return/instance type
 	 * @param <A1> the first argument type
 	 * @return the found method
@@ -145,7 +145,7 @@ public class MethodReferenceCapturer {
 	/**
 	 * Looks for the equivalent {@link Constructor} of 2-args constructor reference
 	 *
-	 * @param methodReference a method reference refering to a 2-args constructor
+	 * @param methodReference a method reference referring to a 2-args constructor
 	 * @param <O> the owning class of the constructor which is also the return/instance type
 	 * @param <A1> the second argument type
 	 * @param <A2> the first argument type
@@ -158,7 +158,7 @@ public class MethodReferenceCapturer {
 	/**
 	 * Looks for the equivalent {@link Constructor} of 3-args constructor reference
 	 *
-	 * @param methodReference a method reference refering to a 2-args constructor
+	 * @param methodReference a method reference referring to a 2-args constructor
 	 * @param <O> the owning class of the constructor which is also the return/instance type
 	 * @param <A1> the second argument type
 	 * @param <A2> the first argument type
@@ -226,7 +226,7 @@ public class MethodReferenceCapturer {
 	/**
 	 * Looks for the equivalent {@link Executable} of a {@link SerializableFunction}
 	 *
-	 * @param methodReference a method reference refering to a getter
+	 * @param methodReference a method reference referring to a getter
 	 * @param <I> the owning class of the {@link Executable}
 	 * @param <O> the return type of the function
 	 * @return the found method
@@ -238,7 +238,7 @@ public class MethodReferenceCapturer {
 	/**
 	 * Looks for the equivalent {@link Executable} of a {@link SerializableBiFunction}
 	 *
-	 * @param methodReference a method reference refering to a 1-arg getter
+	 * @param methodReference a method reference referring to a 1-arg getter
 	 * @param <I> the owning class of the {@link Executable}
 	 * @param <A1> the argument type
 	 * @param <O> the return type of the function
@@ -251,7 +251,7 @@ public class MethodReferenceCapturer {
 	/**
 	 * Looks for the equivalent {@link Executable} of a {@link SerializableTriFunction}
 	 *
-	 * @param methodReference a method reference refering to a 2-args getter
+	 * @param methodReference a method reference referring to a 2-args getter
 	 * @param <I> the owning class of the {@link Executable}
 	 * @param <A1> the first argument type
 	 * @param <A2> the second argument type
@@ -265,7 +265,7 @@ public class MethodReferenceCapturer {
 	/**
 	 * Looks for the equivalent {@link Executable} of a {@link SerializableConsumer}
 	 *
-	 * @param methodReference a method reference refering to a no-arg no-return function
+	 * @param methodReference a method reference referring to a no-arg no-return function
 	 * @param <I> the owning class of the {@link Executable}
 	 * @return the found {@link Executable}
 	 */
@@ -276,7 +276,7 @@ public class MethodReferenceCapturer {
 	/**
 	 * Looks for the equivalent {@link Executable} of a {@link SerializableBiConsumer}
 	 *
-	 * @param methodReference a method reference refering to a setter
+	 * @param methodReference a method reference referring to a setter
 	 * @param <I> the owning class of the {@link Executable}
 	 * @param <A1> the input type of the consumer
 	 * @return the found {@link Executable}
@@ -288,7 +288,7 @@ public class MethodReferenceCapturer {
 	/**
 	 * Looks for the equivalent {@link Executable} of a {@link SerializableTriConsumer}
 	 *
-	 * @param methodReference a method reference refering to a 2-args setter
+	 * @param methodReference a method reference referring to a 2-args setter
 	 * @param <I> the owning class of the {@link Executable}
 	 * @param <A1> the first argument type
 	 * @param <A2> the first argument type
@@ -431,7 +431,7 @@ public class MethodReferenceCapturer {
 				// Object type ends with ';'
 				int typeDefEnd = currPos;
 				while(signatureChars[++typeDefEnd] != ';') {
-					// iteration is already done in condition, so ther's nothing to do here
+					// iteration is already done in condition, so there's nothing to do here
 				}
 				typeDefSize = typeDefEnd - currPos + 1;
 				className = cleanClassName(new String(signatureChars, currPos, typeDefSize));
@@ -443,17 +443,17 @@ public class MethodReferenceCapturer {
 		
 		/**
 		 * Cleans the given class name to comply with {@link Reflections#forName(String)} expected input
-		 * @param objectClass a class name with '/' and ;
-		 * @return
+		 * @param className a class name with '/' and ;
+		 * @return a full class name (package included) made of dots
 		 */
-		private static String cleanClassName(String objectClass) {
-			if (objectClass.charAt(0) == 'L') {
+		private static String cleanClassName(String className) {
+			if (className.charAt(0) == 'L') {
 				// class name : starts with 'L' and ends with ';' : we remove them
-				objectClass = objectClass.substring(1, objectClass.length() - 1);
+				className = className.substring(1, className.length() - 1);
 			}
 			// other case [L...; (object array) is accepted without modification
-			objectClass = objectClass.replace('/', '.');
-			return objectClass;
+			className = className.replace('/', '.');
+			return className;
 		}
 		
 	}
