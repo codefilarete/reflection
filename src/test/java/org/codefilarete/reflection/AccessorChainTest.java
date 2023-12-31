@@ -149,9 +149,9 @@ class AccessorChainTest {
 		AccessorChain<Object, Object> testInstance = AccessorChain.chainNullSafe(toList(dataSet.personAddressAccessor,
 				dataSet.addressPhonesAccessor, new ListAccessor<>(0)), (accessor, valueType) -> {
 			if (accessor == dataSet.addressPhonesAccessor) {
-				return MyList.class;	// we return a special List that prevent IndexOutOfBoundsException
+				return new MyList<>();	// we return a special List that prevent IndexOutOfBoundsException
 			} else {
-				return ValueInitializerOnNullValue.giveValueType(accessor, valueType);
+				return ValueInitializerOnNullValue.newInstance(accessor, valueType);
 			}
 		});
 		Person pawn = new Person(null);

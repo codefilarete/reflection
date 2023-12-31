@@ -1,21 +1,33 @@
 package org.codefilarete.reflection;
 
 import javax.annotation.Nullable;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.TransferQueue;
 import java.util.function.BiFunction;
 
-import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.codefilarete.tool.Reflections;
 import org.codefilarete.tool.bean.Objects;
 import org.codefilarete.tool.collection.Arrays;
 import org.codefilarete.tool.collection.Collections;
 import org.codefilarete.tool.collection.Iterables;
+import org.danekja.java.util.function.serializable.SerializableFunction;
 
 /**
  * Chain of {@link Accessor}s that behaves as a {@link Accessor}
@@ -43,7 +55,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 *
 	 * @param accessors list of {@link Accessor} to be used by chain
 	 * @see #RETURN_NULL
-	 * @see ValueInitializerOnNullValue#giveValueType(Accessor, Class)
+	 * @see ValueInitializerOnNullValue#newInstance(Accessor, Class)
 	 * @see #chainNullSafe(List, BiFunction)
 	 */
 	public static <IN, OUT> AccessorChain<IN, OUT> chainNullSafe(List<? extends Accessor<?, ?>> accessors) {
@@ -60,9 +72,9 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @param valueTypeDeterminer must be given if a bean type is badly determined by default mechanism
 	 * 		  (returning Object on generic for instance, or wrong Collection concrete type), null accepted (means default mechanism)
 	 * @see #RETURN_NULL
-	 * @see ValueInitializerOnNullValue#giveValueType(Accessor, Class)
+	 * @see ValueInitializerOnNullValue#newInstance(Accessor, Class)
 	 */
-	public static <IN, OUT> AccessorChain<IN, OUT> chainNullSafe(List<? extends Accessor<?, ?>> accessors, @Nullable BiFunction<Accessor, Class, Class> valueTypeDeterminer) {
+	public static <IN, OUT> AccessorChain<IN, OUT> chainNullSafe(List<? extends Accessor<?, ?>> accessors, @Nullable BiFunction<Accessor, Class, Object> valueTypeDeterminer) {
 		return new AccessorChain<IN, OUT>(accessors) {
 			
 			private final AccessorChainMutator<IN, Object, OUT> mutator = (AccessorChainMutator<IN, Object, OUT>) super.toMutator()
@@ -232,18 +244,18 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	
 	/**
 	 * Class that will initialize value by instantiating its class and set it onto the property.
-	 * instantiated types can be controlled through {@link #giveValueType(Accessor, Class)}.
+	 * instantiated types can be controlled through {@link #newInstance(Accessor, Class)}.
 	 */
 	public static class ValueInitializerOnNullValue implements NullValueHandler {
 		
-		private final BiFunction<Accessor, Class, Class> valueTypeDeterminer;
+		private final BiFunction<Accessor, Class, Object> valueTypeDeterminer;
 		
 		public ValueInitializerOnNullValue() {
 			this(null);
 		}
 		
-		public ValueInitializerOnNullValue(@Nullable BiFunction<Accessor, Class, Class> valueTypeDeterminer) {
-			this.valueTypeDeterminer = Objects.preventNull(valueTypeDeterminer, ValueInitializerOnNullValue::giveValueType);
+		public ValueInitializerOnNullValue(@Nullable BiFunction<Accessor, Class, Object> valueTypeDeterminer) {
+			this.valueTypeDeterminer = Objects.preventNull(valueTypeDeterminer, ValueInitializerOnNullValue::newInstance);
 		}
 		
 		@Override
@@ -251,8 +263,8 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 			if (accessor instanceof ReversibleAccessor) {
 				Mutator mutator = ((ReversibleAccessor) accessor).toMutator();
 				Class inputType = Accessors.giveInputType(mutator);
-				// NB: will throw an exception if type is not instanciable
-				Object value = Reflections.newInstance(valueTypeDeterminer.apply(accessor, inputType));
+				// NB: will throw an exception if type is not instantiable
+				Object value = valueTypeDeterminer.apply(accessor, inputType);
 				mutator.set(srcBean, value);
 				return value;
 			} else {
@@ -262,23 +274,33 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 		}
 		
 		/**
-		 * Expected to give concrete class to be instantiated.
-		 * @param accessor the current accessor that returned null, given for a fine grained adjustment of returned type
+		 * Expected to return an instance matching <code>valueType</code> class.
+		 * @param accessor the current accessor that returned null, given for a fine-grained adjustment of returned type
 		 * @param valueType expected compatible type, this of accessor
-		 * @return a concrete and instanciable type compatible with acccessor input type
+		 * @return a concrete and instantiable type compatible with accessor input type
 		 */
-		public static Class giveValueType(Accessor accessor, Class valueType) {
+		public static <T> T newInstance(Accessor<?, T> accessor, Class<T> valueType) {
 			if (List.class.equals(valueType)) {
-				return ArrayList.class;
+				return (T) new ArrayList();
+			} else if (SortedSet.class.equals(valueType)) {
+				return (T) new TreeSet();
 			} else if (Set.class.equals(valueType)) {
-				return HashSet.class;
+				return (T) new HashSet();
+			} else if (SortedMap.class.equals(valueType)) {
+				return (T) new TreeMap();
 			} else if (Map.class.equals(valueType)) {
-				return HashMap.class;
+				return (T) new HashMap();
+			} else if (BlockingDeque.class.equals(valueType)) {
+				return (T) new LinkedBlockingDeque();
+			} else if (TransferQueue.class.equals(valueType)) {
+				return (T) new LinkedTransferQueue();
+			} else if (BlockingQueue.class.equals(valueType)) {
+				return (T) new ArrayBlockingQueue(16);
+			} else if (Queue.class.equals(valueType)) {
+				return (T) new ArrayDeque();
 			} else {
-				return valueType;
+				return Reflections.newInstance(valueType);
 			}
 		}
 	}
-	
-	
 }
