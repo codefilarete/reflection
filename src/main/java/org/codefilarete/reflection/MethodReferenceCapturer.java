@@ -349,7 +349,6 @@ public class MethodReferenceCapturer {
 	 * @param serializedLambda a {@link SerializedLambda}
 	 * @return an object describing the method of the given method reference
 	 */
-	@Nonnull
 	public static MethodDefinition giveArgumentTypes(SerializedLambda serializedLambda) {
 		String methodSignature = serializedLambda.getImplMethodSignature();
 		Class declaringType = Reflections.forName(serializedLambda.getImplClass().replace('/', '.'));

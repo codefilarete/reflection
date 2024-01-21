@@ -49,7 +49,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	 * @return this
 	 */
 	public <X, R> MethodReferenceDispatcher redirect(SerializableFunction<X, R> methodToCapture, Supplier<R> codeToInvoke) {
-		addInterceptor(METHOD_REFERENCE_CAPTURER.findMethod(methodToCapture), (ArgsDigester) args -> codeToInvoke.get());
+		addInterceptor(METHOD_REFERENCE_CAPTURER.findMethod(methodToCapture), (ArgsDigester<R>) args -> codeToInvoke.get());
 		return this;
 	}
 	
@@ -79,7 +79,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	 * @return this
 	 */
 	public <X, A, R> MethodReferenceDispatcher redirect(SerializableBiFunction<X, A, R> methodToCapture, Function<A, R> codeToInvoke) {
-		addInterceptor(METHOD_REFERENCE_CAPTURER.findMethod(methodToCapture), (ArgsDigester) args -> codeToInvoke.apply((A) args[0]));
+		addInterceptor(METHOD_REFERENCE_CAPTURER.findMethod(methodToCapture), (ArgsDigester<R>) args -> codeToInvoke.apply((A) args[0]));
 		return this;
 	}
 	
@@ -110,7 +110,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	 * @return this
 	 */
 	public <X, A, B, R> MethodReferenceDispatcher redirect(SerializableTriFunction<X, A, B, R> methodToCapture, BiFunction<A, B, R> codeToInvoke) {
-		addInterceptor(METHOD_REFERENCE_CAPTURER.findMethod(methodToCapture), (ArgsDigester) args -> codeToInvoke.apply((A) args[0], (B) args[1]));
+		addInterceptor(METHOD_REFERENCE_CAPTURER.findMethod(methodToCapture), (ArgsDigester<R>) args -> codeToInvoke.apply((A) args[0], (B) args[1]));
 		return this;
 	}
 	
