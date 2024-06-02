@@ -1,9 +1,12 @@
 package org.codefilarete.reflection;
 
+import java.lang.reflect.Method;
+
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.codefilarete.reflection.model.Address;
 import org.codefilarete.reflection.model.City;
 import org.codefilarete.reflection.model.Person;
+import org.codefilarete.tool.Reflections;
 import org.codefilarete.tool.collection.Arrays;
 import org.codefilarete.tool.exception.Exceptions;
 import org.junit.jupiter.api.Test;
@@ -33,6 +36,9 @@ class AccessorDefinitionTest {
 				
 				{ new AccessorChain<>(Arrays.asList(new AccessorByMethodReference<>(Person::getAddress), new AccessorByMethodReference<>(Address::getCity))),
 						Person.class, "address.city", City.class },
+				
+				{ new DefinedAccessorByMethod<>(Reflections.getMethod(Person.class, "setName", String.class), new AccessorDefinition(String.class, "non sense", Integer.class)),
+						String.class, "non sense", Integer.class}
 		};
 	}
 	
@@ -104,6 +110,25 @@ class AccessorDefinitionTest {
 				new AccessorByMethodReference<>(Person::getAddress),
 				new AccessorByMethodReference<>(Address::getCity),
 				Accessors.accessorByField(Person.class, "name")))).isEqualTo("Person::getAddress > Address::getCity > o.c.r.m.Person.name");
+	}
+	
+	/**
+	 * A class that inherits from {@link AccessorByMethod} but implements {@link AccessorDefinitionDefiner} to ensure
+	 * that the latter is taken into account, not the mechanism implemented by {@link AccessorDefinition#giveDefinition(ValueAccessPoint)}
+	 */
+	private static class DefinedAccessorByMethod<C, T> extends AccessorByMethod<C, T> implements AccessorDefinitionDefiner<C> {
+		
+		private final AccessorDefinition accessorDefinition;
+		
+		public DefinedAccessorByMethod(Method getter, AccessorDefinition accessorDefinition) {
+			super(getter);
+			this.accessorDefinition = accessorDefinition;
+		}
+		
+		@Override
+		public AccessorDefinition asAccessorDefinition() {
+			return accessorDefinition;
+		}
 	}
 	
 }

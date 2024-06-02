@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.Reflections.MemberNotFoundException;
 import org.codefilarete.tool.StringAppender;
 import org.codefilarete.tool.collection.Iterables;
 
@@ -24,21 +25,29 @@ public class AccessorDefinition {
 	
 	/**
 	 * Gives an {@link AccessorDefinition} defining given {@link ValueAccessPoint}.
-	 * 
+	 * The mechanism is to create an {@link AccessorDefinition} for known classes ({@link AccessorChain},
+	 * {@link PropertyAccessor}, {@link AbstractReflector}) which may requires that given point sticks to Java Bean
+	 * Naming Convention (else it will throw an exception).
+	 * To come over this mechanism, given point must implement {@link AccessorDefinitionDefiner} because it is taken
+	 * priority over the other.
+	 *
 	 * @param accessPoint any {@link ValueAccessPoint}
 	 * @return a common representation of given input
 	 * @throws UnsupportedOperationException when member can't be found because given {@link ValueAccessPoint} is not a known concrete type
+	 * @throws MemberNotFoundException when member can't be found because it doesn't meet Java Bean Naming Convention
 	 */
 	public static AccessorDefinition giveDefinition(ValueAccessPoint<?> accessPoint) {
 		AccessorDefinition result;
-		if (accessPoint instanceof AccessorChain) {
+		// we take AccessorDefinitionDefiner in priority over concrete classes, because they can also implement it
+		// through a subclass
+		if (accessPoint instanceof AccessorDefinitionDefiner) {
+			result = ((AccessorDefinitionDefiner) accessPoint).asAccessorDefinition();
+		} else if (accessPoint instanceof AccessorChain) {
 			result = giveDefinition((AccessorChain) accessPoint);
 		} else if (accessPoint instanceof PropertyAccessor) {
 			result = giveDefinition(((PropertyAccessor) accessPoint).getAccessor());
 		} else if (accessPoint instanceof AbstractReflector) {
 			result = giveDefinition((AbstractReflector) accessPoint);
-		} else if (accessPoint instanceof AccessorDefinitionDefiner) {
-			result = ((AccessorDefinitionDefiner) accessPoint).asAccessorDefinition();
 		} else {
 			throw new UnsupportedOperationException("Accessor type is unsupported to compute its definition : " + (accessPoint == null ? "null" : Reflections.toString(accessPoint.getClass())));
 		}
