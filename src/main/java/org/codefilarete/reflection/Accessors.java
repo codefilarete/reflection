@@ -244,8 +244,10 @@ public final class Accessors {
 			// so AccessorByField will throw a NPE later
 			Field foundField = Reflections.getField(clazz, propertyName);
 			if (!Reflections.isAssignableFrom(propertyType, foundField.getType())) {
-				throw new MemberNotFoundException("Member type doesn't match expected one for field " + Reflections.toString(foundField)
-						+ ": expected " + Reflections.toString(propertyType) + " but is " + Reflections.toString(foundField.getType()) );
+				throw new MemberNotFoundException(
+						Reflections.toString(clazz) + "." + propertyName,
+						"Member type doesn't match expected one for field " + Reflections.toString(foundField)
+						+ ": expected " + Reflections.toString(propertyType) + " but is " + Reflections.toString(foundField.getType()));
 			}
 			propertyGetter = new AccessorByField<>(foundField);
 		}
@@ -287,8 +289,10 @@ public final class Accessors {
 			// so AccessorByField will throw a NPE later
 			Field foundField = Reflections.getField(clazz, propertyName);
 			if (!Reflections.isAssignableFrom(propertyType, foundField.getType())) {
-				throw new MemberNotFoundException("Member type doesn't match expected one for field " + Reflections.toString(foundField)
-						+ ": expected " + Reflections.toString(propertyType) + " but is " + Reflections.toString(foundField.getType()) );
+				throw new MemberNotFoundException(
+						Reflections.toString(clazz) + "." + propertyName,
+						"Member type doesn't match expected one for field " + Reflections.toString(foundField)
+						+ ": expected " + Reflections.toString(propertyType) + " but is " + Reflections.toString(foundField.getType()));
 			}
 			propertySetter = new MutatorByField<>(foundField);
 		}
