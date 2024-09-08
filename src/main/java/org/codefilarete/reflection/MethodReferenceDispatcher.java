@@ -9,10 +9,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.danekja.java.util.function.serializable.SerializableBiConsumer;
-import org.danekja.java.util.function.serializable.SerializableBiFunction;
-import org.danekja.java.util.function.serializable.SerializableConsumer;
-import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.codefilarete.tool.function.SerializableThrowingBiConsumer;
 import org.codefilarete.tool.function.SerializableThrowingConsumer;
 import org.codefilarete.tool.function.SerializableThrowingFunction;
@@ -23,10 +19,13 @@ import org.codefilarete.tool.function.ThrowingBiConsumer;
 import org.codefilarete.tool.function.ThrowingConsumer;
 import org.codefilarete.tool.function.TriFunction;
 import org.codefilarete.tool.reflect.MethodDispatcher;
+import org.danekja.java.util.function.serializable.SerializableBiConsumer;
+import org.danekja.java.util.function.serializable.SerializableBiFunction;
+import org.danekja.java.util.function.serializable.SerializableConsumer;
+import org.danekja.java.util.function.serializable.SerializableFunction;
 
 import static org.codefilarete.tool.Reflections.PRIMITIVE_DEFAULT_VALUES;
 import static org.codefilarete.tool.Reflections.newProxy;
-import static org.codefilarete.reflection.MethodReferences.buildSerializedLambda;
 
 /**
  * A specialized version of {@link MethodDispatcher} for single method to be redirected.
@@ -210,6 +209,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	 * {@inheritDoc}
 	 * Overridden to cast return type to current instance one, to allow better chaining
 	 */
+	@Override
 	public <X> MethodReferenceDispatcher redirect(Class<X> interfazz, X extensionSurrogate) {
 		return (MethodReferenceDispatcher) super.redirect(interfazz, extensionSurrogate);
 	}
@@ -218,6 +218,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	 * {@inheritDoc}
 	 * Overridden to cast return type to current instance one, to allow better chaining
 	 */
+	@Override
 	public <X> MethodReferenceDispatcher redirect(Class<X> interfazz, X extensionSurrogate, boolean returnProxy) {
 		return (MethodReferenceDispatcher) super.redirect(interfazz, extensionSurrogate, returnProxy);
 	}
@@ -226,6 +227,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	 * {@inheritDoc}
 	 * Overridden to cast return type to current instance one, to allow better chaining
 	 */
+	@Override
 	public <X> MethodReferenceDispatcher redirect(Class<X> interfazz, X extensionSurrogate, Object returningMethodsTarget) {
 		return (MethodReferenceDispatcher) super.redirect(interfazz, extensionSurrogate, returningMethodsTarget);
 	}
