@@ -1,3 +1,8 @@
+[![Build Status](https://ci.codefilarete.org/jenkins/buildStatus/icon?job=Reflection+pipeline)](https://ci.codefilarete.org/jenkins/job/Reflection%20pipeline/)
+[![Quality Gate Status](https://ci.codefilarete.org/sonar/api/project_badges/measure?project=Reflection&metric=alert_status)](https://ci.codefilarete.org/sonar/dashboard?id=Reflection)
+[![Coverage](https://ci.codefilarete.org/sonar/api/project_badges/measure?project=Reflection&metric=coverage)](https://ci.codefilarete.org/sonar/dashboard?id=Reflection)
+[![Vulnerabilities](https://ci.codefilarete.org/sonar/api/project_badges/measure?project=Reflection&metric=vulnerabilities)](https://ci.codefilarete.org/sonar/dashboard?id=Reflection)
+
 A project aimed at providing access to bean properties through one main class : [PropertyAccessor](src/main/java/org/codefilarete/reflection/PropertyAccessor.java)
 
 You can access properties [for reading](src/main/java/org/codefilarete/reflection/Accessor.java) or [for writing](src/main/java/org/codefilarete/reflection/Mutator.java)
