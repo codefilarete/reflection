@@ -5,7 +5,7 @@ import org.codefilarete.tool.Reflections;
 /**
  * @author Guillaume Mary
  */
-public abstract class AbstractReflector<C> {
+public abstract class AbstractReflector<C> implements ValueAccessPoint<C> {
 	
 	private final ExceptionConverter exceptionConverter;
 	
@@ -23,5 +23,5 @@ public abstract class AbstractReflector<C> {
 		throw new RuntimeException(message, convertedException);
 	}
 	
-	protected abstract String getDescription();
+	public abstract String getDescription();
 }

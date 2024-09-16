@@ -47,7 +47,7 @@ public class AccessorDefinition {
 		} else if (accessPoint instanceof PropertyAccessor) {
 			result = giveDefinition(((PropertyAccessor) accessPoint).getAccessor());
 		} else if (accessPoint instanceof AbstractReflector) {
-			result = giveDefinition((AbstractReflector) accessPoint);
+			result = giveReflectorDefinition((AbstractReflector) accessPoint);
 		} else {
 			throw new UnsupportedOperationException("Accessor type is unsupported to compute its definition : " + (accessPoint == null ? "null" : Reflections.toString(accessPoint.getClass())));
 		}
@@ -79,7 +79,7 @@ public class AccessorDefinition {
 	 * @param o any accessor / mutator by field, method and method reference
 	 * @return a {@link AccessorDefinition} describing input
 	 */
-	private static AccessorDefinition giveDefinition(AbstractReflector o) {
+	private static AccessorDefinition giveReflectorDefinition(AbstractReflector o) {
 		String memberName = null;
 		Class declarator = null;
 		Class memberType = null;

@@ -112,7 +112,7 @@ public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implement
 	 * @return getters and final setter aggregated
 	 */
 	@Override
-	protected String getDescription() {
+	public String getDescription() {
 		// NB: arrow mark is totally arbitrary and is only here to distinguish mutator from accessor part
 		return super.getDescription() + " <- " + this.mutator.toString();
 	}
