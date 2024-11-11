@@ -29,7 +29,8 @@ public final class Accessors {
 	private static final MethodReferenceCapturer methodCapturer = new MethodReferenceCapturer();
 	
 	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Field field) {
-		return accessorByMethod(field.getDeclaringClass(), field.getName());
+		Method getter = findGetter(field.getDeclaringClass(), field.getName(), field.getType());
+		return getter == null ? null : new AccessorByMethod<>(getter);
 	}
 	
 	/**
@@ -45,8 +46,7 @@ public final class Accessors {
 	 */
 	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Class clazz, String propertyName) {
 		Field field = Reflections.findField(clazz, propertyName);
-		Method getter = findGetter(clazz, propertyName, field.getType());
-		return getter == null ? null : new AccessorByMethod<>(getter);
+		return accessorByMethod(field);
 	}
 	
 	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Class clazz, String propertyName, Class<T> inputType) {
@@ -111,7 +111,8 @@ public final class Accessors {
 	}
 	
 	public static <C, T> MutatorByMethod<C, T> mutatorByMethod(Field field) {
-		return mutatorByMethod((Class<C>) field.getDeclaringClass(), field.getName());
+		// we do our best : no argument is given because we couldn't determine it
+		return new MutatorByMethod<>(Reflections.getMethod(field.getDeclaringClass(), "set" + Strings.capitalize(field.getName()), field.getType()));
 	}
 	
 	/**
@@ -127,20 +128,11 @@ public final class Accessors {
 	 */
 	@Nullable
 	public static <C, T> MutatorByMethod<C, T> mutatorByMethod(Class<C> clazz, String propertyName) {
-		Field propertyField;
+		Field field = Reflections.getField(clazz, propertyName);
 		try {
-			propertyField = Reflections.getField(clazz, propertyName);
+			return mutatorByMethod(field);
 		} catch (MemberNotFoundException e) {
-			propertyField = null;
-		}
-		
-		if (propertyField != null) {
-			// a matching field exists, we benefit from it to have a better method definition
-			Class<T> inputType = (Class<T>) propertyField.getType();
-			return mutatorByMethod(clazz, propertyName, inputType);
-		} else {
-			// we do our best : no argument is given because we couldn't determine it
-			return new MutatorByMethod<>(Reflections.getMethod(clazz, "set" + Strings.capitalize(propertyName)));
+			return null;
 		}
 	}
 	
@@ -264,13 +256,12 @@ public final class Accessors {
 	 * @return a new {@link Mutator}
 	 */
 	public static <C, T, M extends Member> MutatorByMember<C, T, M> mutator(Class<C> clazz, String propertyName) {
-		MutatorByMember<C, T, ?> propertySetter = mutatorByMethod(clazz, propertyName);
-		if (propertySetter == null) {
-			// NB: we use getField instead of findField because the latest returns null if field wasn't found
-			// so AccessorByField will throw a NPE later
-			propertySetter = new MutatorByField<>(Reflections.getField(clazz, propertyName));
+		Field field = Reflections.getField(clazz, propertyName);
+		try {
+			return (MutatorByMember<C, T, M>) mutatorByMethod(field);
+		} catch (MemberNotFoundException e) {
+			return (MutatorByMember<C, T, M>) new MutatorByField<>(field);
 		}
-		return (MutatorByMember<C, T, M>) propertySetter;
 	}
 	
 	/**

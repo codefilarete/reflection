@@ -111,7 +111,7 @@ class AccessorsTest {
 	void mutatorByMethod_noMatchingField() {
 		assertThatThrownBy(() -> Accessors.mutatorByMethod(Toto.class, "noMatchingField"))
 				.isInstanceOf(MemberNotFoundException.class)
-				.hasMessage("Method setNoMatchingField() on o.c.r.AccessorsTest$Toto was not found");
+				.hasMessage("Field noMatchingField on o.c.r.AccessorsTest$Toto was not found");
 	}
 	
 	protected static class Toto {
