@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.codefilarete.tool.InvocationHandlerSupport;
 import org.codefilarete.tool.function.SerializableThrowingBiConsumer;
 import org.codefilarete.tool.function.SerializableThrowingConsumer;
 import org.codefilarete.tool.function.SerializableThrowingFunction;
@@ -232,8 +233,6 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 		return (MethodReferenceDispatcher) super.redirect(interfazz, extensionSurrogate, returningMethodsTarget);
 	}
 	
-	/* Shortcut methods  */
-	
 	private void addInterceptor(Method method, ArgsDigester argsDigester) {
 		addInterceptor(method, (p, m, args) -> argsDigester.digest(args), false);
 	}
@@ -246,7 +245,9 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	}
 	
 	private void addInterceptor(Method method, InvocationHandler invocationHandler, boolean returnProxy) {
-		interceptors.put(giveSignature(method), new Interceptor(method, newProxy(method.getDeclaringClass(), invocationHandler), returnProxy));
+		// we wrap the given invocation handler into an InvocationHandlerSupport to benefit from its equals/hasCode/toString handling in case of debug
+		Object proxy = newProxy(method.getDeclaringClass(), new InvocationHandlerSupport(invocationHandler));
+		interceptors.put(giveSignature(method), new Interceptor(method, proxy, returnProxy));
 	}
 	
 	@FunctionalInterface

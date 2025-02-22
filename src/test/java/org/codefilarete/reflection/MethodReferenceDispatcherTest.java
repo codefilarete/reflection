@@ -11,16 +11,18 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.danekja.java.util.function.serializable.SerializableBiFunction;
-import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.codefilarete.tool.collection.Arrays;
 import org.codefilarete.tool.collection.Iterables;
 import org.codefilarete.tool.collection.Maps;
 import org.codefilarete.tool.function.Hanger.Holder;
+import org.codefilarete.tool.reflect.MethodDispatcher.WrongTypeReturnedException;
 import org.codefilarete.tool.trace.ModifiableInt;
+import org.danekja.java.util.function.serializable.SerializableBiFunction;
+import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 /**
  * @author Guillaume Mary
@@ -28,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MethodReferenceDispatcherTest {
 	
 	@Test
-	public void testRedirect_TriFunction() {
+	void redirect_TriFunction() {
 		CharSequence testInstance;
 		
 		// SerializableTriFunction : a getter with 2 args
@@ -44,8 +46,34 @@ class MethodReferenceDispatcherTest {
 		assertThat(testInstance.toString()).isEqualTo("Dispatcher to Hello world !");
 	}
 	
+	/**
+	 * Edge case : due to generics or too generic typing (Object), the code to invoke might not return the expected type (the one of captured method).
+	 * Whereas it's a misusage of the API, this case is hard to understand and debug, we added the handling of it in the code to avoid dev spend
+	 * too much time to understand what's going on. Hence, we test it (again, even it's an edge case it has some (time) value to be addressed)
+	 */
 	@Test
-	public void testRedirect_TriFunction_BiConsumer() {
+	void redirect_TriFunction_FunctionReturnsWrongType_throwsRuntimeException() {
+		Map<Integer, String> valuesHolder = new HashMap<>();
+		int key = 42;
+		// we put a value for the key that is going to be set, to make the call return a value (Map.put(..) returns the old value)
+		valuesHolder.put(key, "any string");
+		DummySetter testInstance = new MethodReferenceDispatcher()
+				// Note that initial problem comes from here : argument-methods are incompatible on their returned type, but for any (compiler ?)
+				// reasons, the returned type is not checked. This will lead to a ClassCastException at runtime.
+				.redirect(DummySetter::value, valuesHolder::put)
+				.build(DummySetter.class);
+		
+		// because we previously put a value for the key in the Map, the method will return a String, whereas it should have returned a DummySetter
+		// as expected by DummySetter.value(int, String). Without the case handling, user would get a java.lang.ClassCastException very difficult
+		// to understand
+		assertThatCode(() -> testInstance.value(key, "whatever"))
+				.isInstanceOf(WrongTypeReturnedException.class)
+				.hasMessage("Code handling o.c.r.MethodReferenceDispatcherTest$DummySetter.value(int, j.l.String)" +
+						" is expected to return a o.c.r.MethodReferenceDispatcherTest$DummySetter but returned a j.l.String");
+	}
+	
+	@Test
+	void redirect_TriFunction_BiConsumer() {
 		CharSequence testInstance;
 		
 		// SerializableTriFunction : a getter with 2 args
@@ -68,7 +96,7 @@ class MethodReferenceDispatcherTest {
 	}
 	
 	@Test
-	public void testRedirect_Function() {
+	void redirect_Function() {
 		Stream testInstance;
 		
 		// SerializableBiFunction : a getter with 1 arg
@@ -84,7 +112,7 @@ class MethodReferenceDispatcherTest {
 	}
 	
 	@Test
-	public void testRedirect_Function_Runnable() {
+	void redirect_Function_Runnable() {
 		Stream testInstance;
 		
 		// SerializableBiFunction : a getter with 1 arg
@@ -104,7 +132,7 @@ class MethodReferenceDispatcherTest {
 	}
 	
 	@Test
-	public void testRedirect_BiFunction() {
+	void redirect_BiFunction() {
 		Stream testInstance;
 		
 		// SerializableTriFunction : a getter with 2 args
@@ -120,7 +148,7 @@ class MethodReferenceDispatcherTest {
 	}
 	
 	@Test
-	public void testRedirect_BiFunction_Consumer() {
+	void redirect_BiFunction_Consumer() {
 		Stream testInstance;
 		
 		// SerializableTriFunction : a getter with 2 args
@@ -138,7 +166,7 @@ class MethodReferenceDispatcherTest {
 	}
 	
 	@Test
-	public void testRedirect_Consumer() {
+	void redirect_Consumer() {
 		ExtendedRunnable testInstance;
 		
 		// SerializableConsumer : a runner
@@ -164,7 +192,7 @@ class MethodReferenceDispatcherTest {
 	}
 	
 	@Test
-	public void testRedirect_BiConsumer() {
+	void redirect_BiConsumer() {
 		// SerializableBiConsummer : a setter
 		DummySetter testInstance;
 		
@@ -187,7 +215,7 @@ class MethodReferenceDispatcherTest {
 	}
 	
 	@Test
-	public void testRedirect_ThrowingConsumer() throws SQLException {
+	void redirect_ThrowingConsumer() throws SQLException {
 		Connection testInstance;
 		
 		// ThrowingBiConsumer
@@ -200,7 +228,7 @@ class MethodReferenceDispatcherTest {
 	}
 	
 	@Test
-	public void testRedirect_ThrowingBiConsumer() throws SQLException {
+	void redirect_ThrowingBiConsumer() throws SQLException {
 		PreparedStatement testInstance;
 		
 		// ThrowingBiConsumer
@@ -213,7 +241,7 @@ class MethodReferenceDispatcherTest {
 	}
 	
 	@Test
-	public void testRedirect_ThrowingTriConsumer() throws SQLException {
+	void redirect_ThrowingTriConsumer() throws SQLException {
 		PreparedStatement testInstance;
 		
 		// ThrowingTriConsumer
@@ -234,7 +262,7 @@ class MethodReferenceDispatcherTest {
 	}
 	
 	@Test
-	public void testRedirect_ThrowingFunction() throws SQLException {
+	void redirect_ThrowingFunction() throws SQLException {
 		PreparedStatement testInstance;
 		
 		// ThrowingFunction
@@ -254,5 +282,7 @@ class MethodReferenceDispatcherTest {
 		void setValue(int i);
 		
 		void setValues(int i, String s);
+		
+		DummySetter value(int i, String s);
 	}
 }
