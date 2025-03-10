@@ -16,7 +16,7 @@ import org.codefilarete.tool.collection.Iterables;
 import org.codefilarete.tool.collection.Maps;
 import org.codefilarete.tool.function.Hanger.Holder;
 import org.codefilarete.tool.reflect.MethodDispatcher.WrongTypeReturnedException;
-import org.codefilarete.tool.trace.ModifiableInt;
+import org.codefilarete.tool.trace.MutableInt;
 import org.danekja.java.util.function.serializable.SerializableBiFunction;
 import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.junit.jupiter.api.Test;
@@ -77,7 +77,7 @@ class MethodReferenceDispatcherTest {
 		CharSequence testInstance;
 		
 		// SerializableTriFunction : a getter with 2 args
-		ModifiableInt modifiableInt = new ModifiableInt();
+		MutableInt modifiableInt = new MutableInt();
 		testInstance = new MethodReferenceDispatcher()
 				.redirect(CharSequence::subSequence, (i, j) -> {
 					modifiableInt.increment(i);
@@ -116,7 +116,7 @@ class MethodReferenceDispatcherTest {
 		Stream testInstance;
 		
 		// SerializableBiFunction : a getter with 1 arg
-		ModifiableInt modifiableInt = new ModifiableInt();
+		MutableInt modifiableInt = new MutableInt();
 		testInstance = new MethodReferenceDispatcher()
 				.redirect((SerializableFunction<Stream, Stream>) Stream::distinct, (Runnable) modifiableInt::increment)
 				.fallbackOn(Stream.of(1, null, 2))
@@ -152,7 +152,7 @@ class MethodReferenceDispatcherTest {
 		Stream testInstance;
 		
 		// SerializableTriFunction : a getter with 2 args
-		ModifiableInt modifiableInt = new ModifiableInt();
+		MutableInt modifiableInt = new MutableInt();
 		testInstance = new MethodReferenceDispatcher()
 				.redirect((SerializableBiFunction<Stream, Long, Stream>) Stream::limit, (Consumer<Long>) l -> modifiableInt.increment(l.intValue()))
 				.fallbackOn(Stream.of(1, null, 2))
@@ -170,7 +170,7 @@ class MethodReferenceDispatcherTest {
 		ExtendedRunnable testInstance;
 		
 		// SerializableConsumer : a runner
-		ModifiableInt modifiableInt = new ModifiableInt();
+		MutableInt modifiableInt = new MutableInt();
 		testInstance = new MethodReferenceDispatcher()
 				.redirect(ExtendedRunnable::run, modifiableInt::increment)
 				.fallbackOn(new ExtendedRunnable() {
