@@ -25,7 +25,6 @@ import java.util.function.BiFunction;
 import org.codefilarete.tool.Reflections;
 import org.codefilarete.tool.bean.Objects;
 import org.codefilarete.tool.collection.Arrays;
-import org.codefilarete.tool.collection.Collections;
 import org.codefilarete.tool.collection.Iterables;
 import org.danekja.java.util.function.serializable.SerializableFunction;
 
@@ -182,7 +181,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 		Accessor lastAccessor = Iterables.last(getAccessors());
 		if (lastAccessor instanceof ReversibleAccessor) {
 			ReversibleMutator<Object, T> lastMutator = (ReversibleMutator<Object, T>) ((ReversibleAccessor) lastAccessor).toMutator();
-			AccessorChainMutator<C, Object, T> result = new AccessorChainMutator<>(Collections.cutTail(getAccessors()), lastMutator);
+			AccessorChainMutator<C, Object, T> result = new AccessorChainMutator<>(Iterables.cutTail(getAccessors()), lastMutator);
 			result.setNullValueHandler(this.nullValueHandler);
 			return result;
 		} else {
