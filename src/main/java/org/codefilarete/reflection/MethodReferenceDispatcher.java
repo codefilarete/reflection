@@ -211,8 +211,8 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	 * Overridden to cast return type to current instance one, to allow better chaining
 	 */
 	@Override
-	public <X> MethodReferenceDispatcher redirect(Class<X> interfazz, X extensionSurrogate) {
-		return (MethodReferenceDispatcher) super.redirect(interfazz, extensionSurrogate);
+	public <X> MethodReferenceDispatcher redirect(Class<X> interfazz, X extensionDelegate) {
+		return (MethodReferenceDispatcher) super.redirect(interfazz, extensionDelegate);
 	}
 	
 	/**
@@ -220,8 +220,8 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	 * Overridden to cast return type to current instance one, to allow better chaining
 	 */
 	@Override
-	public <X> MethodReferenceDispatcher redirect(Class<X> interfazz, X extensionSurrogate, boolean returnProxy) {
-		return (MethodReferenceDispatcher) super.redirect(interfazz, extensionSurrogate, returnProxy);
+	public <X> MethodReferenceDispatcher redirect(Class<X> interfazz, X extensionDelegate, boolean returnProxy) {
+		return (MethodReferenceDispatcher) super.redirect(interfazz, extensionDelegate, returnProxy);
 	}
 	
 	/**
@@ -229,8 +229,8 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	 * Overridden to cast return type to current instance one, to allow better chaining
 	 */
 	@Override
-	public <X> MethodReferenceDispatcher redirect(Class<X> interfazz, X extensionSurrogate, Object returningMethodsTarget) {
-		return (MethodReferenceDispatcher) super.redirect(interfazz, extensionSurrogate, returningMethodsTarget);
+	public <X> MethodReferenceDispatcher redirect(Class<X> interfazz, X extensionDelegate, Object returningMethodsTarget) {
+		return (MethodReferenceDispatcher) super.redirect(interfazz, extensionDelegate, returningMethodsTarget);
 	}
 	
 	private void addInterceptor(Method method, ArgsDigester argsDigester) {
