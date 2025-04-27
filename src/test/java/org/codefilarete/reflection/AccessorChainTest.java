@@ -128,7 +128,7 @@ class AccessorChainTest {
 	void chainNullSafe_getWithSomeNullOnPath_returnsNull() {
 		DataSet dataSet = new DataSet();
 		AccessorChain<Object, Object> testInstance = AccessorChain.chainNullSafe(toList(dataSet.personAddressAccessor,
-				dataSet.addressCityAccessor, dataSet.cityNameAccessor), null);
+				dataSet.addressCityAccessor, dataSet.cityNameAccessor));
 		assertThat(testInstance.get(new Person(null))).isNull();
 		assertThat(testInstance.get(new Person(new Address(null, null)))).isNull();
 	}
@@ -137,9 +137,32 @@ class AccessorChainTest {
 	void chainNullSafe_setWithSomeNullOnPath_instantiateBeansOnPath() {
 		DataSet dataSet = new DataSet();
 		AccessorChain<Object, Object> testInstance = AccessorChain.chainNullSafe(toList(dataSet.personAddressAccessor,
-				dataSet.addressCityAccessor, dataSet.cityNameAccessor), null);
+				dataSet.addressCityAccessor, dataSet.cityNameAccessor));
 		Person pawn = new Person(null);
 		testInstance.toMutator().set(pawn, "toto");
+		assertThat(pawn.getAddress().getCity().getName()).isEqualTo("toto");
+	}
+	
+	@Test
+	void chainNullSafe_withMethodReference_getWithSomeNullOnPath_returnsNull() {
+		AccessorChain<Person, City> testInstance = AccessorChain.chainNullSafe(Person::getAddress, Address::getCity);
+		Person pawn = new Person(null);
+		assertThat(testInstance.get(pawn)).isEqualTo(null);
+	}
+	
+	@Test
+	void chainNullSafe_withMethodReference_setWithSomeNullOnPath_instantiateBeansOnPath() {
+		AccessorChain<Person, City> testInstance = AccessorChain.chainNullSafe(Person::getAddress, Address::getCity);
+		Person pawn = new Person(null);
+		testInstance.toMutator().set(pawn, new City("toto"));
+		assertThat(pawn.getAddress().getCity().getName()).isEqualTo("toto");
+	}
+	
+	@Test
+	void chainNullSafe_mutator_withMethodReference_setWithSomeNullOnPath_instantiateBeansOnPath() {
+		AccessorChainMutator<Person, Address, City> testInstance = AccessorChain.chainNullSafe(Person::getAddress, Address::setCity);
+		Person pawn = new Person(null);
+		testInstance.set(pawn, new City("toto"));
 		assertThat(pawn.getAddress().getCity().getName()).isEqualTo("toto");
 	}
 	

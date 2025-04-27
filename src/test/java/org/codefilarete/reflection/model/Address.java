@@ -27,4 +27,8 @@ public class Address {
 	public City getCity() {
 		return city;
 	}
+	
+	public void setCity(City city) {
+		this.city = city;
+	}
 }

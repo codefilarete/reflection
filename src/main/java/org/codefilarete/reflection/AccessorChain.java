@@ -20,6 +20,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TransferQueue;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 import org.codefilarete.tool.Reflections;
@@ -47,9 +48,50 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	}
 	
 	/**
-	 * Creates a chain that :
-	 * - returns null when any accessor on path returns null
+	 * Creates a chain that:
+	 * - returns null when any getters return null
 	 * - initializes values (instantiate bean) on path when its mutator is used
+	 * (voluntary dissimetric behavior)
+	 *
+	 * @param getter1 getter of the first property
+	 * @param getter2 getter of the second property
+	 * @see #RETURN_NULL
+	 * @see ValueInitializerOnNullValue#newInstance(Accessor, Class)
+	 * @see #chainNullSafe(List, BiFunction)
+	 */
+	public static <IN, A, OUT> AccessorChain<IN, OUT> chainNullSafe(SerializableFunction<IN, A> getter1, SerializableFunction<A, OUT> getter2) {
+		// Note that we use Accessors.accessor because it builds a ReversibleAccessor (required further to eventually set value) whereas AccessorByMethodReference doesn't
+		return new AccessorChain<IN, OUT>(Accessors.accessor(getter1), Accessors.accessor(getter2)) {
+			
+			private final AccessorChainMutator<IN, Object, OUT> mutator = (AccessorChainMutator<IN, Object, OUT>) super.toMutator()
+					.setNullValueHandler(INITIALIZE_VALUE);
+			
+			@Override
+			public AccessorChainMutator toMutator() {
+				return mutator;
+			}
+		}.setNullValueHandler(AccessorChain.RETURN_NULL);
+	}
+	
+	/**
+	 * Creates a chain that initializes values (instantiate bean) on its path if accessor returns null.
+	 *
+	 * @param getter getter of the first property
+	 * @param setter setter of the second property
+	 * @see #INITIALIZE_VALUE
+	 * @see #chainNullSafe(List, BiFunction)
+	 */
+	public static <IN, A, OUT> AccessorChainMutator<IN, A, OUT> chainNullSafe(SerializableFunction<IN, A> getter, BiConsumer<A, OUT> setter) {
+		// Note that we use Accessors.accessor because it builds a ReversibleAccessor (required further to eventually set value) whereas AccessorByMethodReference doesn't
+		AccessorChainMutator<IN, A, OUT> result = new AccessorChainMutator<>(Arrays.asList(Accessors.accessor(getter)), setter::accept);
+		result.setNullValueHandler(AccessorChain.INITIALIZE_VALUE);
+		return result;
+	}
+	
+	/**
+	 * Creates a chain that:
+	 * - returns null when any accessor on the path returns null
+	 * - initializes values (instantiate bean) on the path when its mutator is used
 	 * (voluntary dissimetric behavior)
 	 *
 	 * @param accessors list of {@link Accessor} to be used by chain
@@ -62,7 +104,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	}
 	
 	/**
-	 * Creates a chain that :
+	 * Creates a chain that:
 	 * - returns null when any accessor on path returns null
 	 * - initializes values (instantiate bean) on path when its mutator is used
 	 * (voluntary dissimetric behavior)
