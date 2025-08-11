@@ -39,11 +39,11 @@ import org.danekja.java.util.function.serializable.SerializableFunction;
  */
 public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements ReversibleAccessor<C, T> {
 	
-	public static <IN, OUT> AccessorChain<IN, OUT> chain(SerializableFunction<IN, OUT> function1) {
-		return new AccessorChain<>(new AccessorByMethodReference<>(function1));
+	public static <IN, OUT> AccessorChain<IN, OUT> fromMethodReference(SerializableFunction<IN, OUT> getter) {
+		return new AccessorChain<>(new AccessorByMethodReference<>(getter));
 	}
 	
-	public static <IN, A, OUT> AccessorChain<IN, OUT> chain(SerializableFunction<IN, A> function1, SerializableFunction<A, OUT> function2) {
+	public static <IN, A, OUT> AccessorChain<IN, OUT> fromMethodReferences(SerializableFunction<IN, A> function1, SerializableFunction<A, OUT> function2) {
 		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2));
 	}
 	
@@ -57,9 +57,9 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @param getter2 getter of the second property
 	 * @see #RETURN_NULL
 	 * @see ValueInitializerOnNullValue#newInstance(Accessor, Class)
-	 * @see #chainNullSafe(List, BiFunction)
+	 * @see #fromAccessorsWithNullSafe(List, BiFunction)
 	 */
-	public static <IN, A, OUT> AccessorChain<IN, OUT> chainNullSafe(SerializableFunction<IN, A> getter1, SerializableFunction<A, OUT> getter2) {
+	public static <IN, A, OUT> AccessorChain<IN, OUT> fromMethodReferencesWithNullSafe(SerializableFunction<IN, A> getter1, SerializableFunction<A, OUT> getter2) {
 		// Note that we use Accessors.accessor because it builds a ReversibleAccessor (required further to eventually set value) whereas AccessorByMethodReference doesn't
 		return new AccessorChain<IN, OUT>(Accessors.accessor(getter1), Accessors.accessor(getter2)) {
 			
@@ -79,9 +79,9 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @param getter getter of the first property
 	 * @param setter setter of the second property
 	 * @see #INITIALIZE_VALUE
-	 * @see #chainNullSafe(List, BiFunction)
+	 * @see #fromAccessorsWithNullSafe(List, BiFunction)
 	 */
-	public static <IN, A, OUT> AccessorChainMutator<IN, A, OUT> chainNullSafe(SerializableFunction<IN, A> getter, BiConsumer<A, OUT> setter) {
+	public static <IN, A, OUT> AccessorChainMutator<IN, A, OUT> fromMethodReferencesWithNullSafe(SerializableFunction<IN, A> getter, BiConsumer<A, OUT> setter) {
 		// Note that we use Accessors.accessor because it builds a ReversibleAccessor (required further to eventually set value) whereas AccessorByMethodReference doesn't
 		AccessorChainMutator<IN, A, OUT> result = new AccessorChainMutator<>(Arrays.asList(Accessors.accessor(getter)), setter::accept);
 		result.setNullValueHandler(AccessorChain.INITIALIZE_VALUE);
@@ -97,10 +97,10 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @param accessors list of {@link Accessor} to be used by chain
 	 * @see #RETURN_NULL
 	 * @see ValueInitializerOnNullValue#newInstance(Accessor, Class)
-	 * @see #chainNullSafe(List, BiFunction)
+	 * @see #fromAccessorsWithNullSafe(List, BiFunction)
 	 */
-	public static <IN, OUT> AccessorChain<IN, OUT> chainNullSafe(List<? extends Accessor<?, ?>> accessors) {
-		return chainNullSafe(accessors, null);
+	public static <IN, OUT> AccessorChain<IN, OUT> fromAccessorsWithNullSafe(List<? extends Accessor<?, ?>> accessors) {
+		return fromAccessorsWithNullSafe(accessors, null);
 	}
 	
 	/**
@@ -115,7 +115,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @see #RETURN_NULL
 	 * @see ValueInitializerOnNullValue#newInstance(Accessor, Class)
 	 */
-	public static <IN, OUT> AccessorChain<IN, OUT> chainNullSafe(List<? extends Accessor<?, ?>> accessors, @Nullable BiFunction<Accessor, Class, Object> valueTypeDeterminer) {
+	public static <IN, OUT> AccessorChain<IN, OUT> fromAccessorsWithNullSafe(List<? extends Accessor<?, ?>> accessors, @Nullable BiFunction<Accessor, Class, Object> valueTypeDeterminer) {
 		return new AccessorChain<IN, OUT>(accessors) {
 			
 			private final AccessorChainMutator<IN, Object, OUT> mutator = (AccessorChainMutator<IN, Object, OUT>) super.toMutator()
