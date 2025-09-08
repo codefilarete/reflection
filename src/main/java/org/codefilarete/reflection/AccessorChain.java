@@ -55,6 +55,14 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2), new AccessorByMethodReference<>(function3));
 	}
 	
+	public static <IN, A, B, C, OUT> AccessorChain<IN, OUT> fromMethodReferences(SerializableFunction<IN, A> function1,
+																				 SerializableFunction<A, B> function2,
+																				 SerializableFunction<B, C> function3,
+																				 SerializableFunction<C, OUT> function4
+	) {
+		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2), new AccessorByMethodReference<>(function3), new AccessorByMethodReference<>(function4));
+	}
+	
 	/**
 	 * Creates a chain that:
 	 * - returns null when any getters return null
