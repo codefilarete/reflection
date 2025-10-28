@@ -243,7 +243,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 			result.setNullValueHandler(this.nullValueHandler);
 			return result;
 		} else {
-			throw new UnsupportedOperationException("Last accessor cannot be reverted because it's not " + ReversibleAccessor.class.getName()
+			throw new UnsupportedOperationException("Last accessor cannot be reverted because it's not " + Reflections.toString(ReversibleAccessor.class)
 					+ ": " + lastAccessor);
 		}
 	}

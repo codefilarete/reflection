@@ -112,7 +112,7 @@ public class AccessorDefinition {
 	}
 	
 	/**
-	 * Dedicated to {@link AccessorChain}: returns an AccessorDefinition made of the the dotted properties of the "path" of the given {@link AccessorChain}.
+	 * Dedicated to {@link AccessorChain}: returns an {@link AccessorDefinition} made of the dotted properties of the "path" of the given {@link AccessorChain}.
 	 * @param o an {@link AccessorChain}
 	 * @return a {@link AccessorDefinition} describing input
 	 */
