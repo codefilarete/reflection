@@ -171,10 +171,10 @@ class AccessorChainTest {
 		DataSet dataSet = new DataSet();
 		AccessorChain<Object, Object> testInstance = AccessorChain.fromAccessorsWithNullSafe(toList(dataSet.personAddressAccessor,
 				dataSet.addressPhonesAccessor, new ListAccessor<>(0)), (accessor, valueType) -> {
-			if (accessor == dataSet.addressPhonesAccessor) {
+			if ((Accessor) accessor == dataSet.addressPhonesAccessor) {
 				return new MyList<>();	// we return a special List that prevent IndexOutOfBoundsException
 			} else {
-				return ValueInitializerOnNullValue.newInstance(accessor, valueType);
+				return Reflections.newInstance(valueType);
 			}
 		});
 		Person pawn = new Person(null);

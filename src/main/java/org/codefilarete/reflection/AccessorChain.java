@@ -1,30 +1,13 @@
 package org.codefilarete.reflection;
 
 import javax.annotation.Nullable;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedTransferQueue;
-import java.util.concurrent.TransferQueue;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 import org.codefilarete.tool.Reflections;
-import org.codefilarete.tool.bean.Objects;
 import org.codefilarete.tool.collection.Arrays;
 import org.codefilarete.tool.collection.Iterables;
 import org.danekja.java.util.function.serializable.SerializableFunction;
@@ -131,7 +114,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @see #RETURN_NULL
 	 * @see ValueInitializerOnNullValue#newInstance(Accessor, Class)
 	 */
-	public static <IN, OUT> AccessorChain<IN, OUT> fromAccessorsWithNullSafe(List<? extends Accessor<?, ?>> accessors, @Nullable BiFunction<Accessor, Class, Object> valueTypeDeterminer) {
+	public static <IN, OUT, T> AccessorChain<IN, OUT> fromAccessorsWithNullSafe(List<? extends Accessor<?, ?>> accessors, @Nullable BiFunction<Accessor<?, T>, Class<T>, T> valueTypeDeterminer) {
 		return new AccessorChain<IN, OUT>(accessors) {
 			
 			private final AccessorChainMutator<IN, Object, OUT> mutator = (AccessorChainMutator<IN, Object, OUT>) super.toMutator()
@@ -305,14 +288,16 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 */
 	public static class ValueInitializerOnNullValue implements NullValueHandler {
 		
-		private final BiFunction<Accessor, Class, Object> valueTypeDeterminer;
+		private final BiFunction<Accessor<?, ?>, Class<?>, ?> valueTypeDeterminer;
 		
 		public ValueInitializerOnNullValue() {
 			this(null);
 		}
 		
-		public ValueInitializerOnNullValue(@Nullable BiFunction<Accessor, Class, Object> valueTypeDeterminer) {
-			this.valueTypeDeterminer = Objects.preventNull(valueTypeDeterminer, ValueInitializerOnNullValue::newInstance);
+		public <T> ValueInitializerOnNullValue(@Nullable BiFunction<Accessor<?, T>, Class<T>, T> valueTypeDeterminer) {
+			this.valueTypeDeterminer = valueTypeDeterminer == null
+					? (accessor, clazz) -> this.newInstance((Accessor) accessor, clazz)
+					: (BiFunction) valueTypeDeterminer;
 		}
 		
 		@Override
@@ -336,28 +321,8 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 		 * @param valueType expected compatible type, this of accessor
 		 * @return a concrete and instantiable type compatible with accessor input type
 		 */
-		public static <T> T newInstance(Accessor<?, T> accessor, Class<T> valueType) {
-			if (List.class.equals(valueType)) {
-				return (T) new ArrayList();
-			} else if (SortedSet.class.equals(valueType)) {
-				return (T) new TreeSet();
-			} else if (Set.class.equals(valueType)) {
-				return (T) new HashSet();
-			} else if (SortedMap.class.equals(valueType)) {
-				return (T) new TreeMap();
-			} else if (Map.class.equals(valueType)) {
-				return (T) new HashMap();
-			} else if (BlockingDeque.class.equals(valueType)) {
-				return (T) new LinkedBlockingDeque();
-			} else if (TransferQueue.class.equals(valueType)) {
-				return (T) new LinkedTransferQueue();
-			} else if (BlockingQueue.class.equals(valueType)) {
-				return (T) new ArrayBlockingQueue(16);
-			} else if (Queue.class.equals(valueType)) {
-				return (T) new ArrayDeque();
-			} else {
-				return Reflections.newInstance(valueType);
-			}
+		protected <T> T newInstance(Accessor<?, T> accessor, Class<T> valueType) {
+			return Reflections.newInstance(valueType);
 		}
 	}
 }
