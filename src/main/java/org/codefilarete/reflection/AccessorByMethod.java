@@ -15,6 +15,9 @@ import org.codefilarete.tool.function.ThreadSafeLazyInitializer;
 import static org.codefilarete.tool.Reflections.propertyName;
 
 /**
+ * {@link Accessor} that wraps a {@link Method} to provide its value.
+ * Has {@link ReversibleAccessor} behavior through a lazily initialized internal {@link Mutator}.
+ *
  * @author Guillaume Mary
  */
 public class AccessorByMethod<C, T> extends AbstractAccessor<C, T>
@@ -24,12 +27,34 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T>
 	
 	private final Object[] methodParameters;
 	
+	/** For {@link ReversibleAccessor implementation} */
 	private final Supplier<Mutator<C, T>> mutator;
 	
+	/**
+	 * Create an instance based on the given method coordinates.
+	 *
+	 * @param declaringClass the class that owns the method
+	 * @param getterName the method name to be found in given class
+	 * @param argTypes optional argument types of the method
+	 */
+    public AccessorByMethod(Class<C> declaringClass, String getterName, Class ... argTypes) {
+        this(Reflections.getMethod(declaringClass, getterName, argTypes));
+    }
+	
+	/**
+	 * Create an instance based on the given {@link Method}. The method is expected to take no argument (getter)
+	 * @param getter a property accessor
+	 */
 	public AccessorByMethod(Method getter) {
 		this(getter, new Object[getter.getParameterTypes().length]);
 	}
 	
+	/**
+	 * Create an instance based on the given {@link Method}. The method is expected to take some arguments, their values are also given now.
+	 *
+	 * @param getter a property accessor
+	 * @param arguments the values to pass to the method when invoking {@link #get(Object)}
+	 */
 	public AccessorByMethod(Method getter, Object ... arguments) {
 		Reflections.ensureAccessible(getter);
 		this.getter = getter;
