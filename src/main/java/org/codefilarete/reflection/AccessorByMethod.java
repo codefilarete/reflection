@@ -1,7 +1,6 @@
 package org.codefilarete.reflection;
 
 import javax.annotation.Nonnegative;
-import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -157,7 +156,7 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T>
 	 * @param params arguments
 	 * @return result of the called method
 	 */
-	public T get(@Nonnull C c, Object ... params) {
+	public T get(C c, Object ... params) {
 		try {
 			return doGet(c, params);
 		} catch (ReflectiveOperationException | RuntimeException t) {

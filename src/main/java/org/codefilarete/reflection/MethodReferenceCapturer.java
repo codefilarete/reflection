@@ -1,6 +1,5 @@
 package org.codefilarete.reflection;
 
-import javax.annotation.Nonnull;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;

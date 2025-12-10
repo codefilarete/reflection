@@ -1,7 +1,6 @@
 package org.codefilarete.reflection;
 
 import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -20,7 +19,6 @@ import static org.codefilarete.tool.Reflections.propertyName;
 /**
  * @author Guillaume Mary
  */
-@ParametersAreNonnullByDefault
 public final class Accessors {
 	
 	/**
