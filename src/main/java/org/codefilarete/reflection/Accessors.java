@@ -26,6 +26,7 @@ public final class Accessors {
 	 */
 	private static final MethodReferenceCapturer methodCapturer = new MethodReferenceCapturer();
 	
+    @Nullable
 	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Field field) {
 		Method getter = findGetter(field.getDeclaringClass(), field.getName(), field.getType());
 		return getter == null ? null : new AccessorByMethod<>(getter);
@@ -42,11 +43,13 @@ public final class Accessors {
 	 * @param <T> getter return type, which is property type too
 	 * @return null if getter method is not found
 	 */
+    @Nullable
 	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Class clazz, String propertyName) {
 		Field field = Reflections.findField(clazz, propertyName);
 		return accessorByMethod(field);
 	}
 	
+    @Nullable
 	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Class clazz, String propertyName, Class<T> inputType) {
 		Method getter = findGetter(clazz, propertyName, inputType);
 		return getter == null ? null : new AccessorByMethod<>(getter);
@@ -228,7 +231,7 @@ public final class Accessors {
 	 * @return a new {@link Accessor}
 	 */
 	public static <C, T, M extends Member> AccessorByMember<C, T, M> accessor(Class<C> clazz, String propertyName, Class<T> propertyType) {
-		AccessorByMember<C, T, ?> propertyGetter = accessorByMethod(clazz, propertyName);
+		AccessorByMember<C, T, ?> propertyGetter = accessorByMethod(clazz, propertyName, propertyType);
 		if (propertyGetter == null) {
 			// NB: we use getField instead of findField because the latest returns null if field wasn't found
 			// so AccessorByField will throw a NPE later

@@ -8,6 +8,7 @@ import org.codefilarete.reflection.model.City;
 import org.codefilarete.tool.Reflections;
 import org.codefilarete.tool.Reflections.MemberNotFoundException;
 import org.codefilarete.tool.collection.Arrays;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,8 +69,24 @@ class AccessorsTest {
 	
 	@Test
 	void mutator_withMethodReferenceSetter() {
-		assertThat(Accessors.mutator(Toto::setProperty).getMutator().getClass()).isEqualTo(MutatorByMethodReference.class);
-		assertThat(((ValueAccessPointByMethod<Toto>) Accessors.mutator(Toto::setProperty).getAccessor()).getMethod()).isEqualTo(Reflections.getMethod(Toto.class, "getProperty"));
+		PropertyAccessor<Toto, StringBuilder> testInstance = Accessors.mutator(Toto::setProperty);
+		assertThat(testInstance.getMutator().getClass()).isEqualTo(MutatorByMethodReference.class);
+		assertThat(((ValueAccessPointByMethod<Toto>) testInstance.getAccessor()).getMethod()).isEqualTo(Reflections.getMethod(Toto.class, "getProperty"));
+		assertThat(Accessors.mutator(Toto::setPropertyWithoutField).getMutator().getClass()).isEqualTo(MutatorByMethodReference.class);
+	}
+	
+	@Nested
+	class WithoutField {
+		
+		@Test
+		void accessor() {
+			assertThat(Accessors.accessor(Toto::getPropertyWithoutField).getAccessor().getClass()).isEqualTo(AccessorByMethodReference.class);
+		}
+		
+		@Test
+		void mutator() {
+			assertThat(Accessors.mutator(Toto::setPropertyWithoutField).getMutator().getClass()).isEqualTo(MutatorByMethodReference.class);
+		}
 	}
 	
 	@Test
@@ -131,6 +148,14 @@ class AccessorsTest {
 		public void setProperty(StringBuilder property) {
 			this.property = property;
 		}
+		
+		public void setPropertyWithoutField(String value) {
+		
+		}
+		
+		public String getPropertyWithoutField() {
+            return null;
+        }
 		
 		public StringBuilder getPropertyNoSetter() {
 			return propertyNoSetter;
