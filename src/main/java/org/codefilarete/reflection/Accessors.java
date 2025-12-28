@@ -83,23 +83,7 @@ public final class Accessors {
 	}
 	
 	public static <C, T> ReversibleAccessor<C, T> accessorByMethodReference(SerializableFunction<C, T> getter, SerializableBiConsumer<C, T> setter) {
-		AccessorByMethodReference<C, T> fallback = new AccessorByMethodReference<>(getter);
-		return new MethodDispatcher()
-				// reverse methods are redirected to a redirecting lambda
-				.redirect(ReversibleAccessor.class, new ReversibleAccessor<C, T>() {
-					@Override
-					public Mutator<C, T> toMutator() {
-						return new MutatorByMethodReference<>(setter);
-					}
-					
-					@Override
-					public T get(C o) {
-						return fallback.get(o);
-					}
-				})
-				// fallback goes to default instance
-				.fallbackOn(fallback)
-				.build(ReversibleAccessor.class);
+		return PropertyAccessor.fromMethodReference(getter, setter);
 	}
 	
 	public static <C, T> AccessorByField<C, T> accessorByField(Field field) {
