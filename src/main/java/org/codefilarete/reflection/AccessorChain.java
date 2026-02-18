@@ -23,11 +23,13 @@ import org.danekja.java.util.function.serializable.SerializableFunction;
 public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements ReversibleAccessor<C, T> {
 	
 	public static <IN, OUT> AccessorChain<IN, OUT> fromMethodReference(SerializableFunction<IN, OUT> getter) {
-		return new AccessorChain<>(new AccessorByMethodReference<>(getter));
+		return new AccessorChain<>(Accessors.accessor(getter));
 	}
 	
 	public static <IN, A, OUT> AccessorChain<IN, OUT> fromMethodReferences(SerializableFunction<IN, A> function1, SerializableFunction<A, OUT> function2) {
-		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2));
+		// Note that we use Accessors.accessor(..) for the second argument because it builds a ReversibleAccessor,
+		// to fulfill AccessorChain ReversibleAccessor contract, whereas direct AccessorByMethodReference doesn't
+		return new AccessorChain<>(new AccessorByMethodReference<>(function1), Accessors.accessor(function2));
 	}
 	
 	public static <IN, A, B, OUT> AccessorChain<IN, OUT> fromMethodReferences(
@@ -35,7 +37,9 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 			SerializableFunction<A, B> function2,
 			SerializableFunction<B, OUT> function3
 	) {
-		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2), new AccessorByMethodReference<>(function3));
+		// Note that we use Accessors.accessor(..) for the third argument because it builds a ReversibleAccessor,
+		// to fulfill AccessorChain ReversibleAccessor contract, whereas direct AccessorByMethodReference doesn't
+		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2), Accessors.accessor(function3));
 	}
 	
 	public static <IN, A, B, C, OUT> AccessorChain<IN, OUT> fromMethodReferences(SerializableFunction<IN, A> function1,
@@ -43,7 +47,9 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 																				 SerializableFunction<B, C> function3,
 																				 SerializableFunction<C, OUT> function4
 	) {
-		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2), new AccessorByMethodReference<>(function3), new AccessorByMethodReference<>(function4));
+		// Note that we use Accessors.accessor(..) for the fourth argument because it builds a ReversibleAccessor,
+		// to fulfill AccessorChain ReversibleAccessor contract, whereas direct AccessorByMethodReference doesn't
+		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2), new AccessorByMethodReference<>(function3), Accessors.accessor(function4));
 	}
 	
 	/**
@@ -59,7 +65,8 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @see #fromAccessorsWithNullSafe(List, BiFunction)
 	 */
 	public static <IN, A, OUT> AccessorChain<IN, OUT> fromMethodReferencesWithNullSafe(SerializableFunction<IN, A> getter1, SerializableFunction<A, OUT> getter2) {
-		// Note that we use Accessors.accessor because it builds a ReversibleAccessor (required further to eventually set value) whereas AccessorByMethodReference doesn't
+		// Note that we use Accessors.accessor(..) for the second argument because it builds a ReversibleAccessor,
+		// to fulfill AccessorChain ReversibleAccessor contract, whereas direct AccessorByMethodReference doesn't
 		return new AccessorChain<IN, OUT>(Accessors.accessor(getter1), Accessors.accessor(getter2)) {
 			
 			private final AccessorChainMutator<IN, Object, OUT> mutator = (AccessorChainMutator<IN, Object, OUT>) super.toMutator()
