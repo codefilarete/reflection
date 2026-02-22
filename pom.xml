@@ -82,7 +82,7 @@
 	</dependencies>
 	
 	<build>
-		<finalName>codefilarete-${artifactId}-${version}</finalName>
+		<finalName>codefilarete-${project.artifactId}-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
