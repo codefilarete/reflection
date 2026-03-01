@@ -1,25 +1,19 @@
 package org.codefilarete.trace;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
-
-import org.codefilarete.reflection.Accessor;
-import org.codefilarete.reflection.ValueAccessPointByMethodReference;
-import org.danekja.java.util.function.serializable.SerializableFunction;
+import org.codefilarete.reflection.*;
 import org.codefilarete.tool.Experimental;
 import org.codefilarete.tool.Reflections;
 import org.codefilarete.tool.StringAppender;
 import org.codefilarete.tool.bean.InstanceMethodIterator;
 import org.codefilarete.tool.collection.Iterables;
 import org.codefilarete.tool.collection.KeepOrderSet;
-import org.codefilarete.reflection.AccessorByMethod;
-import org.codefilarete.reflection.AccessorByMethodReference;
-import org.codefilarete.reflection.AccessorDefinition;
-import org.codefilarete.reflection.ValueAccessPointSet;
+
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
 
 /**
  * Builder for {@link ObjectPrinter}. {@link ObjectPrinter} may be used to give a trace of some instances, to be logged or debug.
@@ -32,7 +26,7 @@ public class ObjectPrinterBuilder<C> {
 	
 	/**
 	 * Starts a printer configurer that will print all (public) methods of given class (including inherited ones).
-	 * Non wished properties may be removed by using {@link #except(SerializableFunction)} on result.
+	 * Non wished properties may be removed by using {@link #except(SerializableAccessor)} on result.
 	 *
 	 * @param type the class which methods must be printed
 	 * @return a {@link ObjectPrinterBuilder} that will print all methods of given class, and may be further configured
@@ -68,7 +62,7 @@ public class ObjectPrinterBuilder<C> {
 	 * @param getter the method reference that gives access to the property, can be one the parameterized class or one of its subtype
 	 * @return this
 	 */
-	public <D extends C> ObjectPrinterBuilder<C> addProperty(SerializableFunction<D, Object> getter) {
+	public <D extends C> ObjectPrinterBuilder<C> addProperty(SerializableAccessor<D, Object> getter) {
 		return this.addProperty(new AccessorByMethodReference(getter));
 	}
 	
@@ -83,7 +77,7 @@ public class ObjectPrinterBuilder<C> {
 	 * @param getter the method reference that gives access to the property
 	 * @return this
 	 */
-	public ObjectPrinterBuilder<C> except(SerializableFunction<C, Object> getter) {
+	public ObjectPrinterBuilder<C> except(SerializableAccessor<C, Object> getter) {
 		this.excludedProperties.add(new AccessorByMethodReference<>(getter));
 		return this;
 	}

@@ -1,29 +1,17 @@
 package org.codefilarete.reflection;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.util.concurrent.Callable;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import org.codefilarete.tool.InvocationHandlerSupport;
-import org.codefilarete.tool.function.SerializableThrowingBiConsumer;
-import org.codefilarete.tool.function.SerializableThrowingConsumer;
-import org.codefilarete.tool.function.SerializableThrowingFunction;
-import org.codefilarete.tool.function.SerializableThrowingTriConsumer;
-import org.codefilarete.tool.function.SerializableTriConsumer;
-import org.codefilarete.tool.function.SerializableTriFunction;
-import org.codefilarete.tool.function.ThrowingBiConsumer;
-import org.codefilarete.tool.function.ThrowingConsumer;
-import org.codefilarete.tool.function.TriFunction;
+import org.codefilarete.tool.function.*;
 import org.codefilarete.tool.reflect.MethodDispatcher;
 import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 import org.danekja.java.util.function.serializable.SerializableBiFunction;
 import org.danekja.java.util.function.serializable.SerializableConsumer;
 import org.danekja.java.util.function.serializable.SerializableFunction;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.util.concurrent.Callable;
+import java.util.function.*;
 
 import static org.codefilarete.tool.Reflections.PRIMITIVE_DEFAULT_VALUES;
 import static org.codefilarete.tool.Reflections.newProxy;
@@ -48,7 +36,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	 * @param <R> result type of the given function
 	 * @return this
 	 */
-	public <X, R> MethodReferenceDispatcher redirect(SerializableFunction<X, R> methodToCapture, Supplier<R> codeToInvoke) {
+	public <X, R> MethodReferenceDispatcher redirect(SerializableAccessor<X, R> methodToCapture, Supplier<R> codeToInvoke) {
 		addInterceptor(METHOD_REFERENCE_CAPTURER.findMethod(methodToCapture), (ArgsDigester<R>) args -> codeToInvoke.get());
 		return this;
 	}
@@ -64,7 +52,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	 * @param <R> result type of the given function
 	 * @return this
 	 */
-	public <X, R> MethodReferenceDispatcher redirect(SerializableFunction<X, R> methodToCapture, Runnable codeToInvoke) {
+	public <X, R> MethodReferenceDispatcher redirect(SerializableAccessor<X, R> methodToCapture, Runnable codeToInvoke) {
 		addInterceptor(METHOD_REFERENCE_CAPTURER.findMethod(methodToCapture), (ArgsConsumer) args -> codeToInvoke.run());
 		return this;
 	}
@@ -138,7 +126,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 		return this;
 	}
 	
-	public <X, A> MethodReferenceDispatcher redirect(SerializableBiConsumer<X, A> methodToCapture, Consumer<A> codeToInvoke) {
+	public <X, A> MethodReferenceDispatcher redirect(SerializableMutator<X, A> methodToCapture, Consumer<A> codeToInvoke) {
 		addInterceptor(METHOD_REFERENCE_CAPTURER.findMethod(methodToCapture),
 				(proxy, m, args) -> { codeToInvoke.accept((A) args[0]); return null; }, true);
 		return this;
@@ -150,7 +138,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	}
 	
 	/**
-	 * Same as {@link #redirect(SerializableFunction, Supplier)}, but dedicated to intercepted methods that have a {@code throws} clause.
+	 * Same as {@link #redirect(SerializableAccessor, Supplier)}, but dedicated to intercepted methods that have a {@code throws} clause.
 	 * Naming it "redirect" would lead to some casting of the argument because compiler doesn't distinct method references that has a throws clause
 	 * from those that don't have one, so, to prevent boilerplate casting, method must be named differently : {@code redirectThrower}.
 	 *
@@ -172,7 +160,7 @@ public class MethodReferenceDispatcher extends MethodDispatcher {
 	}
 	
 	/**
-	 * Same as {@link #redirect(SerializableBiConsumer, Consumer)}, but dedicated to intercepted methods that have a {@code throws} clause.
+	 * Same as {@link #redirect(SerializableMutator, Consumer)}, but dedicated to intercepted methods that have a {@code throws} clause.
 	 * Naming it "redirect" would lead to some casting of the argument because compiler doesn't distinct method references that has a throws clause
 	 * from those that don't have one, so, to prevent boilerplate casting, method must be named differently : {@code redirectThrower}.
 	 *

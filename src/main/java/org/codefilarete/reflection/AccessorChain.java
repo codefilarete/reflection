@@ -1,16 +1,15 @@
 package org.codefilarete.reflection;
 
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.collection.Arrays;
+import org.codefilarete.tool.collection.Iterables;
+
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-
-import org.codefilarete.tool.Reflections;
-import org.codefilarete.tool.collection.Arrays;
-import org.codefilarete.tool.collection.Iterables;
-import org.danekja.java.util.function.serializable.SerializableFunction;
 
 /**
  * Chain of {@link Accessor}s that behaves as a {@link Accessor}
@@ -22,30 +21,30 @@ import org.danekja.java.util.function.serializable.SerializableFunction;
  */
 public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements ReversibleAccessor<C, T> {
 	
-	public static <IN, OUT> AccessorChain<IN, OUT> fromMethodReference(SerializableFunction<IN, OUT> getter) {
+	public static <IN, OUT> AccessorChain<IN, OUT> fromMethodReference(SerializableAccessor<IN, OUT> getter) {
 		return new AccessorChain<>(Accessors.accessor(getter));
 	}
 	
-	public static <IN, A, OUT> AccessorChain<IN, OUT> fromMethodReferences(SerializableFunction<IN, A> function1, SerializableFunction<A, OUT> function2) {
+	public static <IN, A, OUT> AccessorChain<IN, OUT> fromMethodReferences(SerializableAccessor<IN, A> function1, SerializableAccessor<A, OUT> function2) {
 		// Note that we use Accessors.accessor(..) for the second argument because it builds a ReversibleAccessor,
 		// to fulfill AccessorChain ReversibleAccessor contract, whereas direct AccessorByMethodReference doesn't
 		return new AccessorChain<>(new AccessorByMethodReference<>(function1), Accessors.accessor(function2));
 	}
 	
 	public static <IN, A, B, OUT> AccessorChain<IN, OUT> fromMethodReferences(
-			SerializableFunction<IN, A> function1,
-			SerializableFunction<A, B> function2,
-			SerializableFunction<B, OUT> function3
+			SerializableAccessor<IN, A> function1,
+			SerializableAccessor<A, B> function2,
+			SerializableAccessor<B, OUT> function3
 	) {
 		// Note that we use Accessors.accessor(..) for the third argument because it builds a ReversibleAccessor,
 		// to fulfill AccessorChain ReversibleAccessor contract, whereas direct AccessorByMethodReference doesn't
 		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2), Accessors.accessor(function3));
 	}
 	
-	public static <IN, A, B, C, OUT> AccessorChain<IN, OUT> fromMethodReferences(SerializableFunction<IN, A> function1,
-																				 SerializableFunction<A, B> function2,
-																				 SerializableFunction<B, C> function3,
-																				 SerializableFunction<C, OUT> function4
+	public static <IN, A, B, C, OUT> AccessorChain<IN, OUT> fromMethodReferences(SerializableAccessor<IN, A> function1,
+																				 SerializableAccessor<A, B> function2,
+																				 SerializableAccessor<B, C> function3,
+																				 SerializableAccessor<C, OUT> function4
 	) {
 		// Note that we use Accessors.accessor(..) for the fourth argument because it builds a ReversibleAccessor,
 		// to fulfill AccessorChain ReversibleAccessor contract, whereas direct AccessorByMethodReference doesn't
@@ -64,7 +63,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @see ValueInitializerOnNullValue#newInstance(Accessor, Class)
 	 * @see #fromAccessorsWithNullSafe(List, BiFunction)
 	 */
-	public static <IN, A, OUT> AccessorChain<IN, OUT> fromMethodReferencesWithNullSafe(SerializableFunction<IN, A> getter1, SerializableFunction<A, OUT> getter2) {
+	public static <IN, A, OUT> AccessorChain<IN, OUT> fromMethodReferencesWithNullSafe(SerializableAccessor<IN, A> getter1, SerializableAccessor<A, OUT> getter2) {
 		// Note that we use Accessors.accessor(..) for the second argument because it builds a ReversibleAccessor,
 		// to fulfill AccessorChain ReversibleAccessor contract, whereas direct AccessorByMethodReference doesn't
 		return new AccessorChain<IN, OUT>(Accessors.accessor(getter1), Accessors.accessor(getter2)) {
@@ -87,7 +86,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @see #INITIALIZE_VALUE
 	 * @see #fromAccessorsWithNullSafe(List, BiFunction)
 	 */
-	public static <IN, A, OUT> AccessorChainMutator<IN, A, OUT> fromMethodReferencesWithNullSafe(SerializableFunction<IN, A> getter, BiConsumer<A, OUT> setter) {
+	public static <IN, A, OUT> AccessorChainMutator<IN, A, OUT> fromMethodReferencesWithNullSafe(SerializableAccessor<IN, A> getter, BiConsumer<A, OUT> setter) {
 		// Note that we use Accessors.accessor because it builds a ReversibleAccessor (required further to eventually set value) whereas AccessorByMethodReference doesn't
 		AccessorChainMutator<IN, A, OUT> result = new AccessorChainMutator<>(Arrays.asList(Accessors.accessor(getter)), setter::accept);
 		result.setNullValueHandler(AccessorChain.INITIALIZE_VALUE);

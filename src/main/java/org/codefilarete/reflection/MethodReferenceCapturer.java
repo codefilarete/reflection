@@ -1,5 +1,12 @@
 package org.codefilarete.reflection;
 
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.Reflections.MemberNotFoundException;
+import org.codefilarete.tool.exception.Exceptions;
+import org.codefilarete.tool.function.SerializableTriConsumer;
+import org.codefilarete.tool.function.SerializableTriFunction;
+import org.danekja.java.util.function.serializable.*;
+
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
@@ -9,17 +16,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.danekja.java.util.function.serializable.SerializableBiConsumer;
-import org.danekja.java.util.function.serializable.SerializableBiFunction;
-import org.danekja.java.util.function.serializable.SerializableConsumer;
-import org.danekja.java.util.function.serializable.SerializableFunction;
-import org.danekja.java.util.function.serializable.SerializableSupplier;
-import org.codefilarete.tool.Reflections;
-import org.codefilarete.tool.Reflections.MemberNotFoundException;
-import org.codefilarete.tool.exception.Exceptions;
-import org.codefilarete.tool.function.SerializableTriConsumer;
-import org.codefilarete.tool.function.SerializableTriFunction;
 
 /**
  * Will help to find {@link Method}s behind method references.
@@ -51,7 +47,7 @@ public class MethodReferenceCapturer {
 	 * @param <O> the return type of the getter
 	 * @return the found method
 	 */
-	public <I, O> Method findMethod(SerializableFunction<I, O> methodReference) {
+	public <I, O> Method findMethod(SerializableAccessor<I, O> methodReference) {
 		return findMethod(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	
@@ -101,7 +97,7 @@ public class MethodReferenceCapturer {
 	 * @param <A1> the input type of the setter
 	 * @return the found method
 	 */
-	public <I, A1> Method findMethod(SerializableBiConsumer<I, A1> methodReference) {
+	public <I, A1> Method findMethod(SerializableMutator<I, A1> methodReference) {
 		return findMethod(MethodReferences.buildSerializedLambda(methodReference));
 	}
 	

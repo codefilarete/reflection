@@ -1,8 +1,5 @@
 package org.codefilarete.reflection;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.codefilarete.reflection.model.Address;
 import org.codefilarete.reflection.model.City;
@@ -10,10 +7,12 @@ import org.codefilarete.reflection.model.Person;
 import org.codefilarete.reflection.model.Phone;
 import org.codefilarete.tool.Reflections;
 import org.codefilarete.tool.collection.Arrays;
-import org.codefilarete.reflection.AccessorChain.ValueInitializerOnNullValue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

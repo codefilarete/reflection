@@ -1,7 +1,5 @@
 package org.codefilarete.reflection;
 
-import org.danekja.java.util.function.serializable.SerializableBiConsumer;
-import org.danekja.java.util.function.serializable.SerializableFunction;
 import org.codefilarete.tool.function.Predicates;
 
 /**
@@ -20,7 +18,7 @@ public class PropertyAccessor<C, T> implements ReversibleAccessor<C, T>, Reversi
 	 * @param <T> property type
 	 * @return a {@link PropertyAccessor} that will access a property through the given getter and getter
 	 */
-	public static <C, T> PropertyAccessor<C, T> fromMethodReference(SerializableFunction<C, T> accessor, SerializableBiConsumer<C, T> mutator) {
+	public static <C, T> PropertyAccessor<C, T> fromMethodReference(SerializableAccessor<C, T> accessor, SerializableMutator<C, T> mutator) {
 		return new PropertyAccessor<>(new AccessorByMethodReference<>(accessor), new MutatorByMethodReference<>(mutator));
 	}
 	

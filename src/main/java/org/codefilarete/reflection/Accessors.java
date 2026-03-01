@@ -1,18 +1,16 @@
 package org.codefilarete.reflection;
 
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.Reflections.MemberNotFoundException;
+import org.codefilarete.tool.Strings;
+import org.codefilarete.tool.collection.Iterables;
+import org.danekja.java.util.function.serializable.SerializableBiConsumer;
+
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.List;
-
-import org.danekja.java.util.function.serializable.SerializableBiConsumer;
-import org.danekja.java.util.function.serializable.SerializableFunction;
-import org.codefilarete.tool.Reflections;
-import org.codefilarete.tool.Reflections.MemberNotFoundException;
-import org.codefilarete.tool.Strings;
-import org.codefilarete.tool.collection.Iterables;
-import org.codefilarete.tool.reflect.MethodDispatcher;
 
 import static org.codefilarete.tool.Reflections.propertyName;
 
@@ -78,11 +76,11 @@ public final class Accessors {
 		return Reflections.findMethod(clazz, methodPrefix + capitalizedProperty);
 	}
 	
-	public static <C, T> AccessorByMethodReference<C, T> accessorByMethodReference(SerializableFunction<C, T> getter) {
+	public static <C, T> AccessorByMethodReference<C, T> accessorByMethodReference(SerializableAccessor<C, T> getter) {
 		return new AccessorByMethodReference<>(getter);
 	}
 	
-	public static <C, T> ReversibleAccessor<C, T> accessorByMethodReference(SerializableFunction<C, T> getter, SerializableBiConsumer<C, T> setter) {
+	public static <C, T> ReversibleAccessor<C, T> accessorByMethodReference(SerializableAccessor<C, T> getter, SerializableMutator<C, T> setter) {
 		return PropertyAccessor.fromMethodReference(getter, setter);
 	}
 	
@@ -152,7 +150,7 @@ public final class Accessors {
 		}
 	}
 	
-	public static <C, T> MutatorByMethodReference<C, T> mutatorByMethodReference(SerializableBiConsumer<C, T> setter) {
+	public static <C, T> MutatorByMethodReference<C, T> mutatorByMethodReference(SerializableMutator<C, T> setter) {
 		return new MutatorByMethodReference<>(setter);
 	}
 	
@@ -275,7 +273,7 @@ public final class Accessors {
 		return (MutatorByMember<C, T, M>) propertySetter;
 	}
 	
-	public static <C, E> PropertyAccessor<C, E> accessor(SerializableFunction<C, E> getter) {
+	public static <C, E> PropertyAccessor<C, E> accessor(SerializableAccessor<C, E> getter) {
 		AccessorByMethodReference<C, E> methodReference = accessorByMethodReference(getter);
 		return new PropertyAccessor<>(
 				methodReference,
@@ -283,7 +281,7 @@ public final class Accessors {
 		);
 	}
 	
-	public static <C, E> PropertyAccessor<C, E> mutator(SerializableBiConsumer<C, E> setter) {
+	public static <C, E> PropertyAccessor<C, E> mutator(SerializableMutator<C, E> setter) {
 		MutatorByMethodReference<C, E> methodReference = mutatorByMethodReference(setter);
 		return new PropertyAccessor<>(
 				accessor(methodReference.getDeclaringClass(), propertyName(methodReference.getMethodName()), methodReference.getPropertyType()),

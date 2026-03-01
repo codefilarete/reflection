@@ -1,27 +1,11 @@
 package org.codefilarete.reflection;
 
-import java.lang.reflect.Constructor;
-import java.text.Collator;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiPredicate;
-import java.util.function.Function;
-
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.presentation.Representation;
 import org.codefilarete.reflection.MethodReferenceCapturer.LRUCache;
 import org.codefilarete.reflection.MethodReferenceCapturer.MethodDefinition;
 import org.codefilarete.reflection.jailed.PackagePrivateInheritedClass;
-import org.danekja.java.util.function.serializable.SerializableBiConsumer;
-import org.danekja.java.util.function.serializable.SerializableBiFunction;
-import org.danekja.java.util.function.serializable.SerializableConsumer;
-import org.danekja.java.util.function.serializable.SerializableFunction;
-import org.danekja.java.util.function.serializable.SerializableSupplier;
 import org.codefilarete.tool.Reflections;
 import org.codefilarete.tool.StringAppender;
 import org.codefilarete.tool.Strings;
@@ -29,9 +13,17 @@ import org.codefilarete.tool.collection.Arrays;
 import org.codefilarete.tool.function.Predicates;
 import org.codefilarete.tool.function.SerializableTriConsumer;
 import org.codefilarete.tool.function.SerializableTriFunction;
+import org.danekja.java.util.function.serializable.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import java.lang.reflect.Constructor;
+import java.text.Collator;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -51,7 +43,7 @@ class MethodReferenceCapturerTest {
 		assertThat(testInstance.findMethod(Collator::setStrength)).isEqualTo(Reflections.getMethod(Collator.class, "setStrength", int.class));
 		assertThat(testInstance.findMethod(String::toCharArray)).isEqualTo(Reflections.getMethod(String.class, "toCharArray"));
 		assertThat(testInstance.findMethod((SerializableBiFunction<List, Object[], Object[]>) List::toArray)).isEqualTo(Reflections.getMethod(List.class, "toArray", Object[].class));
-		assertThat(testInstance.findMethod((SerializableBiConsumer<List, Object[]>) List::toArray)).isEqualTo(Reflections.getMethod(List.class, 
+		assertThat(testInstance.findMethod((SerializableMutator<List, Object[]>) List::toArray)).isEqualTo(Reflections.getMethod(List.class,
 				"toArray", Object[].class));
 		assertThat(testInstance.findMethod(
 				(SerializableTriConsumer<String, Integer, Integer>) String::codePointCount)).isEqualTo(Reflections.getMethod(String.class, 
@@ -82,13 +74,13 @@ class MethodReferenceCapturerTest {
 	@Test
 	void findMethod_methodDefinedInPackagePrivateClass_throwsException() {
 		MethodReferenceCapturer testInstance = new MethodReferenceCapturer();
-		assertThatThrownBy(() -> testInstance.findMethod((SerializableBiConsumer<PackagePrivateInheritedClass, Integer>) PackagePrivateInheritedClass::doSomethingWith))
+		assertThatThrownBy(() -> testInstance.findMethod((SerializableMutator<PackagePrivateInheritedClass, Integer>) PackagePrivateInheritedClass::doSomethingWith))
 				.isInstanceOf(UnsupportedOperationException.class)
 				.extracting(Throwable::getMessage, InstanceOfAssertFactories.STRING)
 				.startsWith("Found method is synthetic which means original one was wrapped by some bytecode "
 						+ "(generally to bypass visibility constraint)");
 		
-		assertThatThrownBy(() -> testInstance.findMethod((SerializableBiConsumer<StringBuilder, Integer>) StringBuilder::ensureCapacity))
+		assertThatThrownBy(() -> testInstance.findMethod((SerializableMutator<StringBuilder, Integer>) StringBuilder::ensureCapacity))
 				.isInstanceOf(UnsupportedOperationException.class)
 				.extracting(Throwable::getMessage, InstanceOfAssertFactories.STRING)
 				.startsWith("Found method is synthetic which means original one was wrapped by some bytecode "
@@ -234,13 +226,13 @@ class MethodReferenceCapturerTest {
 	@Test
 	void testToMethodReferenceString() throws NoSuchMethodException {
 		assertThat(MethodReferences.toMethodReferenceString(String.class.getMethod("concat", String.class))).isEqualTo("String::concat");
-		SerializableFunction<String, char[]> toCharArray = String::toCharArray;
+		SerializableAccessor<String, char[]> toCharArray = String::toCharArray;
 		assertThat(MethodReferences.toMethodReferenceString(toCharArray)).isEqualTo("String::toCharArray");
 		SerializableBiFunction<String, String, String> concat = String::concat;
 		assertThat(MethodReferences.toMethodReferenceString(concat)).isEqualTo("String::concat");
 		SerializableTriFunction<String, Integer, Integer, CharSequence> subSequence = String::subSequence;
 		assertThat(MethodReferences.toMethodReferenceString(subSequence)).isEqualTo("String::subSequence");
-		SerializableBiConsumer<AtomicInteger, Integer> set = AtomicInteger::set;
+		SerializableMutator<AtomicInteger, Integer> set = AtomicInteger::set;
 		assertThat(MethodReferences.toMethodReferenceString(set)).isEqualTo("AtomicInteger::set");
 		SerializableConsumer<Map> clear = Map::clear;
 		assertThat(MethodReferences.toMethodReferenceString(clear)).isEqualTo("Map::clear");

@@ -1,5 +1,14 @@
 package org.codefilarete.reflection;
 
+import org.codefilarete.tool.collection.Arrays;
+import org.codefilarete.tool.collection.Iterables;
+import org.codefilarete.tool.collection.Maps;
+import org.codefilarete.tool.function.Hanger.Holder;
+import org.codefilarete.tool.reflect.MethodDispatcher.WrongTypeReturnedException;
+import org.codefilarete.tool.trace.MutableInt;
+import org.danekja.java.util.function.serializable.SerializableBiFunction;
+import org.junit.jupiter.api.Test;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -10,16 +19,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import org.codefilarete.tool.collection.Arrays;
-import org.codefilarete.tool.collection.Iterables;
-import org.codefilarete.tool.collection.Maps;
-import org.codefilarete.tool.function.Hanger.Holder;
-import org.codefilarete.tool.reflect.MethodDispatcher.WrongTypeReturnedException;
-import org.codefilarete.tool.trace.MutableInt;
-import org.danekja.java.util.function.serializable.SerializableBiFunction;
-import org.danekja.java.util.function.serializable.SerializableFunction;
-import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -101,7 +100,7 @@ class MethodReferenceDispatcherTest {
 		
 		// SerializableBiFunction : a getter with 1 arg
 		testInstance = new MethodReferenceDispatcher()
-				.redirect((SerializableFunction<Stream, Optional>) Stream::findFirst, () -> Optional.of(42))
+				.redirect((SerializableAccessor<Stream, Optional>) Stream::findFirst, () -> Optional.of(42))
 				.fallbackOn(Stream.of(1, null, 2))
 				.build(Stream.class);
 		assertThat(testInstance.findFirst()).isEqualTo(Optional.of(42));
@@ -118,7 +117,7 @@ class MethodReferenceDispatcherTest {
 		// SerializableBiFunction : a getter with 1 arg
 		MutableInt modifiableInt = new MutableInt();
 		testInstance = new MethodReferenceDispatcher()
-				.redirect((SerializableFunction<Stream, Stream>) Stream::distinct, (Runnable) modifiableInt::increment)
+				.redirect((SerializableAccessor<Stream, Stream>) Stream::distinct, (Runnable) modifiableInt::increment)
 				.fallbackOn(Stream.of(1, null, 2))
 				.build(Stream.class);
 		

@@ -1,22 +1,18 @@
 package org.codefilarete.reflection;
 
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.Strings;
+import org.codefilarete.tool.exception.Exceptions;
+import org.codefilarete.tool.function.SerializableTriConsumer;
+import org.codefilarete.tool.function.SerializableTriFunction;
+import org.danekja.java.util.function.serializable.*;
+
 import java.io.Serializable;
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Function;
-
-import org.codefilarete.tool.Reflections;
-import org.codefilarete.tool.Strings;
-import org.codefilarete.tool.exception.Exceptions;
-import org.codefilarete.tool.function.SerializableTriConsumer;
-import org.codefilarete.tool.function.SerializableTriFunction;
-import org.danekja.java.util.function.serializable.SerializableBiConsumer;
-import org.danekja.java.util.function.serializable.SerializableBiFunction;
-import org.danekja.java.util.function.serializable.SerializableConsumer;
-import org.danekja.java.util.function.serializable.SerializableFunction;
-import org.danekja.java.util.function.serializable.SerializableSupplier;
 
 /**
  * Helper methods for method reference
@@ -27,7 +23,7 @@ public class MethodReferences {
 	
 	private static final MethodReferenceCapturer SINGLETON  = new MethodReferenceCapturer();
 	
-	public static <A, B> String toMethodReferenceString(SerializableFunction<A, B>  methodReference) {
+	public static <A, B> String toMethodReferenceString(SerializableAccessor<A, B>  methodReference) {
 		Method method = SINGLETON.findMethod(methodReference);
 		return toMethodReferenceString(method);
 	}
@@ -47,7 +43,7 @@ public class MethodReferences {
 		return toMethodReferenceString(method);
 	}
 	
-	public static <A, B> String toMethodReferenceString(SerializableBiConsumer<A, B> methodReference) {
+	public static <A, B> String toMethodReferenceString(SerializableMutator<A, B> methodReference) {
 		Method method = SINGLETON.findMethod(methodReference);
 		return toMethodReferenceString(method);
 	}
