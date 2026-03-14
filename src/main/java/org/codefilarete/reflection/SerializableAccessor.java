@@ -11,6 +11,6 @@ import java.io.Serializable;
  * @author Guillaume Mary
  */
 @FunctionalInterface
-public interface SerializableAccessor<C, T> extends Accessor<C, T>, Serializable {
+public interface SerializableAccessor<C, T> extends Accessor<C, T>, Serializable, MethodReference<C> {
 	
 }

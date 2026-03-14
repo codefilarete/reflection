@@ -11,6 +11,6 @@ import java.io.Serializable;
  * @author Guillaume Mary
  */
 @FunctionalInterface
-public interface SerializableMutator<C, T> extends Mutator<C, T>, Serializable {
+public interface SerializableMutator<C, T> extends Mutator<C, T>, Serializable, MethodReference<C> {
 
 }
