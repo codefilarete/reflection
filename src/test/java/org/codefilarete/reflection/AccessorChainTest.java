@@ -27,7 +27,7 @@ class AccessorChainTest {
 		private final AccessorByField<Address, City> addressCityAccessor;
 		private final AccessorByField<Person, Address> personAddressAccessor;
 		private final AccessorByField<Address, List> addressPhonesAccessor;
-		private final AccessorByMethod<? extends List, Phone> phoneListAccessor;
+		private final ListAccessor<? extends List, Phone> phoneListAccessor;
 		private final AccessorByField<Phone, String> phoneNumberAccessor;
 		private final AccessorByMethod<Phone, String> phoneNumberMethodAccessor;
 		private final AccessorByMethod<String, Character> charAtAccessor;

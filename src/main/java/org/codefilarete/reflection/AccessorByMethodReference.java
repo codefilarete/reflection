@@ -16,17 +16,17 @@ import static org.codefilarete.tool.Reflections.IS_PREFIX_REMOVER;
  *
  * @author Guillaume Mary
  * @see Accessors#accessorByMethodReference(SerializableAccessor)
- * @see Accessors#accessorByMethodReference(SerializableAccessor, SerializableBiConsumer)
+ * @see Accessors#accessorByMethodReference(SerializableAccessor, SerializableMutator)
  */
 @SuppressWarnings("squid:S2160")	// because super.equals() is based on getDescription() it doesn't need to be overriden in this class
-public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> implements ValueAccessPointByMethodReference<C>, AccessorDefinitionDefiner<C> {
+public class AccessorByMethodReference<C, T> extends AbstractAccessor<C, T> implements ValueAccessPointByMethodReference<C>, AccessorDefinitionDefiner<C>, PropertyAccessor<C, T> {
 	
 	private final SerializableAccessor<C, T> methodReference;
 	private final String methodReferenceSignature;
 	private final String methodName;
-	private final Class declaringClass;
+	private final Class<C> declaringClass;
 	private final SerializedLambda serializedLambda;
-	private final Class propertyType;
+	private final Class<T> propertyType;
 	private final AccessorDefinition accessorDefinition;
 	
 	/**

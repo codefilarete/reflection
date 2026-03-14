@@ -20,7 +20,7 @@ import static org.codefilarete.tool.Reflections.propertyName;
  * @author Guillaume Mary
  */
 public class AccessorByMethod<C, T> extends AbstractAccessor<C, T>
-		implements AccessorByMember<C, T, Method>, ReversibleAccessor<C, T>, ValueAccessPointByMethod<C> {
+		implements AccessorByMember<C, T, Method>, ReversibleAccessor<C, T>, ValueAccessPointByMethod<C>, PropertyAccessor<C, T> {
 	
 	private final Method getter;
 	

@@ -26,7 +26,7 @@ public class AccessorDefinition {
 	/**
 	 * Gives an {@link AccessorDefinition} defining given {@link ValueAccessPoint}.
 	 * The mechanism is to create an {@link AccessorDefinition} for known classes ({@link AccessorChain},
-	 * {@link PropertyAccessor}, {@link AbstractReflector}) which may requires that given point sticks to Java Bean
+	 * {@link ReadWriteAccessPoint}, {@link AbstractReflector}) which may requires that given point sticks to Java Bean
 	 * Naming Convention (else it will throw an exception).
 	 * To come over this mechanism, given point must implement {@link AccessorDefinitionDefiner} because it is taken
 	 * priority over the other.
@@ -44,8 +44,8 @@ public class AccessorDefinition {
 			result = ((AccessorDefinitionDefiner) accessPoint).asAccessorDefinition();
 		} else if (accessPoint instanceof AccessorChain) {
 			result = giveDefinition((AccessorChain) accessPoint);
-		} else if (accessPoint instanceof PropertyAccessor) {
-			result = giveDefinition(((PropertyAccessor) accessPoint).getAccessor());
+		} else if (accessPoint instanceof ReadWriteAccessPoint) {
+			result = giveDefinition(((ReadWriteAccessPoint) accessPoint).getAccessor());
 		} else if (accessPoint instanceof AbstractReflector) {
 			result = giveReflectorDefinition((AbstractReflector) accessPoint);
 		} else {
@@ -153,8 +153,8 @@ public class AccessorDefinition {
 			result = toString(((MutatorByMember) o).getSetter());
 		} else if (o instanceof MutatorByMethodReference) {
 			result = MethodReferences.toMethodReferenceString(((MutatorByMethodReference) o).getMethodReference());
-		} else if (o instanceof PropertyAccessor) {
-			result = toString(((PropertyAccessor) o).getAccessor());
+		} else if (o instanceof ReadWriteAccessPoint) {
+			result = toString(((ReadWriteAccessPoint) o).getAccessor());
 		} else if (o instanceof AccessorChain) {
 			StringAppender chainPrint = new StringAppender();
 			((AccessorChain) o).getAccessors().forEach(accessor -> chainPrint.cat(toString((Accessor) accessor)).cat(" > "));

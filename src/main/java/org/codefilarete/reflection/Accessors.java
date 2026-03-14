@@ -4,7 +4,6 @@ import org.codefilarete.tool.Reflections;
 import org.codefilarete.tool.Reflections.MemberNotFoundException;
 import org.codefilarete.tool.Strings;
 import org.codefilarete.tool.collection.Iterables;
-import org.danekja.java.util.function.serializable.SerializableBiConsumer;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
@@ -81,7 +80,7 @@ public final class Accessors {
 	}
 	
 	public static <C, T> ReversibleAccessor<C, T> accessorByMethodReference(SerializableAccessor<C, T> getter, SerializableMutator<C, T> setter) {
-		return PropertyAccessor.fromMethodReference(getter, setter);
+		return ReadWriteAccessPoint.fromMethodReference(getter, setter);
 	}
 	
 	public static <C, T> AccessorByField<C, T> accessorByField(Field field) {
@@ -174,14 +173,14 @@ public final class Accessors {
 		return Reflections.wrappedField(getter);
 	}
 	
-	public static <C, T> PropertyAccessor<C, T> propertyAccessor(Field field) {
-		return new PropertyAccessor<>(new AccessorByField<>(field), new MutatorByField<>(field));
+	public static <C, T> ReadWriteAccessPoint<C, T> propertyAccessor(Field field) {
+		return new ReadWriteAccessPoint<>(new AccessorByField<>(field), new MutatorByField<>(field));
 	}
 	
-	public static <C, T> PropertyAccessor<C, T> propertyAccessor(Class<C> clazz, String propertyName) {
+	public static <C, T> ReadWriteAccessPoint<C, T> propertyAccessor(Class<C> clazz, String propertyName) {
 		AccessorByMember<C, T, ?> propertyGetter = accessor(clazz, propertyName);
 		Mutator<C, T> propertySetter = mutator(clazz, propertyName, propertyGetter.getPropertyType());
-		return new PropertyAccessor<>(propertyGetter, propertySetter);
+		return new ReadWriteAccessPoint<>(propertyGetter, propertySetter);
 	}
 	
 	/**
@@ -273,32 +272,32 @@ public final class Accessors {
 		return (MutatorByMember<C, T, M>) propertySetter;
 	}
 	
-	public static <C, E> PropertyAccessor<C, E> accessor(SerializableAccessor<C, E> getter) {
+	public static <C, E> ReadWriteAccessPoint<C, E> accessor(SerializableAccessor<C, E> getter) {
 		AccessorByMethodReference<C, E> methodReference = accessorByMethodReference(getter);
-		return new PropertyAccessor<>(
+		return new ReadWriteAccessPoint<>(
 				methodReference,
 				mutator(methodReference.getDeclaringClass(), propertyName(methodReference.getMethodName()), methodReference.getPropertyType())
 		);
 	}
 	
-	public static <C, E> PropertyAccessor<C, E> mutator(SerializableMutator<C, E> setter) {
+	public static <C, E> ReadWriteAccessPoint<C, E> mutator(SerializableMutator<C, E> setter) {
 		MutatorByMethodReference<C, E> methodReference = mutatorByMethodReference(setter);
-		return new PropertyAccessor<>(
+		return new ReadWriteAccessPoint<>(
 				accessor(methodReference.getDeclaringClass(), propertyName(methodReference.getMethodName()), methodReference.getPropertyType()),
 				methodReference
 		);
 	}
 	
 	/**
-	 * Gives an adequate {@link PropertyAccessor} according to the given {@link Member}
-	 * @param member a member to be transformed as a {@link PropertyAccessor}
+	 * Gives an adequate {@link ReadWriteAccessPoint} according to the given {@link Member}
+	 * @param member a member to be transformed as a {@link ReadWriteAccessPoint}
 	 * @param <C> the declaring class of the {@link Member}
 	 * @param <T> the type of the {@link Member}
-	 * @return a new {@link PropertyAccessor} with accessor and mutator alloqing to access to the member
+	 * @return a new {@link ReadWriteAccessPoint} with accessor and mutator alloqing to access to the member
 	 */
-	public static <C, T> PropertyAccessor<C, T> accessor(Member member) {
+	public static <C, T> ReadWriteAccessPoint<C, T> accessor(Member member) {
 		if (member instanceof Field) {
-			return new PropertyAccessor<>(new AccessorByField<>((Field) member));
+			return new ReadWriteAccessPoint<>(new AccessorByField<>((Field) member));
 		} else if (member instanceof Method) {
 			// Determining if the method is an accessor or a mutator to give the good arguments to the final PropertyAccessor constructor
 			Method method = (Method) member;
@@ -307,9 +306,9 @@ public final class Accessors {
 					MutatorByMethod::new,
 					AccessorByMethod::new);
 			if (reflector instanceof ReversibleAccessor) {
-				return new PropertyAccessor<>((ReversibleAccessor<C, T>) reflector);
+				return new ReadWriteAccessPoint<>((ReversibleAccessor<C, T>) reflector);
 			} else if (reflector instanceof ReversibleMutator) {
-				return new PropertyAccessor<>((ReversibleMutator<C, T>) reflector);
+				return new ReadWriteAccessPoint<>((ReversibleMutator<C, T>) reflector);
 			} else {
 				// unreachable because preceding ifs check all conditions
 				throw new IllegalArgumentException("Member cannot be determined as a getter or a setter : " + member);
@@ -339,8 +338,8 @@ public final class Accessors {
 			}
 		} else if (mutator instanceof MutatorByMethodReference) {
 			return methodCapturer.findMethod(((MutatorByMethodReference) mutator).getMethodReference()).getParameterTypes()[0];
-		} else if (mutator instanceof PropertyAccessor) {
-			return giveInputType(((PropertyAccessor) mutator).getMutator());
+		} else if (mutator instanceof ReadWriteAccessPoint) {
+			return giveInputType(((ReadWriteAccessPoint) mutator).getMutator());
 		} else if (mutator instanceof AccessorChainMutator) {
 			return giveInputType(((AccessorChainMutator) mutator).getMutator());
 		} else {
@@ -368,8 +367,8 @@ public final class Accessors {
 			}
 		} else if (accessor instanceof AccessorByMethodReference) {
 			return methodCapturer.findMethod(((AccessorByMethodReference) accessor).getMethodReference()).getReturnType();
-		} else if (accessor instanceof PropertyAccessor) {
-			return giveReturnType(((PropertyAccessor) accessor).getAccessor());
+		} else if (accessor instanceof ReadWriteAccessPoint) {
+			return giveReturnType(((ReadWriteAccessPoint) accessor).getAccessor());
 		} else if (accessor instanceof AccessorChain) {
 			return giveReturnType(Iterables.last((List<Accessor>) ((AccessorChain) accessor).getAccessors()));
 		} else {

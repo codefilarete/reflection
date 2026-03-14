@@ -133,20 +133,17 @@ public class AccessorChainMutator<C, X, T> extends AccessorChain<C, X> implement
 				super.cat(((AccessorByMember) o).getGetter().getName());
 				if (((AccessorByMember) o).getGetter() instanceof Method) {
 					super.cat("(");
-					if (o instanceof ListAccessor) {
-						super.cat(((ListAccessor) o).getIndex());
-					} else {
-						if (((Method) ((AccessorByMember) o).getGetter()).getParameterCount() > 0) {
-							// we don't need a perfect description for our case (exception message) so we shortcut method parameters
-							super.cat("..");
-						}
+					if (((Method) ((AccessorByMember) o).getGetter()).getParameterCount() > 0) {
+						// we don't need a perfect description for our case (exception message) so we shortcut method parameters
+						super.cat("..");
 					}
 					super.cat(")");
 				}
 				return this;
+			} else if (o instanceof ListAccessor) {
+				return super.cat("get(", ((ListAccessor) o).getIndex(), ")");
 			} else if (o instanceof AccessorByMethodReference) {
-				super.cat(((AccessorByMethodReference) o).getMethodName() + "()");
-				return this;
+				return super.cat(((AccessorByMethodReference) o).getMethodName() + "()");
 			} else if (o instanceof ArrayAccessor) {
 				return super.cat("[" + ((ArrayAccessor) o).getIndex() + "]");
 			} else {

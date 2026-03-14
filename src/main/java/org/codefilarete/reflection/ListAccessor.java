@@ -10,7 +10,7 @@ import org.codefilarete.tool.Reflections;
  * 
  * @author Guillaume Mary
  */
-public class ListAccessor<C extends List<T>, T> extends AccessorByMethod<C, T> {
+public class ListAccessor<C extends List<T>, T> extends AbstractAccessor<C, T> implements ReversibleAccessor<C, T> {
 	
 	private static final Method GET = Reflections.findMethod(List.class, "get", int.class);
 	
@@ -20,11 +20,13 @@ public class ListAccessor<C extends List<T>, T> extends AccessorByMethod<C, T> {
 	 * of "methodParameters" allows comparison (equals()) with another AccessorByMethod that is not a ListAccessor.
 	 */
 	
+	private final AccessorByMethod<C, T> listGetAccessor = new AccessorByMethod<>(GET);
+	
 	/**
 	 * Default constructor without index. Will lead to error if {@link #setIndex(int)} is not called.
 	 */
 	public ListAccessor() {
-		super(GET);
+		//super(GET);
 	}
 	
 	public ListAccessor(int index) {
@@ -34,17 +36,17 @@ public class ListAccessor<C extends List<T>, T> extends AccessorByMethod<C, T> {
 	
 	public void setIndex(int index) {
 		// we reuse the super parameter method
-		setParameter(0, index);
+		listGetAccessor.setParameter(0, index);
 	}
 	
 	public int getIndex() {
 		// preventing NullPointerException
-		Object parameter = getParameter(0);
+		Object parameter = listGetAccessor.getParameter(0);
 		return parameter == null ? 0 : (int) parameter;
 	}
 	
 	@Override
-	protected T doGet(C c, Object ... args) {
+	protected T doGet(C c) {
 		return c.get(getIndex());
 	}
 	

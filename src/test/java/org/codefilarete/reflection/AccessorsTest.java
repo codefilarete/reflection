@@ -30,7 +30,7 @@ class AccessorsTest {
 		assertThat(Accessors.giveInputType(Accessors.mutatorByMethodReference(City::setCitizenCount))).isEqualTo(int.class);
 		assertThat(Accessors.giveInputType(Accessors.mutatorByMethodReference(City::setCapital))).isEqualTo(boolean.class);
 		assertThat(Accessors.giveInputType(new AccessorChainMutator<>(Arrays.asList(Object::toString), Accessors.mutatorByMethodReference(String::contains)))).isEqualTo(CharSequence.class);
-		assertThat(Accessors.giveInputType(new PropertyAccessor(Accessors.accessorByMethodReference(City::getName), Accessors.mutatorByMethodReference(City::setName)))).isEqualTo(String.class);
+		assertThat(Accessors.giveInputType(new ReadWriteAccessPoint(Accessors.accessorByMethodReference(City::getName), Accessors.mutatorByMethodReference(City::setName)))).isEqualTo(String.class);
 	}
 	
 	@Test
@@ -44,7 +44,7 @@ class AccessorsTest {
 		assertThat(Accessors.giveReturnType(Accessors.accessorByMethodReference(City::getName))).isEqualTo(String.class);
 		assertThat(Accessors.giveReturnType(Accessors.accessorByMethodReference(City::isCapital))).isEqualTo(boolean.class);
 		assertThat(Accessors.giveReturnType(new AccessorChain<>(Accessors.accessorByMethodReference(City::isCapital), Accessors.accessorByMethodReference(Object::toString)))).isEqualTo(String.class);
-		assertThat(Accessors.giveReturnType(new PropertyAccessor(Accessors.accessorByMethodReference(City::getName), Accessors.mutatorByMethodReference(City::setName)))).isEqualTo(String.class);
+		assertThat(Accessors.giveReturnType(new ReadWriteAccessPoint(Accessors.accessorByMethodReference(City::getName), Accessors.mutatorByMethodReference(City::setName)))).isEqualTo(String.class);
 	}
 	
 	@Test
@@ -69,7 +69,7 @@ class AccessorsTest {
 	
 	@Test
 	void mutator_withMethodReferenceSetter() {
-		PropertyAccessor<Toto, StringBuilder> testInstance = Accessors.mutator(Toto::setProperty);
+		ReadWriteAccessPoint<Toto, StringBuilder> testInstance = Accessors.mutator(Toto::setProperty);
 		assertThat(testInstance.getMutator().getClass()).isEqualTo(MutatorByMethodReference.class);
 		assertThat(((ValueAccessPointByMethod<Toto>) testInstance.getAccessor()).getMethod()).isEqualTo(Reflections.getMethod(Toto.class, "getProperty"));
 		assertThat(Accessors.mutator(Toto::setPropertyWithoutField).getMutator().getClass()).isEqualTo(MutatorByMethodReference.class);

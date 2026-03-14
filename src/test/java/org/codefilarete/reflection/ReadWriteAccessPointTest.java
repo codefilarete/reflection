@@ -15,12 +15,12 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * @author Guillaume Mary
  */
-public class PropertyAccessorTest {
+public class ReadWriteAccessPointTest {
 	
 	@Test
 	public void testOf_fieldInput() {
 		Field numberField = Reflections.findField(Phone.class, "number");
-		PropertyAccessor<Phone, String> numberAccessor = Accessors.accessor(numberField);
+		ReadWriteAccessPoint<Phone, String> numberAccessor = Accessors.accessor(numberField);
 		assertThat(numberAccessor.getAccessor()).isEqualTo(new AccessorByField<>(numberField));
 		assertThat(numberAccessor.getMutator()).isEqualTo(new MutatorByField<>(numberField));
 	}
@@ -29,7 +29,7 @@ public class PropertyAccessorTest {
 	public void testOf_methodInput() {
 		Field numberField = Reflections.findField(Phone.class, "number");
 		Method numberGetter = Reflections.findMethod(Phone.class, "getNumber");
-		PropertyAccessor<Phone, String> numberAccessor = Accessors.accessor(numberGetter);
+		ReadWriteAccessPoint<Phone, String> numberAccessor = Accessors.accessor(numberGetter);
 		assertThat(numberAccessor.getAccessor()).isEqualTo(new AccessorByMethod<>(numberGetter));
 		// As there's no setter for "number" field, the mutator is an field one, not a method one
 		assertThat(numberAccessor.getMutator()).isEqualTo(new MutatorByField<>(numberField));
@@ -37,7 +37,7 @@ public class PropertyAccessorTest {
 		
 		Method nameGetter = Reflections.findMethod(City.class, "getName");
 		Method nameSetter = Reflections.findMethod(City.class, "setName", String.class);
-		PropertyAccessor<City, String> nameAccessor = Accessors.accessor(nameGetter);
+		ReadWriteAccessPoint<City, String> nameAccessor = Accessors.accessor(nameGetter);
 		assertThat(nameAccessor.getAccessor()).isEqualTo(new AccessorByMethod<>(nameGetter));
 		// As a setter exists for "name" field, the mutator is a method one, not a field one
 		assertThat(nameAccessor.getMutator()).isEqualTo(new MutatorByMethod<>(nameSetter));

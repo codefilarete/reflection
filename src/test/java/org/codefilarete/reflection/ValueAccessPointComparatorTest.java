@@ -16,7 +16,7 @@ class ValueAccessPointComparatorTest {
 	static Object[][] compare() {
 		MutatorByMethodReference<Person, String> ctMutatorByMethodReference = new MutatorByMethodReference<>(Person::setLastName);
 		AccessorByMethodReference<Person, String> ctAccessorByMethodReference = new AccessorByMethodReference<>(Person::getLastName);
-		PropertyAccessor<Person, String> propertyAccessor = new PropertyAccessor<>(ctAccessorByMethodReference, ctMutatorByMethodReference);
+		ReadWriteAccessPoint<Person, String> propertyAccessor = new ReadWriteAccessPoint<>(ctAccessorByMethodReference, ctMutatorByMethodReference);
 		return new Object[][] {
 				// ACCESSOR vs ACCESSOR
 				// field vs method

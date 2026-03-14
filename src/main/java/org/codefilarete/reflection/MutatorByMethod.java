@@ -12,7 +12,7 @@ import org.codefilarete.tool.function.ThreadSafeLazyInitializer;
  * @author mary
  */
 public class MutatorByMethod<C, T> extends AbstractMutator<C, T>
-		implements MutatorByMember<C, T, Method>, ReversibleMutator<C, T>, ValueAccessPointByMethod<C> {
+		implements MutatorByMember<C, T, Method>, ReversibleMutator<C, T>, ValueAccessPointByMethod<C>, PropertyMutator<C, T> {
 	
 	private final Method setter;
 	private final Supplier<Accessor<C, T>> accessor;

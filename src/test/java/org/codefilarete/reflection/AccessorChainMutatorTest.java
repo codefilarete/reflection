@@ -29,7 +29,7 @@ class AccessorChainMutatorTest {
 		private final AccessorByField<Address, City> addressCityAccessor;
 		private final AccessorByField<Person, Address> personAddressAccessor;
 		private final AccessorByField<Address, List> addressPhonesAccessor;
-		private final AccessorByMethod<? extends List, Phone> phoneListAccessor;
+		private final ListAccessor<? extends List, Phone> phoneListAccessor;
 		private final AccessorByField<Phone, String> phoneNumberAccessor;
 		private final AccessorByMethod<Phone, String> phoneNumberMethodAccessor;
 		private final AccessorByMethod<String, Character> charAtAccessor;
@@ -40,11 +40,9 @@ class AccessorChainMutatorTest {
 		private final MutatorByField<Address, City> addressCityMutator;
 		private final MutatorByField<Person, Address> personAddressMutator;
 		private final MutatorByField<Address, List> addressPhonesMutator;
-		private final MutatorByMethod<? extends List, Phone> phoneListMutator;
+		private final ListMutator<? extends List, Phone> phoneListMutator;
 		private final MutatorByField<Phone, String> phoneNumberMutator;
 		private final MutatorByMethod<Phone, String> phoneNumberMethodMutator;
-		private final MutatorByMethod<String, Character> charAtMutator;
-		private final MutatorByMethod<String, Character[]> toCharArrayMutator;
 		private final ArrayMutator<String> charArrayMutator;
 
 		private DataSet() {
@@ -66,8 +64,6 @@ class AccessorChainMutatorTest {
 			phoneListMutator = new ListMutator<>(2);
 			phoneNumberMutator = Accessors.mutatorByField(Phone.class, "number");
 			phoneNumberMethodMutator = Accessors.mutatorByMethod(Phone.class, "number");
-			charAtMutator = new MutatorByMethod<>(Reflections.findMethod(String.class, "charAt", int.class));
-			toCharArrayMutator = new MutatorByMethod<>(Reflections.findMethod(String.class, "toCharArray"));
 			charArrayMutator = new ArrayMutator<>(2);
 		}
 	}

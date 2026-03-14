@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class ListAccessorTest {
 	
 	@Test
-	public void testGet() {
+	void get_withIndex() {
 		ListAccessor<List<String>, String> testInstance = new ListAccessor<>();
 		List<String> sample = Arrays.asList("a", "b", "c");
 		
@@ -28,7 +28,7 @@ public class ListAccessorTest {
 	}
 	
 	@Test
-	public void testGet_ArrayIndexOutOfBoundsException() {
+	void get_ArrayIndexOutOfBoundsException() {
 		ListAccessor<List<String>, String> testInstance = new ListAccessor<>();
 		List<String> sample = Arrays.asList("a", "b", "c");
 		

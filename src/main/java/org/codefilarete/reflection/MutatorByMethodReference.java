@@ -20,14 +20,14 @@ import static org.codefilarete.tool.Reflections.IS_PREFIX_REMOVER;
  * @see Accessors#accessorByMethodReference(SerializableAccessor, SerializableMutator)
  */
 @SuppressWarnings("squid:S2160")	// because super.equals() is based on getDescription() it doesn't need to be overridden in this class
-public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> implements ValueAccessPointByMethodReference<C>, AccessorDefinitionDefiner<C> {
+public class MutatorByMethodReference<C, T> extends AbstractMutator<C, T> implements ValueAccessPointByMethodReference<C>, AccessorDefinitionDefiner<C>, PropertyMutator<C, T> {
 	
 	private final SerializableMutator<C, T> methodReference;
 	private final String methodReferenceSignature;
 	private final String methodName;
-	private final Class declaringClass;
+	private final Class<C> declaringClass;
 	private final SerializedLambda serializedLambda;
-	private final Class propertyType;
+	private final Class<T> propertyType;
 	private final AccessorDefinition accessorDefinition;
 	
 	/**

@@ -10,7 +10,7 @@ import org.codefilarete.tool.Reflections;
  * @author Guillaume Mary
  */
 public class AccessorByField<C, T> extends AbstractAccessor<C, T>
-		implements AccessorByMember<C, T, Field>, ReversibleAccessor<C, T>, ValueAccessPointByField {
+		implements AccessorByMember<C, T, Field>, ReversibleAccessor<C, T>, ValueAccessPointByField, PropertyAccessor<C, T> {
 	
 	private final Field field;
 	private final Mutator<C, T> mutator;
