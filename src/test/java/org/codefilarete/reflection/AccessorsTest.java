@@ -1,8 +1,5 @@
 package org.codefilarete.reflection;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 import org.assertj.core.api.Assertions;
 import org.codefilarete.reflection.model.City;
 import org.codefilarete.tool.Reflections;
@@ -10,6 +7,9 @@ import org.codefilarete.tool.Reflections.MemberNotFoundException;
 import org.codefilarete.tool.collection.Arrays;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -30,7 +30,7 @@ class AccessorsTest {
 		assertThat(Accessors.giveInputType(Accessors.mutatorByMethodReference(City::setCitizenCount))).isEqualTo(int.class);
 		assertThat(Accessors.giveInputType(Accessors.mutatorByMethodReference(City::setCapital))).isEqualTo(boolean.class);
 		assertThat(Accessors.giveInputType(new AccessorChainMutator<>(Arrays.asList(Object::toString), Accessors.mutatorByMethodReference(String::contains)))).isEqualTo(CharSequence.class);
-		assertThat(Accessors.giveInputType(new ReadWriteAccessPoint(Accessors.accessorByMethodReference(City::getName), Accessors.mutatorByMethodReference(City::setName)))).isEqualTo(String.class);
+		assertThat(Accessors.giveInputType(new DefaultReadWriteAccessPoint<>(Accessors.accessorByMethodReference(City::getName), Accessors.mutatorByMethodReference(City::setName)))).isEqualTo(String.class);
 	}
 	
 	@Test
@@ -44,7 +44,7 @@ class AccessorsTest {
 		assertThat(Accessors.giveReturnType(Accessors.accessorByMethodReference(City::getName))).isEqualTo(String.class);
 		assertThat(Accessors.giveReturnType(Accessors.accessorByMethodReference(City::isCapital))).isEqualTo(boolean.class);
 		assertThat(Accessors.giveReturnType(new AccessorChain<>(Accessors.accessorByMethodReference(City::isCapital), Accessors.accessorByMethodReference(Object::toString)))).isEqualTo(String.class);
-		assertThat(Accessors.giveReturnType(new ReadWriteAccessPoint(Accessors.accessorByMethodReference(City::getName), Accessors.mutatorByMethodReference(City::setName)))).isEqualTo(String.class);
+		assertThat(Accessors.giveReturnType(new DefaultReadWriteAccessPoint<>(Accessors.accessorByMethodReference(City::getName), Accessors.mutatorByMethodReference(City::setName)))).isEqualTo(String.class);
 	}
 	
 	@Test
@@ -68,11 +68,22 @@ class AccessorsTest {
 	}
 	
 	@Test
-	void mutator_withMethodReferenceSetter() {
-		ReadWriteAccessPoint<Toto, StringBuilder> testInstance = Accessors.mutator(Toto::setProperty);
-		assertThat(testInstance.getMutator().getClass()).isEqualTo(MutatorByMethodReference.class);
-		assertThat(((ValueAccessPointByMethod<Toto>) testInstance.getAccessor()).getMethod()).isEqualTo(Reflections.getMethod(Toto.class, "getProperty"));
-		assertThat(Accessors.mutator(Toto::setPropertyWithoutField).getMutator().getClass()).isEqualTo(MutatorByMethodReference.class);
+	void readWriteAccessPoint_accessorAsMethodReference() {
+		ReadWritePropertyAccessPoint<Toto, StringBuilder> testInstance = Accessors.readWriteAccessPoint(Toto::getProperty);
+		assertThat(testInstance.getReader().getClass()).isEqualTo(AccessorByMethodReference.class);
+		assertThat(((ValueAccessPointByMethod<Toto>) testInstance.getWriter()).getMethod()).isEqualTo(Reflections.getMethod(Toto.class, "setProperty", StringBuilder.class));
+	}
+	
+	@Test
+	void readWriteAccessPoint_mutatorAsMethodReference() {
+		ReadWritePropertyAccessPoint<Toto, StringBuilder> testInstance = Accessors.readWriteAccessPoint(Toto::setProperty);
+		assertThat(testInstance.getWriter().getClass()).isEqualTo(MutatorByMethodReference.class);
+		assertThat(((ValueAccessPointByMethod<Toto>) testInstance.getReader()).getMethod()).isEqualTo(Reflections.getMethod(Toto.class, "getProperty"));
+		
+		ReadWritePropertyAccessPoint<Toto, String> testInstance2 = Accessors.readWriteAccessPoint(Toto::setPropertyWithoutField);
+		assertThat(testInstance2.getWriter().getClass()).isEqualTo(MutatorByMethodReference.class);
+		assertThat(((ValueAccessPointByMethod<Toto>) testInstance2.getReader()).getMethod()).isEqualTo(Reflections.getMethod(Toto.class, "getPropertyWithoutField"));
+		
 	}
 	
 	@Nested
@@ -80,12 +91,12 @@ class AccessorsTest {
 		
 		@Test
 		void accessor() {
-			assertThat(Accessors.accessor(Toto::getPropertyWithoutField).getAccessor().getClass()).isEqualTo(AccessorByMethodReference.class);
+			assertThat(Accessors.readWriteAccessPoint(Toto::getPropertyWithoutField).getReader().getClass()).isEqualTo(AccessorByMethodReference.class);
 		}
 		
 		@Test
 		void mutator() {
-			assertThat(Accessors.mutator(Toto::setPropertyWithoutField).getMutator().getClass()).isEqualTo(MutatorByMethodReference.class);
+			assertThat(Accessors.readWriteAccessPoint(Toto::setPropertyWithoutField).getWriter().getClass()).isEqualTo(MutatorByMethodReference.class);
 		}
 	}
 	
@@ -108,12 +119,6 @@ class AccessorsTest {
 		assertThat(Accessors.accessor(Toto.class, "propertyForTypeCompatibility", CharSequence.class).getGetter()).isEqualTo(Reflections.findField(Toto.class, "propertyForTypeCompatibility"));
 	}
 		
-	@Test
-	void accessor_withMethodReferenceSetter() {
-		assertThat(Accessors.accessor(Toto::getProperty).getAccessor().getClass()).isEqualTo(AccessorByMethodReference.class);
-		assertThat(((ValueAccessPointByMethod<Toto>) Accessors.accessor(Toto::getProperty).getMutator()).getMethod()).isEqualTo(Reflections.getMethod(Toto.class, "setProperty", StringBuilder.class));
-	}
-	
 	@Test
 	void mutatorByMethod_setterExists_wrapsJDKMethod() throws NoSuchMethodException {
 		Assertions.assertThat(Accessors.mutatorByMethod(Toto.class, "property").getMethod()).isEqualTo(Toto.class.getMethod("setProperty", StringBuilder.class));

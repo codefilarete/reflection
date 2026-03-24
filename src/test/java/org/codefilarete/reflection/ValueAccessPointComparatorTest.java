@@ -14,9 +14,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ValueAccessPointComparatorTest {
 	
 	static Object[][] compare() {
-		MutatorByMethodReference<Person, String> ctMutatorByMethodReference = new MutatorByMethodReference<>(Person::setLastName);
-		AccessorByMethodReference<Person, String> ctAccessorByMethodReference = new AccessorByMethodReference<>(Person::getLastName);
-		ReadWriteAccessPoint<Person, String> propertyAccessor = new ReadWriteAccessPoint<>(ctAccessorByMethodReference, ctMutatorByMethodReference);
+		MutatorByMethodReference<Person, String> lastNameMutatorByMethodReference = new MutatorByMethodReference<>(Person::setLastName);
+		AccessorByMethodReference<Person, String> lastNameAccessorByMethodReference = new AccessorByMethodReference<>(Person::getLastName);
+		DefaultReadWritePropertyAccessPoint<Person, String> propertyAccessor = new DefaultReadWritePropertyAccessPoint<>(lastNameAccessorByMethodReference, lastNameMutatorByMethodReference);
 		return new Object[][] {
 				// ACCESSOR vs ACCESSOR
 				// field vs method
@@ -24,7 +24,7 @@ class ValueAccessPointComparatorTest {
 				{ Accessors.accessorByField(Person.class, "name"), new AccessorByMethod<>(Person.class, "getName"), true },
 				{ Accessors.accessorByField(Person.class, "name"), new AccessorByMethodReference<>(Person::getName), true },
 				
-				// field vs method with same owning type 
+				// field vs method with same owning type
 				{ Accessors.accessorByField(Person.class, "name"), new AccessorByMethod<>(Person.class, "getLastName"), false },
 				{ Accessors.accessorByField(Person.class, "name"), new AccessorByMethodReference<>(Person::getLastName), false },
 				
@@ -39,7 +39,7 @@ class ValueAccessPointComparatorTest {
 				{ Accessors.mutatorByField(Person.class, "name"), new MutatorByMethod<>(Person.class, "setName", String.class), true },
 				{ Accessors.mutatorByField(Person.class, "name"), new MutatorByMethodReference<>(Person::setName), true },
 				
-				// field vs method with same owning type 
+				// field vs method with same owning type
 				{ Accessors.mutatorByField(Person.class, "name"), new MutatorByMethod<>(Person.class, "setLastName", String.class), false },
 				{ Accessors.mutatorByField(Person.class, "name"), new MutatorByMethodReference<>(Person::setLastName), false },
 				
@@ -69,9 +69,9 @@ class ValueAccessPointComparatorTest {
 	
 	@ParameterizedTest
 	@MethodSource("compare")
-	<X> void compare(ValueAccessPoint<X> accessor1, ValueAccessPoint<X> accessor2, boolean expectedEquality) {
+	<X> void compare(PropertyAccessPoint<X, ?> accessor1, PropertyAccessPoint<X, ?> accessor2, boolean expectedEquality) {
 		
-		ValueAccessPointSet<X> testInstance = new ValueAccessPointSet<>();
+		ValueAccessPointSet<X, ValueAccessPoint<X>> testInstance = new ValueAccessPointSet<>();
 		testInstance.add(accessor2);
 		assertThat(testInstance.contains(accessor1)).isEqualTo(expectedEquality);
 	}

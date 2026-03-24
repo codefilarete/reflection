@@ -1,8 +1,8 @@
 package org.codefilarete.reflection;
 
-import java.lang.reflect.Field;
-
 import org.codefilarete.tool.Reflections;
+
+import java.lang.reflect.Field;
 
 /**
  * Property writer through its {@link Field}
@@ -10,14 +10,16 @@ import org.codefilarete.tool.Reflections;
  * @author Guillaume Mary
  */
 public class MutatorByField<C, T> extends AbstractMutator<C, T>
-		implements MutatorByMember<C, T, Field>, ReversibleMutator<C, T>, ValueAccessPointByField, PropertyMutator<C, T> {
+		implements MutatorByMember<C, T, Field>, ReversibleMutator<C, T>, ValueAccessPointByField, PropertyMutator<C, T>, AccessorDefinitionDefiner<C> {
 	
 	private final Field field;
 	private final Accessor<C, T> accessor;
+	private final AccessorDefinition definition;
 	
 	public MutatorByField(Field field) {
 		Reflections.ensureAccessible(field);
 		this.field = field;
+		this.definition = new AccessorDefinition(field.getDeclaringClass(), field.getName(), field.getType());
 		// since MutatorByField instantiation has no cost we do it now to avoid lazy initialization which is always tricky
 		this.accessor = new AccessorByField<>(field, this);
 	}
@@ -29,7 +31,9 @@ public class MutatorByField<C, T> extends AbstractMutator<C, T>
 	 * @param field the field to write to
 	 */
 	MutatorByField(Field field, Accessor<C, T> accessor) {
+		Reflections.ensureAccessible(field);
 		this.field = field;
+		this.definition = new AccessorDefinition(field.getDeclaringClass(), field.getName(), field.getType());
 		this.accessor = accessor;
 	}
 	
@@ -46,6 +50,11 @@ public class MutatorByField<C, T> extends AbstractMutator<C, T>
 	@Override
 	public Class<T> getPropertyType() {
 		return (Class<T>) field.getType();
+	}
+	
+	@Override
+	public AccessorDefinition asAccessorDefinition() {
+		return definition;
 	}
 	
 	@Override

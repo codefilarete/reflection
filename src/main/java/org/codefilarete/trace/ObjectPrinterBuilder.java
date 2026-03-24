@@ -49,12 +49,12 @@ public class ObjectPrinterBuilder<C> {
 		return result;
 	}
 	
-	/** @apiNote  */
-	private final KeepOrderSet<Accessor<C, Object>> printableProperties = new KeepOrderSet<>();
-	/** @apiNote we use a {@link ValueAccessPointSet} because its supports well contains() method with {@link Accessor} as argument */
-	private final ValueAccessPointSet<C> excludedProperties = new ValueAccessPointSet<>();
+	private final KeepOrderSet<PropertyAccessor<C, Object>> printableProperties = new KeepOrderSet<>();
 	
-	private final Map<Class, Function<Object, String>> overridenPrinters = new HashMap<>();
+	/** @apiNote we use a {@link ValueAccessPointSet} because its supports well contains() method with {@link Accessor} as argument */
+	private final ValueAccessPointSet<C, ValueAccessPoint<C>> excludedProperties = new ValueAccessPointSet<>();
+	
+	private final Map<Class, Function<Object, String>> overriddenPrinters = new HashMap<>();
 	
 	/**
 	 * Adds a property to be printed through its getter
@@ -66,7 +66,7 @@ public class ObjectPrinterBuilder<C> {
 		return this.addProperty(new AccessorByMethodReference(getter));
 	}
 	
-	private ObjectPrinterBuilder<C> addProperty(Accessor<C, Object> getter) {
+	private ObjectPrinterBuilder<C> addProperty(PropertyAccessor<C, Object> getter) {
 		this.printableProperties.add(getter);
 		return this;
 	}
@@ -91,7 +91,7 @@ public class ObjectPrinterBuilder<C> {
 	 * @return this
 	 */
 	public <E> ObjectPrinterBuilder<C> withPrinter(Class<E> overridenType, Function<E, String> printer) {
-		this.overridenPrinters.put(overridenType, (Function<Object, String>) printer);
+		this.overriddenPrinters.put(overridenType, (Function<Object, String>) printer);
 		return this;
 	}
 	
@@ -102,13 +102,13 @@ public class ObjectPrinterBuilder<C> {
 	 */
 	public ObjectPrinter<C> build() {
 		LinkedHashMap<String, Accessor<C, Object>> printingFunctionByPropertyName = new LinkedHashMap<>();
-		for (Accessor<C, Object> printableProperty : printableProperties) {
+		for (PropertyAccessor<C, Object> printableProperty : printableProperties) {
 			String methodName = AccessorDefinition.giveDefinition(printableProperty).getName();
 			if (!excludedProperties.contains(printableProperty)) {
 				printingFunctionByPropertyName.put(methodName, printableProperty);
 			}
 		}
-		return new ObjectPrinter<>(printingFunctionByPropertyName, overridenPrinters);
+		return new ObjectPrinter<>(printingFunctionByPropertyName, overriddenPrinters);
 	}
 	
 	/**

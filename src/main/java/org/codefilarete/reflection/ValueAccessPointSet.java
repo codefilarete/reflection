@@ -10,13 +10,13 @@ import java.util.TreeSet;
  * 
  * @author Guillaume Mary
  */
-public class ValueAccessPointSet<C> extends TreeSet<ValueAccessPoint<C>> {
+public class ValueAccessPointSet<C, P extends ValueAccessPoint<C>> extends TreeSet<P> {
 	
 	public ValueAccessPointSet() {
 		super(new ValueAccessPointComparator());
 	}
 	
-	public ValueAccessPointSet(Collection<? extends ValueAccessPoint<C>> set) {
+	public ValueAccessPointSet(Collection<? extends P> set) {
 		this();
 		addAll(set);
 	}

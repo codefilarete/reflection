@@ -1,7 +1,5 @@
 package org.codefilarete.reflection;
 
-import java.util.List;
-
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.codefilarete.reflection.AccessorChainMutator.AccessorPathBuilder;
 import org.codefilarete.reflection.model.Address;
@@ -14,6 +12,8 @@ import org.codefilarete.tool.collection.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -68,7 +68,7 @@ class AccessorChainMutatorTest {
 		}
 	}
 
-	static Object[][] testGetMutatorData() {
+	static Object[][] testGetWriterData() {
 		DataSet dataSet = new DataSet();
 		return new Object[][]{
 				{ dataSet.cityNameAccessor, dataSet.cityNameMutator },
@@ -83,7 +83,7 @@ class AccessorChainMutatorTest {
 		};
 	}
 
-	static Object[][] testGetMutator_exception_data() {
+	static Object[][] testGetWriter_exception_data() {
 		DataSet dataSet = new DataSet();
 		return new Object[][]{
 				{ dataSet.charAtAccessor },    // chartAt() has no mutator equivalent
@@ -92,14 +92,14 @@ class AccessorChainMutatorTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("testGetMutatorData")
-	void testGetMutator(ReversibleAccessor accessor, Mutator expected) {
+	@MethodSource("testGetWriterData")
+	void testGetWriter(ReversibleAccessor accessor, Mutator expected) {
 		assertThat(accessor.toMutator()).isEqualTo(expected);
 	}
 
 	@ParameterizedTest
-	@MethodSource("testGetMutator_exception_data")
-	void testGetMutator_exception(ReversibleAccessor accessor) {
+	@MethodSource("testGetWriter_exception_data")
+	void testGetWriter_exception(ReversibleAccessor accessor) {
 		assertThatExceptionOfType(MemberNotFoundException.class).isThrownBy(accessor::toMutator);
 	}
 

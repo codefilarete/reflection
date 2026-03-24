@@ -1,12 +1,12 @@
 package org.codefilarete.reflection;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.function.Supplier;
-
 import org.codefilarete.tool.Reflections;
 import org.codefilarete.tool.Reflections.MemberNotFoundException;
 import org.codefilarete.tool.function.ThreadSafeLazyInitializer;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.function.Supplier;
 
 /**
  * @author mary
@@ -15,6 +15,7 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T>
 		implements MutatorByMember<C, T, Method>, ReversibleMutator<C, T>, ValueAccessPointByMethod<C>, PropertyMutator<C, T> {
 	
 	private final Method setter;
+	
 	private final Supplier<Accessor<C, T>> accessor;
 	
 	public MutatorByMethod(Method setter) {
@@ -29,6 +30,7 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T>
 	}
 	
 	MutatorByMethod(Method setter, Accessor<C, T> accessor) {
+		Reflections.ensureAccessible(setter);
 		this.setter = setter;
 		this.accessor = () -> accessor;
 	}
@@ -37,7 +39,7 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T>
 	 * Constructor for a setter-equivalent method
 	 *
 	 * @param declaringClass type that declares the method
-	 * @param setterName name of the mutator
+	 * @param setterName name of the readWriteAccessPoint
 	 * @param argTypes argument types
 	 */
 	public MutatorByMethod(Class<C> declaringClass, String setterName, Class ... argTypes) {
@@ -85,14 +87,14 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T>
 	}
 	
 	private Accessor<C, T> findCompatibleAccessor() {
-		Class<?> declaringClass = getSetter().getDeclaringClass();
+		Class<C> declaringClass = (Class<C>) getSetter().getDeclaringClass();
 		String propertyName = Reflections.propertyName(getSetter());
-		AccessorByMethod<C, T> accessorByMethod = Accessors.accessorByMethod(declaringClass, propertyName,(Class<T>) getSetter().getParameterTypes()[0], this);
+		AccessorByMethod<C, T> accessorByMethod = Accessors.accessorByMethod(declaringClass, propertyName, getPropertyType(), this);
 		if (accessorByMethod == null) {
 			try {
 				return Accessors.accessorByField((Class<C>) declaringClass, propertyName);
 			} catch (MemberNotFoundException e) {
-				throw new NonReversibleAccessor("Can't find a mutator for " + Reflections.toString(getSetter()), e);
+				throw new NonReversibleAccessor("Can't find an accessor for " + Reflections.toString(getSetter()), e);
 			}
 		} else {
 			return accessorByMethod;
@@ -102,7 +104,7 @@ public class MutatorByMethod<C, T> extends AbstractMutator<C, T>
 	@Override
 	public boolean equals(Object other) {
 		// we base our implementation on the setter description because a setAccessible() call on the member changes its internal state
-		// and I don't think it sould be taken into account for comparison
+		// and I don't think it should be taken into account for comparison
 		return this == other ||
 				(other instanceof MutatorByMethod && getSetterDescription().equals(((MutatorByMethod) other).getSetterDescription()));
 	}

@@ -1,15 +1,15 @@
 package org.codefilarete.reflection;
 
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.Reflections.MemberNotFoundException;
+import org.codefilarete.tool.StringAppender;
+import org.codefilarete.tool.collection.Iterables;
+
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Collection;
-
-import org.codefilarete.tool.Reflections;
-import org.codefilarete.tool.Reflections.MemberNotFoundException;
-import org.codefilarete.tool.StringAppender;
-import org.codefilarete.tool.collection.Iterables;
 
 /**
  * A common representation of "class member", in the meaning of property accessor. So it means Fields, Methods and MethodReferences.
@@ -45,7 +45,8 @@ public class AccessorDefinition {
 		} else if (accessPoint instanceof AccessorChain) {
 			result = giveDefinition((AccessorChain) accessPoint);
 		} else if (accessPoint instanceof ReadWriteAccessPoint) {
-			result = giveDefinition(((ReadWriteAccessPoint) accessPoint).getAccessor());
+			// getting the reader of the writer shouldn't matter, we get the definition from the reader, arbitrarily
+			result = giveDefinition(((ReadWriteAccessPoint) accessPoint).getReader());
 		} else if (accessPoint instanceof AbstractReflector) {
 			result = giveReflectorDefinition((AbstractReflector) accessPoint);
 		} else {
@@ -139,7 +140,7 @@ public class AccessorDefinition {
 	
 	/**
 	 * @param o any {@link ValueAccessPoint}
-	 * @return a short representation of the given {@link ValueAccessPoint} : owner + name (spearator depends on accessor kind)
+	 * @return a short representation of the given {@link ValueAccessPoint} : owner + name (separator depends on accessor kind)
 	 */
 	public static String toString(@Nullable ValueAccessPoint<?> o) {
 		String result;
@@ -154,7 +155,8 @@ public class AccessorDefinition {
 		} else if (o instanceof MutatorByMethodReference) {
 			result = MethodReferences.toMethodReferenceString(((MutatorByMethodReference) o).getMethodReference());
 		} else if (o instanceof ReadWriteAccessPoint) {
-			result = toString(((ReadWriteAccessPoint) o).getAccessor());
+			// getting the reader of the writer shouldn't matter, we get the definition from the reader, arbitrarily
+			result = toString(((ReadWriteAccessPoint) o).getReader());
 		} else if (o instanceof AccessorChain) {
 			StringAppender chainPrint = new StringAppender();
 			((AccessorChain) o).getAccessors().forEach(accessor -> chainPrint.cat(toString((Accessor) accessor)).cat(" > "));

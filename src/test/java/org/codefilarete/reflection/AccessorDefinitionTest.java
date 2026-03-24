@@ -1,7 +1,5 @@
 package org.codefilarete.reflection;
 
-import java.lang.reflect.Method;
-
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.codefilarete.reflection.model.Address;
 import org.codefilarete.reflection.model.City;
@@ -12,6 +10,8 @@ import org.codefilarete.tool.exception.Exceptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -88,8 +88,8 @@ class AccessorDefinitionTest {
 				{ new AccessorChain<>(Arrays.asList(new AccessorByMethodReference<>(Person::getAddress), new AccessorByMethodReference<>(Address::getCity))),
 						"Person::getAddress > Address::getCity" },
 				
-				{ new ReadWriteAccessPoint<>(new AccessorByMethodReference<>(Person::getName), new MutatorByMethodReference<>(Person::setName)), "Person::getName" },
-				{ new ReadWriteAccessPoint<>(new AccessorByMethod<>(Person.class, "getName"), new MutatorByMethod<>(Person.class, "setName", String.class)),
+				{ new DefaultReadWriteAccessPoint<>(new AccessorByMethodReference<>(Person::getName), new MutatorByMethodReference<>(Person::setName)), "Person::getName" },
+				{ new DefaultReadWriteAccessPoint<>(new AccessorByMethod<>(Person.class, "getName"), new MutatorByMethod<>(Person.class, "setName", String.class)),
 						"o.c.r.m.Person.getName()" },
 				{ null, "null" }
 		};

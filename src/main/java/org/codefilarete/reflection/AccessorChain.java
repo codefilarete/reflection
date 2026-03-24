@@ -7,8 +7,8 @@ import org.codefilarete.tool.collection.Iterables;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 /**
@@ -19,36 +19,37 @@ import java.util.function.BiFunction;
  * 
  * @author Guillaume Mary
  */
-public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements ReversibleAccessor<C, T> {
+public class AccessorChain<C, T> extends AbstractAccessor<C, T>
+		implements ValueAccessPointChain, ReversibleAccessor<C, T> {
 	
-	public static <IN, OUT> AccessorChain<IN, OUT> fromMethodReference(SerializableAccessor<IN, OUT> getter) {
-		return new AccessorChain<>(Accessors.accessor(getter));
+	public static <IN, OUT> AccessorChain<IN, OUT> fromMethodReference(SerializablePropertyAccessor<IN, OUT> getter) {
+		return new AccessorChain<>(Accessors.readWriteAccessPoint(getter));
 	}
 	
-	public static <IN, A, OUT> AccessorChain<IN, OUT> fromMethodReferences(SerializableAccessor<IN, A> function1, SerializableAccessor<A, OUT> function2) {
-		// Note that we use Accessors.accessor(..) for the second argument because it builds a ReversibleAccessor,
+	public static <IN, A, OUT> AccessorChain<IN, OUT> fromMethodReferences(SerializablePropertyAccessor<IN, A> function1, SerializablePropertyAccessor<A, OUT> function2) {
+		// Note that we use Accessors.readWriteAccessPoint(..) for the second argument because it builds a ReversibleAccessor,
 		// to fulfill AccessorChain ReversibleAccessor contract, whereas direct AccessorByMethodReference doesn't
-		return new AccessorChain<>(new AccessorByMethodReference<>(function1), Accessors.accessor(function2));
+		return new AccessorChain<>(new AccessorByMethodReference<>(function1), Accessors.readWriteAccessPoint(function2));
 	}
 	
 	public static <IN, A, B, OUT> AccessorChain<IN, OUT> fromMethodReferences(
-			SerializableAccessor<IN, A> function1,
-			SerializableAccessor<A, B> function2,
-			SerializableAccessor<B, OUT> function3
+			SerializablePropertyAccessor<IN, A> function1,
+			SerializablePropertyAccessor<A, B> function2,
+			SerializablePropertyAccessor<B, OUT> function3
 	) {
-		// Note that we use Accessors.accessor(..) for the third argument because it builds a ReversibleAccessor,
+		// Note that we use Accessors.readWriteAccessPoint(..) for the third argument because it builds a ReversibleAccessor,
 		// to fulfill AccessorChain ReversibleAccessor contract, whereas direct AccessorByMethodReference doesn't
-		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2), Accessors.accessor(function3));
+		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2), Accessors.readWriteAccessPoint(function3));
 	}
 	
-	public static <IN, A, B, C, OUT> AccessorChain<IN, OUT> fromMethodReferences(SerializableAccessor<IN, A> function1,
-																				 SerializableAccessor<A, B> function2,
-																				 SerializableAccessor<B, C> function3,
-																				 SerializableAccessor<C, OUT> function4
+	public static <IN, A, B, C, OUT> AccessorChain<IN, OUT> fromMethodReferences(SerializablePropertyAccessor<IN, A> function1,
+																				 SerializablePropertyAccessor<A, B> function2,
+																				 SerializablePropertyAccessor<B, C> function3,
+																				 SerializablePropertyAccessor<C, OUT> function4
 	) {
-		// Note that we use Accessors.accessor(..) for the fourth argument because it builds a ReversibleAccessor,
+		// Note that we use Accessors.readWriteAccessPoint(..) for the fourth argument because it builds a ReversibleAccessor,
 		// to fulfill AccessorChain ReversibleAccessor contract, whereas direct AccessorByMethodReference doesn't
-		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2), new AccessorByMethodReference<>(function3), Accessors.accessor(function4));
+		return new AccessorChain<>(new AccessorByMethodReference<>(function1), new AccessorByMethodReference<>(function2), new AccessorByMethodReference<>(function3), Accessors.readWriteAccessPoint(function4));
 	}
 	
 	/**
@@ -63,10 +64,10 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @see ValueInitializerOnNullValue#newInstance(Accessor, Class)
 	 * @see #fromAccessorsWithNullSafe(List, BiFunction)
 	 */
-	public static <IN, A, OUT> AccessorChain<IN, OUT> fromMethodReferencesWithNullSafe(SerializableAccessor<IN, A> getter1, SerializableAccessor<A, OUT> getter2) {
-		// Note that we use Accessors.accessor(..) for the second argument because it builds a ReversibleAccessor,
+	public static <IN, A, OUT> AccessorChain<IN, OUT> fromMethodReferencesWithNullSafe(SerializablePropertyAccessor<IN, A> getter1, SerializablePropertyAccessor<A, OUT> getter2) {
+		// Note that we use Accessors.readWriteAccessPoint(..) for the second argument because it builds a ReversibleAccessor,
 		// to fulfill AccessorChain ReversibleAccessor contract, whereas direct AccessorByMethodReference doesn't
-		return new AccessorChain<IN, OUT>(Accessors.accessor(getter1), Accessors.accessor(getter2)) {
+		return new AccessorChain<IN, OUT>(Accessors.readWriteAccessPoint(getter1), Accessors.readWriteAccessPoint(getter2)) {
 			
 			private final AccessorChainMutator<IN, Object, OUT> mutator = (AccessorChainMutator<IN, Object, OUT>) super.toMutator()
 					.setNullValueHandler(INITIALIZE_VALUE);
@@ -86,9 +87,9 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 	 * @see #INITIALIZE_VALUE
 	 * @see #fromAccessorsWithNullSafe(List, BiFunction)
 	 */
-	public static <IN, A, OUT> AccessorChainMutator<IN, A, OUT> fromMethodReferencesWithNullSafe(SerializableAccessor<IN, A> getter, BiConsumer<A, OUT> setter) {
-		// Note that we use Accessors.accessor because it builds a ReversibleAccessor (required further to eventually set value) whereas AccessorByMethodReference doesn't
-		AccessorChainMutator<IN, A, OUT> result = new AccessorChainMutator<>(Arrays.asList(Accessors.accessor(getter)), setter::accept);
+	public static <IN, A, OUT> AccessorChainMutator<IN, A, OUT> fromMethodReferencesWithNullSafe(SerializablePropertyAccessor<IN, A> getter, Mutator<A, OUT> setter) {
+		// Note that we use Accessors.readWriteAccessPoint because it builds a ReversibleAccessor (required further to eventually set value) whereas AccessorByMethodReference doesn't
+		AccessorChainMutator<IN, A, OUT> result = new AccessorChainMutator<>(Arrays.asList(Accessors.readWriteAccessPoint(getter)), setter);
 		result.setNullValueHandler(AccessorChain.INITIALIZE_VALUE);
 		return result;
 	}
@@ -127,7 +128,7 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 					.setNullValueHandler(new ValueInitializerOnNullValue(valueTypeDeterminer));
 			
 			@Override
-			public AccessorChainMutator toMutator() {
+			public AccessorChainMutator<IN, Object, OUT> toMutator() {
 				return mutator;
 			}
 		}.setNullValueHandler(AccessorChain.RETURN_NULL);
@@ -161,8 +162,11 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 		this.accessors = (List<Accessor<?, ?>>) accessors;
 	}
 	
+	@Override
 	public List<Accessor<?, ?>> getAccessors() {
-		return accessors;
+		// the accessors shouldn't be modified out of this class, overall for deletion which is prohibited.
+		// user can still add accessors through add(..) methods
+		return Collections.unmodifiableList(accessors);
 	}
 	
 	public void add(Accessor<?, ?> accessor) {
@@ -181,6 +185,11 @@ public class AccessorChain<C, T> extends AbstractAccessor<C, T> implements Rever
 		}
 	}
 	
+	public NullValueHandler getNullValueHandler() {
+		return nullValueHandler;
+	}
+	
+	@Override
 	public AccessorChain<C, T> setNullValueHandler(NullValueHandler nullValueHandler) {
 		this.nullValueHandler = nullValueHandler;
 		return this;

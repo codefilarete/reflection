@@ -49,7 +49,7 @@ public class MutatorByMethodTest {
 		MutatorByMethod<Toto, Integer> testInstance = new MutatorByMethod<>(Reflections.findMethod(Toto.class, "setFakeProperty", int.class));
 		assertThatThrownBy(testInstance::toAccessor)
 				.isInstanceOf(NonReversibleAccessor.class)
-				.hasMessage("Can't find a mutator for o.c.r.MutatorByMethodTest$Toto.setFakeProperty(int)");
+				.hasMessage("Can't find an accessor for o.c.r.MutatorByMethodTest$Toto.setFakeProperty(int)");
 	}
 	
 	@Test

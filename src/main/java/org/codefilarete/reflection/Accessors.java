@@ -41,24 +41,23 @@ public final class Accessors {
 	 * @return null if getter method is not found
 	 */
     @Nullable
-	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Class clazz, String propertyName) {
+	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Class<C> clazz, String propertyName) {
 		Field field = Reflections.findField(clazz, propertyName);
 		return accessorByMethod(field);
 	}
 	
     @Nullable
-	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Class clazz, String propertyName, Class<T> inputType) {
+	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Class<C> clazz, String propertyName, Class<T> inputType) {
 		Method getter = findGetter(clazz, propertyName, inputType);
 		return getter == null ? null : new AccessorByMethod<>(getter);
 	}
 	
 	@Nullable
-	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Class clazz, String propertyName, Class<T> inputType, Mutator<C, T> mutator) {
+	public static <C, T> AccessorByMethod<C, T> accessorByMethod(Class<C> clazz, String propertyName, Class<T> inputType, Mutator<C, T> mutator) {
 		Method getter = findGetter(clazz, propertyName, inputType);
 		if (getter == null) {
 			return null;
 		} else {
-			Reflections.ensureAccessible(getter);
 			return new AccessorByMethod<>(getter, new Object[getter.getParameterTypes().length], mutator);
 		}
 	}
@@ -79,8 +78,8 @@ public final class Accessors {
 		return new AccessorByMethodReference<>(getter);
 	}
 	
-	public static <C, T> ReversibleAccessor<C, T> accessorByMethodReference(SerializableAccessor<C, T> getter, SerializableMutator<C, T> setter) {
-		return ReadWriteAccessPoint.fromMethodReference(getter, setter);
+	public static <C, T> ReadWriteAccessPoint<C, T> accessorByMethodReference(SerializableAccessor<C, T> getter, SerializableMutator<C, T> setter) {
+		return DefaultReadWriteAccessPoint.fromMethodReference(getter, setter);
 	}
 	
 	public static <C, T> AccessorByField<C, T> accessorByField(Field field) {
@@ -144,7 +143,6 @@ public final class Accessors {
 		if (setter == null) {
 			return null;
 		} else {
-			Reflections.ensureAccessible(setter);
 			return new MutatorByMethod<>(setter, accessor);
 		}
 	}
@@ -164,7 +162,6 @@ public final class Accessors {
 	
 	public static <C, T> MutatorByField<C, T> mutatorByField(Class clazz, String propertyName, Accessor<C, T> accessor) {
 		Field propertyField = Reflections.getField(clazz, propertyName);
-		Reflections.ensureAccessible(propertyField);
 		return new MutatorByField<>(propertyField, accessor);
 	}
 	
@@ -173,14 +170,14 @@ public final class Accessors {
 		return Reflections.wrappedField(getter);
 	}
 	
-	public static <C, T> ReadWriteAccessPoint<C, T> propertyAccessor(Field field) {
-		return new ReadWriteAccessPoint<>(new AccessorByField<>(field), new MutatorByField<>(field));
+	public static <C, T> DefaultReadWritePropertyAccessPoint<C, T> propertyAccessor(Field field) {
+		return new DefaultReadWritePropertyAccessPoint<>(new AccessorByField<>(field), new MutatorByField<>(field));
 	}
 	
-	public static <C, T> ReadWriteAccessPoint<C, T> propertyAccessor(Class<C> clazz, String propertyName) {
+	public static <C, T> DefaultReadWritePropertyAccessPoint<C, T> propertyAccessor(Class<C> clazz, String propertyName) {
 		AccessorByMember<C, T, ?> propertyGetter = accessor(clazz, propertyName);
-		Mutator<C, T> propertySetter = mutator(clazz, propertyName, propertyGetter.getPropertyType());
-		return new ReadWriteAccessPoint<>(propertyGetter, propertySetter);
+		PropertyMutator<C, T> propertySetter = mutator(clazz, propertyName, propertyGetter.getPropertyType());
+		return new DefaultReadWritePropertyAccessPoint<>(propertyGetter, propertySetter);
 	}
 	
 	/**
@@ -272,17 +269,27 @@ public final class Accessors {
 		return (MutatorByMember<C, T, M>) propertySetter;
 	}
 	
-	public static <C, E> ReadWriteAccessPoint<C, E> accessor(SerializableAccessor<C, E> getter) {
+	/**
+	 * Builds read-write access point from the given getter reference. Mutator is deduced from the getter signature.
+	 *
+	 * @return a new {@link ReadWritePropertyAccessPoint} from given getter reference
+	 */
+	public static <C, E> ReadWritePropertyAccessPoint<C, E> readWriteAccessPoint(SerializablePropertyAccessor<C, E> getter) {
 		AccessorByMethodReference<C, E> methodReference = accessorByMethodReference(getter);
-		return new ReadWriteAccessPoint<>(
+		return new DefaultReadWritePropertyAccessPoint<>(
 				methodReference,
 				mutator(methodReference.getDeclaringClass(), propertyName(methodReference.getMethodName()), methodReference.getPropertyType())
 		);
 	}
 	
-	public static <C, E> ReadWriteAccessPoint<C, E> mutator(SerializableMutator<C, E> setter) {
+	/**
+	 * Builds read-write access point from the given setter reference. Accessor is deduced from the setter signature.
+	 *
+	 * @return a new {@link ReadWritePropertyAccessPoint} from given setter reference
+	 */
+	public static <C, E> ReadWritePropertyAccessPoint<C, E> readWriteAccessPoint(SerializablePropertyMutator<C, E> setter) {
 		MutatorByMethodReference<C, E> methodReference = mutatorByMethodReference(setter);
-		return new ReadWriteAccessPoint<>(
+		return new DefaultReadWritePropertyAccessPoint<>(
 				accessor(methodReference.getDeclaringClass(), propertyName(methodReference.getMethodName()), methodReference.getPropertyType()),
 				methodReference
 		);
@@ -295,9 +302,9 @@ public final class Accessors {
 	 * @param <T> the type of the {@link Member}
 	 * @return a new {@link ReadWriteAccessPoint} with accessor and mutator alloqing to access to the member
 	 */
-	public static <C, T> ReadWriteAccessPoint<C, T> accessor(Member member) {
+	public static <C, T> DefaultReadWritePropertyAccessPoint<C, T> accessor(Member member) {
 		if (member instanceof Field) {
-			return new ReadWriteAccessPoint<>(new AccessorByField<>((Field) member));
+			return new DefaultReadWritePropertyAccessPoint<>(new AccessorByField<>((Field) member));
 		} else if (member instanceof Method) {
 			// Determining if the method is an accessor or a mutator to give the good arguments to the final PropertyAccessor constructor
 			Method method = (Method) member;
@@ -306,9 +313,9 @@ public final class Accessors {
 					MutatorByMethod::new,
 					AccessorByMethod::new);
 			if (reflector instanceof ReversibleAccessor) {
-				return new ReadWriteAccessPoint<>((ReversibleAccessor<C, T>) reflector);
+				return new DefaultReadWritePropertyAccessPoint<>((ReversibleAccessor<C, T>) reflector);
 			} else if (reflector instanceof ReversibleMutator) {
-				return new ReadWriteAccessPoint<>((ReversibleMutator<C, T>) reflector);
+				return new DefaultReadWritePropertyAccessPoint<>((ReversibleMutator<C, T>) reflector);
 			} else {
 				// unreachable because preceding ifs check all conditions
 				throw new IllegalArgumentException("Member cannot be determined as a getter or a setter : " + member);
@@ -320,31 +327,24 @@ public final class Accessors {
 	
 	
 	/**
-	 * Gives input type of a mutator. Implementation is based on well-known mutator classes and is not expected to be generic
+	 * Gives the input type of a {@link Mutator}, which is the type of the setter parameter or the type of a field.
+	 * Implementation is based on well-known {@link Mutator} classes and is not expected to be generic.
 	 * 
 	 * @param mutator any {@link Mutator}
-	 * @return input type of a mutator : input value of a setter and type of a field
+	 * @return input type of the given {@link Mutator}
 	 */
-	public static Class giveInputType(Mutator mutator) {
-		if (mutator instanceof MutatorByMember) {
-			Member member = ((MutatorByMember) mutator).getSetter();
-			if (member instanceof Method) {
-				return ((Method) member).getParameterTypes()[0];
-			} else if (member instanceof Field) {
-				return ((Field) member).getType();
-			} else {
-				// for future new MutatorByMember that are neither a Field nor a Method ... should not happen 
-				throw new UnsupportedOperationException("Mutator type is not implemented : " + mutator);
-			}
-		} else if (mutator instanceof MutatorByMethodReference) {
-			return methodCapturer.findMethod(((MutatorByMethodReference) mutator).getMethodReference()).getParameterTypes()[0];
+	public static <C, T> Class<T> giveInputType(Mutator<C, T> mutator) {
+		if (mutator instanceof AccessorDefinitionDefiner) {
+			return ((AccessorDefinitionDefiner) mutator).asAccessorDefinition().getMemberType();
+		} else if (mutator instanceof MutatorByMethod) {
+			return ((MutatorByMethod) mutator).getPropertyType();
 		} else if (mutator instanceof ReadWriteAccessPoint) {
-			return giveInputType(((ReadWriteAccessPoint) mutator).getMutator());
+			return giveInputType(((ReadWriteAccessPoint<C, T>) mutator).getWriter());
 		} else if (mutator instanceof AccessorChainMutator) {
-			return giveInputType(((AccessorChainMutator) mutator).getMutator());
+			return giveInputType(((AccessorChainMutator<C, ?, T>) mutator).getMutator());
 		} else {
 			// for future new MutatorByMember that are neither a Field nor a Method ... should not happen 
-			throw new UnsupportedOperationException("Mutator type is not implemented : " + mutator);
+			throw new UnsupportedOperationException("Input type lookup is not implemented for " + mutator);
 		}
 	}
 	
@@ -354,26 +354,18 @@ public final class Accessors {
 	 * @param accessor any {@link Accessor}
 	 * @return input type of a mutator : input value of a setter and type of a field
 	 */
-	public static Class giveReturnType(Accessor accessor) {
-		if (accessor instanceof AccessorByMember) {
-			Member member = ((AccessorByMember) accessor).getGetter();
-			if (member instanceof Method) {
-				return ((Method) member).getReturnType();
-			} else if (member instanceof Field) {
-				return ((Field) member).getType();
-			} else {
-				// for future new MutatorByMember that are neither a Field nor a Method ... should not happen 
-				throw new UnsupportedOperationException("Mutator type is not implemented : " + accessor);
-			}
-		} else if (accessor instanceof AccessorByMethodReference) {
-			return methodCapturer.findMethod(((AccessorByMethodReference) accessor).getMethodReference()).getReturnType();
+	public static <C, T> Class<T> giveReturnType(Accessor<C, T> accessor) {
+		if (accessor instanceof AccessorDefinitionDefiner) {
+			return ((AccessorDefinitionDefiner) accessor).asAccessorDefinition().getMemberType();
+		} else if (accessor instanceof AccessorByMethod) {
+			return ((AccessorByMethod) accessor).getPropertyType();
 		} else if (accessor instanceof ReadWriteAccessPoint) {
-			return giveReturnType(((ReadWriteAccessPoint) accessor).getAccessor());
+			return giveReturnType(((ReadWriteAccessPoint<C, T>) accessor).getReader());
 		} else if (accessor instanceof AccessorChain) {
 			return giveReturnType(Iterables.last((List<Accessor>) ((AccessorChain) accessor).getAccessors()));
 		} else {
 			// for future new MutatorByMember that are neither a Field nor a Method ... should not happen 
-			throw new UnsupportedOperationException("Accessor type is not implemented : " + accessor);
+			throw new UnsupportedOperationException("Return type lookup is not implemented for " + accessor);
 		}
 	}
 	

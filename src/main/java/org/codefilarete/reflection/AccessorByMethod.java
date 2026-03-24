@@ -1,17 +1,15 @@
 package org.codefilarete.reflection;
 
+import org.codefilarete.tool.Reflections;
+import org.codefilarete.tool.Reflections.MemberNotFoundException;
+import org.codefilarete.tool.function.ThreadSafeLazyInitializer;
+
 import javax.annotation.Nonnegative;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.function.Supplier;
-
-import org.codefilarete.tool.Reflections;
-import org.codefilarete.tool.Reflections.MemberNotFoundException;
-import org.codefilarete.tool.function.ThreadSafeLazyInitializer;
-
-import static org.codefilarete.tool.Reflections.propertyName;
 
 /**
  * {@link Accessor} that wraps a {@link Method} to provide its value.
@@ -20,7 +18,7 @@ import static org.codefilarete.tool.Reflections.propertyName;
  * @author Guillaume Mary
  */
 public class AccessorByMethod<C, T> extends AbstractAccessor<C, T>
-		implements AccessorByMember<C, T, Method>, ReversibleAccessor<C, T>, ValueAccessPointByMethod<C>, PropertyAccessor<C, T> {
+		implements AccessorByMember<C, T, Method>, ReversibleAccessor<C, T>, ValueAccessPointByMethod<C> {//}, PropertyAccessor<C, T> {
 	
 	private final Method getter;
 	
@@ -67,6 +65,7 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T>
 	}
 	
 	AccessorByMethod(Method getter, Object[] methodParameters, Mutator<C, T> mutator) {
+		Reflections.ensureAccessible(getter);
 		this.getter = getter;
 		this.methodParameters = methodParameters;
 		this.mutator = () -> mutator;
@@ -192,14 +191,14 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T>
 	}
 	
 	private MutatorByMember<C, T, ? extends Member> findCompatibleMutator() {
-		Class<?> declaringClass = getter.getDeclaringClass();
-		String propertyName = propertyName(getter);
-		MutatorByMethod<C, T> mutatorByMethod = Accessors.mutatorByMethod((Class<C>) declaringClass, propertyName, (Class<T>) getter.getReturnType(), this);
+		Class<C> declaringClass = (Class<C>) getGetter().getDeclaringClass();
+		String propertyName = Reflections.propertyName(getGetter());
+		MutatorByMethod<C, T> mutatorByMethod = Accessors.mutatorByMethod(declaringClass, propertyName, getPropertyType(), this);
 		if (mutatorByMethod == null) {
 			try {
 				return Accessors.mutatorByField(declaringClass, propertyName, this);
 			} catch (MemberNotFoundException e) {
-				throw new NonReversibleAccessor("Can't find a mutator for " + Reflections.toString(getter), e);
+				throw new NonReversibleAccessor("Can't find a mutator for " + Reflections.toString(getGetter()), e);
 			}
 		} else {
 			return mutatorByMethod;
@@ -209,9 +208,9 @@ public class AccessorByMethod<C, T> extends AbstractAccessor<C, T>
 	@Override
 	public boolean equals(Object other) {
 		// We base our implementation on the getter String because a setAccessible() call on the member changes its internal state
-		// and I don't think it sould be taken into account for comparison
+		// and I don't think it should be taken into account for comparison
 		// We could base it on getGetterDescription() but it requires more computation
-		return this == other || 
+		return this == other ||
 				(other instanceof AccessorByMethod
 						&& getGetter().toString().equals(((AccessorByMethod) other).getGetter().toString())
 						&& Arrays.equals(methodParameters, ((AccessorByMethod) other).methodParameters));
