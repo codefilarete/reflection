@@ -20,7 +20,7 @@ import java.util.function.BiFunction;
  * @author Guillaume Mary
  */
 public class AccessorChain<C, T> extends AbstractAccessor<C, T>
-		implements ValueAccessPointChain, ReversibleAccessor<C, T> {
+		implements ValueAccessPointChain, ReversibleAccessor<C, T>, PropertyAccessor<C, T> {
 	
 	public static <IN, OUT> AccessorChain<IN, OUT> fromMethodReference(SerializablePropertyAccessor<IN, OUT> getter) {
 		return new AccessorChain<>(Accessors.readWriteAccessPoint(getter));

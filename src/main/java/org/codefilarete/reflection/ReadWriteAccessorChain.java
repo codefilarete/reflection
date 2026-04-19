@@ -24,27 +24,29 @@ public class ReadWriteAccessorChain<C, X, T>
 	
 	private final AccessorChain<C, T> accessorChain;
 	private final AccessorChainMutator<C, X, T> mutatorChain;
-	private final PropertyAccessor<C, T> accessor;
 	private final PropertyMutator<C, T> mutator;
 	
-	public ReadWriteAccessorChain(PropertyAccessor<C, X> accessorChain, ReadWriteAccessPoint<X, T> mutator) {
-		this.accessorChain = new AccessorChain<>(Arrays.asList(accessorChain, mutator.getReader()));
-		this.mutatorChain = new AccessorChainMutator<>(Arrays.asList(accessorChain), mutator);
-		this.accessor = this.accessorChain::get;
+	public ReadWriteAccessorChain(PropertyAccessor<C, X> rootAccessor, ReadWriteAccessPoint<X, T> mutator) {
+		this.accessorChain = new AccessorChain<>(Arrays.asList(rootAccessor, mutator));
+		this.mutatorChain = new AccessorChainMutator<>(Arrays.asList(rootAccessor), mutator);
 		this.mutator = this.mutatorChain::set;
 	}
 	
-	public ReadWriteAccessorChain(List<? extends Accessor<?, ?>> accessors, ReadWriteAccessPoint<X, T> mutatorChain) {
-		this.accessorChain = new AccessorChain<>(Collections.cat(accessors, Arrays.asList(mutatorChain.getReader())));
-		this.mutatorChain = new AccessorChainMutator<>(accessors, mutatorChain);
-		this.accessor = this.accessorChain::get;
+	public ReadWriteAccessorChain(List<? extends Accessor<?, ?>> rootAccessors, ReadWriteAccessPoint<X, T> lastAccessPoint) {
+		this.accessorChain = new AccessorChain<>(Collections.cat(rootAccessors, Arrays.asList(lastAccessPoint)));
+		this.mutatorChain = new AccessorChainMutator<>(rootAccessors, lastAccessPoint);
 		this.mutator = this.mutatorChain::set;
 	}
 	
 	public ReadWriteAccessorChain(AccessorChain<C, T> accessorChain) {
 		this.accessorChain = accessorChain;
 		this.mutatorChain = (AccessorChainMutator<C, X, T>) accessorChain.toMutator();
-		this.accessor = this.accessorChain::get;
+		this.mutator = this.mutatorChain::set;
+	}
+	
+	public ReadWriteAccessorChain(AccessorChainMutator<C, X, T> accessorChain) {
+		this.accessorChain = accessorChain.toAccessor();
+		this.mutatorChain = accessorChain;
 		this.mutator = this.mutatorChain::set;
 	}
 	
@@ -55,7 +57,7 @@ public class ReadWriteAccessorChain<C, X, T>
 	
 	@Override
 	public PropertyAccessor<C, T> getReader() {
-		return accessor;
+		return accessorChain;
 	}
 	
 	@Override
