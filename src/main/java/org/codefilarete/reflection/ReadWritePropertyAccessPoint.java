@@ -9,7 +9,8 @@ package org.codefilarete.reflection;
  */
 public interface ReadWritePropertyAccessPoint<C, T>
 		extends
-		PropertyAccessor<C, T>, PropertyMutator<C, T>, ReadWriteAccessPoint<C, T>
+		PropertyAccessor<C, T>, PropertyMutator<C, T>, ReadWriteAccessPoint<C, T>,
+		ReversibleMutator<C, T>, ReversibleAccessor<C, T>
 {
 	
 	@Override
@@ -17,6 +18,16 @@ public interface ReadWritePropertyAccessPoint<C, T>
 	
 	@Override
 	PropertyMutator<C, T> getWriter();
+	
+	@Override
+	default PropertyAccessor<C, T> toAccessor() {
+		return getReader();
+	}
+	
+	@Override
+	default PropertyMutator<C, T> toMutator() {
+		return getWriter();
+	}
 	
 	@Override
 	default T get(C c) {

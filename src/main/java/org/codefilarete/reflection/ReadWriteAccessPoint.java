@@ -8,7 +8,8 @@ package org.codefilarete.reflection;
  * @see Accessors
  */
 public interface ReadWriteAccessPoint<C, T>
-		extends Accessor<C, T>, Mutator<C, T> {
+		extends Accessor<C, T>, Mutator<C, T>,
+		ReversibleMutator<C, T>, ReversibleAccessor<C, T> {
 	
 	// Naming note : those methods can't be named toAccessor() and toMutator() because there return types are not
 	// compatible on AccessorChainMutator chain, because this particular class is not symmetric and return an
@@ -17,4 +18,14 @@ public interface ReadWriteAccessPoint<C, T>
 	Accessor<C, T> getReader();
 	
 	Mutator<C, T> getWriter();
+	
+	@Override
+	default Accessor<C, T> toAccessor() {
+		return getReader();
+	}
+	
+	@Override
+	default Mutator<C, T> toMutator() {
+		return getWriter();
+	}
 }

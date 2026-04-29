@@ -53,12 +53,12 @@ public class DefaultReadWritePropertyAccessPoint<C, T>
 	}
 	
 	@Override
-	public Accessor<C, T> toAccessor() {
+	public PropertyAccessor<C, T> toAccessor() {
 		return accessor;
 	}
 	
 	@Override
-	public Mutator<C, T> toMutator() {
+	public PropertyMutator<C, T> toMutator() {
 		return mutator;
 	}
 	
