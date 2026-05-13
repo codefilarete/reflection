@@ -1,6 +1,14 @@
 package org.codefilarete.trace;
 
-import org.codefilarete.reflection.*;
+import org.codefilarete.reflection.Accessor;
+import org.codefilarete.reflection.AccessorByMethod;
+import org.codefilarete.reflection.AccessorByMethodReference;
+import org.codefilarete.reflection.AccessorDefinition;
+import org.codefilarete.reflection.PropertyAccessor;
+import org.codefilarete.reflection.SerializableAccessor;
+import org.codefilarete.reflection.ValueAccessPoint;
+import org.codefilarete.reflection.ValueAccessPointByMethodReference;
+import org.codefilarete.reflection.ValueAccessPointSet;
 import org.codefilarete.tool.Experimental;
 import org.codefilarete.tool.Reflections;
 import org.codefilarete.tool.StringAppender;
@@ -9,6 +17,7 @@ import org.codefilarete.tool.collection.Iterables;
 import org.codefilarete.tool.collection.KeepOrderSet;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -49,7 +58,7 @@ public class ObjectPrinterBuilder<C> {
 		return result;
 	}
 	
-	private final KeepOrderSet<PropertyAccessor<C, Object>> printableProperties = new KeepOrderSet<>();
+	private final KeepOrderSet<PropertyDefinition<? extends C>> printableProperties = new KeepOrderSet<>();
 	
 	/** @apiNote we use a {@link ValueAccessPointSet} because its supports well contains() method with {@link Accessor} as argument */
 	private final ValueAccessPointSet<C, ValueAccessPoint<C>> excludedProperties = new ValueAccessPointSet<>();
@@ -62,12 +71,23 @@ public class ObjectPrinterBuilder<C> {
 	 * @param getter the method reference that gives access to the property, can be one the parameterized class or one of its subtype
 	 * @return this
 	 */
-	public <D extends C> ObjectPrinterBuilder<C> addProperty(SerializableAccessor<D, Object> getter) {
-		return this.addProperty(new AccessorByMethodReference(getter));
+	public <D extends C> ObjectPrinterBuilder<C> addProperty(SerializableAccessor<D, ?> getter) {
+		AccessorByMethodReference<D, ?> accessor = new AccessorByMethodReference<>(getter);
+		return addProperty(accessor);
 	}
 	
-	private ObjectPrinterBuilder<C> addProperty(PropertyAccessor<C, Object> getter) {
-		this.printableProperties.add(getter);
+	private <D extends C> ObjectPrinterBuilder<C> addProperty(PropertyAccessor<D, ?> getter) {
+		this.printableProperties.add(new PropertyDefinition<>(getter, null));
+		return this;
+	}
+	
+	public <D extends C, X, S extends Collection<X>> ObjectPrinterBuilder<C> addProperty(SerializableAccessor<D, S> getter, Class<X> componentType) {
+		AccessorByMethodReference<D, ?> accessor = new AccessorByMethodReference<>(getter);
+		return addProperty(accessor, componentType);
+	}
+	
+	private <D extends C, X> ObjectPrinterBuilder<C> addProperty(PropertyAccessor<D, ?> getter, Class<X> componentType) {
+		this.printableProperties.add(new PropertyDefinition<>(getter, componentType));
 		return this;
 	}
 	
@@ -77,7 +97,7 @@ public class ObjectPrinterBuilder<C> {
 	 * @param getter the method reference that gives access to the property
 	 * @return this
 	 */
-	public ObjectPrinterBuilder<C> except(SerializableAccessor<C, Object> getter) {
+	public ObjectPrinterBuilder<C> except(SerializableAccessor<C, ?> getter) {
 		this.excludedProperties.add(new AccessorByMethodReference<>(getter));
 		return this;
 	}
@@ -101,11 +121,11 @@ public class ObjectPrinterBuilder<C> {
 	 * @return a configured printer for current type
 	 */
 	public ObjectPrinter<C> build() {
-		LinkedHashMap<String, Accessor<C, Object>> printingFunctionByPropertyName = new LinkedHashMap<>();
-		for (PropertyAccessor<C, Object> printableProperty : printableProperties) {
-			String methodName = AccessorDefinition.giveDefinition(printableProperty).getName();
-			if (!excludedProperties.contains(printableProperty)) {
-				printingFunctionByPropertyName.put(methodName, printableProperty);
+		LinkedHashMap<String, PropertyDefinition<C>> printingFunctionByPropertyName = new LinkedHashMap<>();
+		for (PropertyDefinition<? extends C> printableProperty : printableProperties) {
+			String methodName = AccessorDefinition.giveDefinition(printableProperty.getGetter()).getName();
+			if (!excludedProperties.contains(printableProperty.getGetter())) {
+				printingFunctionByPropertyName.put(methodName, (PropertyDefinition<C>) printableProperty);
 			}
 		}
 		return new ObjectPrinter<>(printingFunctionByPropertyName, overriddenPrinters);
@@ -118,15 +138,15 @@ public class ObjectPrinterBuilder<C> {
 	 */
 	public static class ObjectPrinter<C> {
 		
-		private final Map<String, Accessor<C, Object>> printableProperties;
-		private final Map<Class, Function<Object, String>> overridenPrinters;
+		private final Map<String, PropertyDefinition<C>> printableProperties;
+		private final Map<Class, Function<Object, String>> overriddenPrinters;
 		
 		/**
 		 * @apiNote private because {@link ObjectPrinterBuilder} is expected to be used for configuration 
 		 */
-		private ObjectPrinter(LinkedHashMap<String, Accessor<C, Object>> printableProperties, Map<Class, Function<Object, String>> overridenPrinters) {
+		private ObjectPrinter(LinkedHashMap<String, PropertyDefinition<C>> printableProperties, Map<Class, Function<Object, String>> overriddenPrinters) {
 			this.printableProperties = printableProperties;
-			this.overridenPrinters = overridenPrinters;
+			this.overriddenPrinters = overriddenPrinters;
 		}
 		
 		/**
@@ -137,28 +157,72 @@ public class ObjectPrinterBuilder<C> {
 			StringAppender result = new StringAppender();
 			String separator = ",";
 			printableProperties.forEach((propName, getter) -> {
-				// we prevent subclass property accessor of being invoked on parent class
-				boolean getterCompliesWithInstance;
-				if (getter instanceof ValueAccessPointByMethodReference) {
-					getterCompliesWithInstance = ((ValueAccessPointByMethodReference<C>) getter).getDeclaringClass().isInstance(object);
-				} else {
-					// necessarly AccessorByMethod, see printerFor(Class)
-					getterCompliesWithInstance = ((AccessorByMethod) getter).getGetter().getDeclaringClass().isInstance(object);
-				}
-				if (getterCompliesWithInstance) {
-					final Object value = getter.get(object);
-					Entry<Class, Function<Object, String>> foundOverringPrinter = Iterables.find(overridenPrinters.entrySet(),
-							e -> e.getKey().isInstance(value));
-					Object valueToPrint;
-					if (foundOverringPrinter != null) {
-						valueToPrint = foundOverringPrinter.getValue().apply(value);
+				if (getter.getComponentType() != null) {
+					Object value = getter.getGetter().get(object);
+					if (value != null) {
+						StringAppender collectionResult = new StringAppender();
+						((Collection) value).forEach(item -> {
+							
+							collectionResult.cat(item.getClass().getSimpleName(), "{");
+							Entry<Class, Function<Object, String>> foundOverringPrinter = Iterables.find(overriddenPrinters.entrySet(),
+									e -> getter.getComponentType().isAssignableFrom(e.getKey()));
+							Object valueToPrint;
+							if (foundOverringPrinter != null) {
+								valueToPrint = foundOverringPrinter.getValue().apply(item);
+							} else {
+								valueToPrint = item;
+							}
+							collectionResult.cat(valueToPrint, "}", separator);
+						});
+						collectionResult.cutTail(separator.length());
+						result.cat(propName, "=[", collectionResult, "]", separator);
 					} else {
-						valueToPrint = value;
+						result.cat(propName, "=null", separator);
 					}
-					result.cat(propName, "=", valueToPrint, separator);
+				} else {
+					// we prevent subclass property accessor of being invoked on parent class
+					boolean getterCompliesWithInstance;
+					if (getter.getGetter() instanceof ValueAccessPointByMethodReference) {
+						getterCompliesWithInstance = ((ValueAccessPointByMethodReference<C>) getter.getGetter()).getDeclaringClass().isInstance(object);
+					} else {
+						// necessarly AccessorByMethod, see printerFor(Class)
+						getterCompliesWithInstance = ((AccessorByMethod) getter.getGetter()).getGetter().getDeclaringClass().isInstance(object);
+					}
+					if (getterCompliesWithInstance) {
+						final Object value = getter.getGetter().get(object);
+						Entry<Class, Function<Object, String>> foundOverringPrinter = Iterables.find(overriddenPrinters.entrySet(),
+								e -> e.getKey().isInstance(value));
+						Object valueToPrint;
+						if (foundOverringPrinter != null) {
+							String printerValue = foundOverringPrinter.getValue().apply(value);
+							valueToPrint = foundOverringPrinter.getKey().getSimpleName() + "{" + printerValue + "}";
+						} else {
+							valueToPrint = value;
+						}
+						result.cat(propName, "=", valueToPrint, separator);
+					}
 				}
 			});
 			return result.cutTail(separator.length()).toString();
+		}
+	}
+	
+	private static class PropertyDefinition<C> {
+		
+		private final PropertyAccessor<C, ?> getter;
+		private final Class<?> componentType;
+		
+		PropertyDefinition(PropertyAccessor<C, ?> getter, Class<?> componentType) {
+			this.getter = getter;
+			this.componentType = componentType;
+		}
+		
+		public Accessor<C, ?> getGetter() {
+			return getter;
+		}
+		
+		public Class<?> getComponentType() {
+			return componentType;
 		}
 	}
 }
