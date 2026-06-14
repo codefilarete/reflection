@@ -1,5 +1,6 @@
 package org.codefilarete.reflection;
 
+import org.codefilarete.tool.Reflections;
 import org.codefilarete.tool.function.Predicates;
 
 /**
@@ -99,12 +100,13 @@ public class DefaultReadWriteAccessPoint<C, T>
 	
 	/**
 	 * Implemented for trace in errors or debug
-	 * @return the getter description if available, else defaults to super.toString()
+	 * @return the getter description if available, else defaults to getReader().toString()
 	 */
 	@Override
 	public String toString() {
-		return "property readWriteAccessPoint by " + (getReader() instanceof AbstractAccessor
+		return (getReader() instanceof AbstractAccessor
 				? ((AbstractAccessor<C, T>) getReader()).getGetterDescription()
-				: getReader().toString());
+				: getReader().toString())
+				+ " [by " + Reflections.toString(DefaultReadWriteAccessPoint.class) + "]";
 	}
 }
